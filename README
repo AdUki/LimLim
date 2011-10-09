@@ -11,3 +11,7 @@ Dependancies:
   -Qt 4.7.2
   -Lua 5.1
   -QScintilla 6.1.0
+
+Installation:
+  qmake LuaIDE.pro
+  make
