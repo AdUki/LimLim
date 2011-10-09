@@ -1,0 +1,91 @@
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
+
+#include <QMainWindow>
+
+class QPlainTextEdit;
+class QsciLexerLua;
+class LuaInterpret;
+class LuaEditor;
+class QLabel;
+
+class LuaControl : public QMainWindow
+{
+	Q_OBJECT
+
+public:
+	LuaControl();
+
+protected:
+	void closeEvent(QCloseEvent *event);
+
+private slots:
+	void newFile();
+	void open();
+	bool save();
+	bool saveAs();
+	void about();
+	void openRecentFile();
+	void updateStatusBar();
+	void run();
+	void debug();
+	void stop();
+
+private:
+	void createActions();
+	void createMenus();
+	void createToolBars();
+	void createStatusBar();
+	void createDockWindows();
+
+	void readSettings();
+	void writeSettings();
+
+	bool okToContinue();
+
+	bool loadFile(const QString &fileName);
+	bool saveFile(const QString &fileName);
+	void setCurrentFile(const QString &fileName);
+	void updateRecentFileActions();
+
+	QString strippedName(const QString &fullFileName);
+	QStringList recentFiles;
+	QString curFile;
+
+	LuaInterpret *interpret;
+	LuaEditor *editor;
+	QLabel *statusLabel;
+
+	QMenu *fileMenu;
+	QMenu *editMenu;
+	QMenu *executeMenu;
+	QMenu *viewMenu;
+	QMenu *optionsMenu;
+	QMenu *helpMenu;
+
+	QToolBar *fileToolBar;
+	QToolBar *editToolBar;
+
+	enum { MaxRecentFiles = 5 };
+	QAction *recentFileActions[MaxRecentFiles];
+	QAction *separatorAction;
+
+	QAction *newAction;
+	QAction *openAction;
+	QAction *saveAction;
+	QAction *saveAsAction;
+	QAction *aboutQtAction;
+	QAction *aboutAction;
+	QAction *exitAction;
+
+	QAction *copyAction;
+	QAction *pasteAction;
+	QAction *cutAction;
+	QAction *deleteAction;
+
+	QAction *runAction;
+	QAction *debugAction;
+	QAction *stopAction;
+};
+
+#endif // MAINWINDOW_H
