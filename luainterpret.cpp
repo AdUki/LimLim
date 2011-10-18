@@ -14,7 +14,7 @@
 	TODO Try to implement eventFilter inside LuaInterpret class
 		 or try to add more functionality from keyPressEvent
 		 from LuaInterpret here.
-*/
+*//*
 class UserInputFilter : public QObject {
 
 public:
@@ -33,20 +33,22 @@ protected:
 			QMouseEvent *mousePress = static_cast<QMouseEvent*>(event);
 			if (mousePress->button() == Qt::LeftButton)
 			{
+
 				parent->setFocus();
 				return true; // block left mouse button
 			}
 		}
-		else if (event->type() == QEvent::KeyPress)
+		//else if (event->type() == QEvent::KeyPress)
 
 		return false;
 	}
-};
+};*/
 
 /*
 	Main class for interpreting lua code.
 
 	You can also launch lua code with debug via this class.
+	TODO !!!!! disable left mouse button !!!!!
 */
 LuaInterpret::LuaInterpret(QWidget *parent) :
 	QTextEdit(parent)
@@ -74,7 +76,7 @@ int LuaInterpret::run(QString code)
 	connect(process, SIGNAL(readyReadStandardOutput()), this, SLOT(writeOutput()));
 	connect(process, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(end(int, QProcess::ExitStatus)));
 
-	installEventFilter(new UserInputFilter(this));
+	//installEventFilter(new UserInputFilter(this));
 
 	return 0;
 }
@@ -126,7 +128,6 @@ void LuaInterpret::keyPressEvent ( QKeyEvent * event )
 				event->key() == Qt::Key_Enter) {
 			sendInput(inputBuff);
 			inputBuff.clear();
-			//QTextEdit::keyPressEvent(event);
 		// TODO next line is ugly solution... refactor
 		// TODO add this filtering to InputFilter
 		} else if (event->key() >= Qt::Key_Space &&
