@@ -4,12 +4,59 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <QKeyEvent>
+#include <QTimer>
 
+/*
+	This class need to acces LuaIntrpret atributes and it just
+	filters input.
+
+	TODO Try to implement eventFilter inside LuaInterpret class
+		 or try to add more functionality from keyPressEvent
+		 from LuaInterpret here.
+*/
+class UserInputFilter : public QObject {
+
+public:
+	UserInputFilter( QObject *parent = 0 ) : QObject( parent ) {
+		this->parent = static_cast<LuaInterpret*>(parent);
+	}
+
+private:
+	LuaInterpret *parent;
+
+protected:
+	bool eventFilter( QObject *dist, QEvent *event )
+	{
+		if (event->type() == QEvent::MouseButtonPress)
+		{
+			QMouseEvent *mousePress = static_cast<QMouseEvent*>(event);
+			if (mousePress->button() == Qt::LeftButton)
+			{
+				parent->setFocus();
+				return true; // block left mouse button
+			}
+		}
+		else if (event->type() == QEvent::KeyPress)
+
+		return false;
+	}
+};
+
+/*
+	Main class for interpreting lua code.
+
+	You can also launch lua code with debug via this class.
+*/
 LuaInterpret::LuaInterpret(QWidget *parent) :
-	QPlainTextEdit(parent)
+	QTextEdit(parent)
 {
+	setUndoRedoEnabled(false);
 	setReadOnly(true);
 	setOverwriteMode(false);
+	fixedPosition = 0;
+	//setAttribute(Qt::WA_TransparentForMouseEvents);
+
 	// connect all 'observers' breakpoint()
 	// ...
 
@@ -18,39 +65,52 @@ LuaInterpret::LuaInterpret(QWidget *parent) :
 int LuaInterpret::run(QString code)
 {
 	clear();
-	// ##################################################################
-	// TODO WARINING!!!! fix this part !!! this is platform specific !!!!
-	// ##################################################################
+	setReadOnly(false);
 	process = new QProcess(this);
-	process->start("lua5.1", QStringList() << "-e" << code);
+	// TODO WARINING next line is platform specific
+	// TODO change next line so that lua will execute code from file path
+	process->start("lua", QStringList() << "-e" << "io.stdout:setvbuf 'no'" << "-e" << code << "--");
 	connect(process, SIGNAL(readyReadStandardError()), this, SLOT(writeError()));
 	connect(process, SIGNAL(readyReadStandardOutput()), this, SLOT(writeOutput()));
-	connect(process, SIGNAL(finished(int,QProcess::ExitStatus)),
-			this, SLOT(end(int, QProcess::ExitStatus)));
+	connect(process, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(end(int, QProcess::ExitStatus)));
+
+	installEventFilter(new UserInputFilter(this));
 
 	return 0;
 }
 
 int LuaInterpret::debug(QString code)
 {
+	code = "";
+
 	return 0;
 }
 
 
 void LuaInterpret::writeError()
 {
-	appendPlainText(process->readAllStandardError());
+	// TODO set char format to print colorful text (setCurrentCharFormat)
+	QColor *color = new QColor(255,0,0,255);
+	setTextColor(*color);
+	append(process->readAllStandardError());
 }
 
 void LuaInterpret::writeOutput()
 {
-	appendPlainText(process->readAllStandardOutput());
+	// TODO set char format to print colorful text (setCurrentCharFormat)
+	QColor *color = new QColor(0,0,255,255);
+	setTextColor(*color);
+	append(process->readAllStandardOutput());
+	color = new QColor(0,0,0,255);
+	setTextColor(*color);
 }
 
 void LuaInterpret::end(int value, QProcess::ExitStatus)
 {
-	appendPlainText(QString("Program exited with %1\n").arg(value));
-	setReadOnly(true);
+	QColor *color = new QColor(0,0,0,255);
+	setTextColor(*color);
+	append(QString("Program exited with %1\n").arg(value));
+	setReadOnly(false);
 	emit finished(true);
 }
 
@@ -62,16 +122,20 @@ void LuaInterpret::stop()
 void LuaInterpret::keyPressEvent ( QKeyEvent * event )
 {
 	if (!isReadOnly()) {
-		// ######################################################################
-		// TODO WARINING!!!! fix condition !!! this may be platform specific !!!!
-		// ###  new line character has not got ascii value bat strange value  ###
-		// ######################################################################
-		if (event->text().compare(QString('\n')) == 3) {
+		if (event->key() == Qt::Key_Return ||
+				event->key() == Qt::Key_Enter) {
 			sendInput(inputBuff);
 			inputBuff.clear();
-		} else {
+			//QTextEdit::keyPressEvent(event);
+		// TODO next line is ugly solution... refactor
+		// TODO add this filtering to InputFilter
+		} else if (event->key() >= Qt::Key_Space &&
+				   event->key() <= Qt::Key_ydiaeresis) {
 			inputBuff.append(event->text().toAscii());
-			QPlainTextEdit::keyPressEvent(event);
+			QTextEdit::keyPressEvent(event);
+		} else if (event->key() == Qt::Key_Backspace) {
+			inputBuff.remove(inputBuff.size()-1, 1);
+			QTextEdit::keyPressEvent(event);
 		}
 	}
 }
@@ -79,6 +143,7 @@ void LuaInterpret::keyPressEvent ( QKeyEvent * event )
 void LuaInterpret::sendInput(const QByteArray& input)
 {
 	process->write(input.data(), input.size());
-	char newLine = '\n';
-	process->write(&newLine, 1);
+	process->write(QByteArray("\n"));
 }
+
+

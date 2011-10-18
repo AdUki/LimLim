@@ -13,12 +13,15 @@ TEMPLATE = app
 SOURCES += main.cpp\
     luaeditor.cpp \
     luainterpret.cpp \
-    luacontrol.cpp
+    luacontrol.cpp \
+    luadebugger.cpp
 
 HEADERS  += \
     luaeditor.h \
     luainterpret.h \
-    luacontrol.h
+    luacontrol.h \
+    luadebugger.h \
+    luaredirect.h
 
 FORMS    +=
 

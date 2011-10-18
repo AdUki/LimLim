@@ -1,10 +1,10 @@
 #ifndef LUA_INTERPRET_H
 #define LUA_INTERPRET_H
 
-#include <QPlainTextEdit>
+#include <QTextEdit>
 #include <QProcess>
 
-class LuaInterpret : public QPlainTextEdit
+class LuaInterpret : public QTextEdit
 {
     Q_OBJECT
 
@@ -27,6 +27,7 @@ public slots:
 private:
 	QProcess *process;
 	QByteArray inputBuff;
+	int fixedPosition;
 
 	void sendInput(const QByteArray& input);
 
@@ -34,7 +35,6 @@ private slots:
 	void writeError();
 	void writeOutput();
 	void end(int value, QProcess::ExitStatus);
-
 };
 
 #endif // LUA_INTERPRET_H

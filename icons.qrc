@@ -1,11 +1,25 @@
 <RCC>
     <qresource prefix="/">
-        <file>images/save.png</file>
-        <file>images/paste.png</file>
-        <file>images/open.png</file>
-        <file>images/new.png</file>
-        <file>images/cut.png</file>
-        <file>images/copy.png</file>
         <file>images/lua.png</file>
+        <file>images/edit/undo.png</file>
+        <file>images/edit/save.png</file>
+        <file>images/edit/redo.png</file>
+        <file>images/edit/paste.png</file>
+        <file>images/edit/open.png</file>
+        <file>images/edit/new.png</file>
+        <file>images/edit/cut.png</file>
+        <file>images/edit/copy.png</file>
+        <file>images/run.png</file>
+        <file>images/compile.png</file>
+        <file>images/debug/step-over.png</file>
+        <file>images/debug/step-out.png</file>
+        <file>images/debug/step-into-instruction.png</file>
+        <file>images/debug/step-into.png</file>
+        <file>images/debug/step-instruction.png</file>
+        <file>images/debug/run-cursor.png</file>
+        <file>images/debug/run.png</file>
+        <file>images/debug/execute-to-cursor.png</file>
+        <file>images/debug/execute-from-cursor.png</file>
+        <file>images/process-stop.png</file>
     </qresource>
 </RCC>

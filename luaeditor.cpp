@@ -8,4 +8,6 @@ LuaEditor::LuaEditor(QWidget *parent) :
 
 	setMarginType(1, NumberMargin);
 	setMarginWidth(1, 40);
+
+	setUtf8(true);
 }

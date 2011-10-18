@@ -28,7 +28,6 @@ void LuaControl::run()
 {
 	runAction->setEnabled(false);
 	debugAction->setEnabled(false);
-	interpret->setReadOnly(false);
 	interpret->run(editor->text());
 }
 
@@ -36,7 +35,6 @@ void LuaControl::debug()
 {
 	runAction->setEnabled(false);
 	debugAction->setEnabled(false);
-	interpret->setReadOnly(false);
 	interpret->debug(editor->text());
 }
 
@@ -49,7 +47,7 @@ void LuaControl::stop()
 void LuaControl::createActions()
 {
 	newAction = new QAction(tr("&New"), this);
-	newAction->setIcon(QIcon(":/images/new.png"));
+	newAction->setIcon(QIcon(":/images/edit/new.png"));
 	newAction->setShortcut(QKeySequence::New);
 	newAction->setStatusTip(tr("Create a new file"));
 	connect(newAction, SIGNAL(triggered()), this, SLOT(newFile()));
@@ -62,13 +60,13 @@ void LuaControl::createActions()
 	}
 
 	openAction = new QAction(tr("&Open"), this);
-	openAction->setIcon(QIcon(":/images/open.png"));
+	openAction->setIcon(QIcon(":/images/edit/open.png"));
 	openAction->setShortcut(QKeySequence::Open);
 	openAction->setStatusTip(tr("Open new file"));
 	connect(openAction, SIGNAL(triggered()), this, SLOT(open()));
 
 	saveAction = new QAction(tr("&Save"), this);
-	saveAction->setIcon(QIcon(":/images/save.png"));
+	saveAction->setIcon(QIcon(":/images/edit/save.png"));
 	saveAction->setShortcut(QKeySequence::Save);
 	saveAction->setStatusTip(tr("Save the Lua file to disk"));
 	connect(saveAction, SIGNAL(triggered()), this, SLOT(save()));
@@ -83,21 +81,21 @@ void LuaControl::createActions()
 	connect(exitAction, SIGNAL(triggered()), qApp, SLOT(closeAllWindows()));
 
 	cutAction = new QAction(tr("Cu&t"), this);
-	cutAction->setIcon(QIcon(":/images/cut.png"));
+	cutAction->setIcon(QIcon(":/images/edit/cut.png"));
 	cutAction->setShortcut(QKeySequence::Cut);
 	cutAction->setStatusTip(tr("Cut the current selection's contents "
 							   "to the clipboard"));
 	connect(cutAction, SIGNAL(triggered()), editor, SLOT(cut()));
 
 	copyAction = new QAction(tr("&Copy"), this);
-	copyAction->setIcon(QIcon(":/images/copy.png"));
+	copyAction->setIcon(QIcon(":/images/edit/copy.png"));
 	copyAction->setShortcut(QKeySequence::Copy);
 	copyAction->setStatusTip(tr("Copy the current selection's contents "
 								"to the clipboard"));
 	connect(copyAction, SIGNAL(triggered()), editor, SLOT(copy()));
 
 	pasteAction = new QAction(tr("&Paste"), this);
-	pasteAction->setIcon(QIcon(":/images/paste.png"));
+	pasteAction->setIcon(QIcon(":/images/edit/paste.png"));
 	pasteAction->setShortcut(QKeySequence::Paste);
 	pasteAction->setStatusTip(tr("Paste the clipboard's contents into "
 								 "the current selection"));
@@ -117,16 +115,20 @@ void LuaControl::createActions()
 	connect(aboutQtAction, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
 	runAction = new QAction(tr("&Run"), this);
+	runAction->setShortcut(Qt::Key_F5);
+	runAction->setIcon(QIcon(":/images/run.png"));
 	runAction->setStatusTip(tr("Run current chunk of Lua code"));
 	connect(runAction, SIGNAL(triggered()), this, SLOT(run()));
 	connect(interpret, SIGNAL(finished(bool)), runAction, SLOT(setEnabled(bool)));
 
 	debugAction = new QAction(tr("&Debug"), this);
+	debugAction->setIcon(QIcon(":/images/debug/run"));
 	debugAction->setStatusTip(tr("Debug current chunk of Lua code"));
 	connect(debugAction, SIGNAL(triggered()), this, SLOT(debug()));
 	connect(interpret, SIGNAL(finished(bool)), debugAction, SLOT(setEnabled(bool)));
 
 	stopAction = new QAction(tr("&Stop"), this);
+	stopAction->setIcon(QIcon(":/images/process-stop.png"));
 	stopAction->setStatusTip(tr("Stop current running program"));
 	connect(stopAction, SIGNAL(triggered()), interpret, SLOT(stop()));
 }
@@ -150,10 +152,10 @@ void LuaControl::createMenus()
 	editMenu->addAction(pasteAction);
 	editMenu->addAction(deleteAction);
 
-	executeMenu = menuBar()->addMenu(tr("E&xecute"));
-	executeMenu->addAction(runAction);
-	executeMenu->addAction(debugAction);
-	executeMenu->addAction(stopAction);
+	projectMenu = menuBar()->addMenu(tr("&Project"));
+	projectMenu->addAction(runAction);
+	projectMenu->addAction(debugAction);
+	projectMenu->addAction(stopAction);
 
 	optionsMenu = menuBar()->addMenu(tr("&Options"));
 
@@ -174,6 +176,10 @@ void LuaControl::createToolBars()
 	editToolBar->addAction(cutAction);
 	editToolBar->addAction(copyAction);
 	editToolBar->addAction(pasteAction);
+	runToolBar = addToolBar(tr("&Run"));
+	runToolBar->addAction(runAction);
+	runToolBar->addAction(debugAction);
+	runToolBar->addAction(stopAction);
 }
 
 void LuaControl::createStatusBar()

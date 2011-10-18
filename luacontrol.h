@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 
-class QPlainTextEdit;
+class QTextEdit;
 class QsciLexerLua;
 class LuaInterpret;
 class LuaEditor;
@@ -58,13 +58,14 @@ private:
 
 	QMenu *fileMenu;
 	QMenu *editMenu;
-	QMenu *executeMenu;
+	QMenu *projectMenu;
 	QMenu *viewMenu;
 	QMenu *optionsMenu;
 	QMenu *helpMenu;
 
 	QToolBar *fileToolBar;
 	QToolBar *editToolBar;
+	QToolBar *runToolBar;
 
 	enum { MaxRecentFiles = 5 };
 	QAction *recentFileActions[MaxRecentFiles];
