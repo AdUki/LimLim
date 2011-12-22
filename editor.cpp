@@ -33,14 +33,27 @@ const Source* Editor::openSource(const QString &filename)
 
 const Source* Editor::addSource(Source* source)
 {
-    QString sourceName = source->getShortFileName();
-    if (sourceName.compare("") != 0) {
-        int i = addTab(source, sourceName);
-        setCurrentIndex(i);
-        connect(source, SIGNAL(modificationChanged(bool)), this, SLOT(updateSourceNames()));
-        return source;
+    int i, tabIndex = -1;
+    for (i = 0; i < count(); i++) {
+        Source* src = static_cast<Source*>(widget(i));
+        if (*src == *source) {
+            tabIndex = i;
+            break;
+        }
     }
-    return NULL;
+    if (tabIndex >= 0) {
+        setCurrentIndex(tabIndex);
+        setStatusTip(tr("Source already opened"));
+    } else {
+        QString sourceName = source->getShortFileName();
+        if (sourceName.compare("") != 0) {
+            int i = addTab(source, sourceName);
+            setCurrentIndex(i);
+            connect(source, SIGNAL(modificationChanged(bool)), this, SLOT(updateSourceNames()));
+            return source;
+        }
+        return NULL;
+    }
 }
 
 void Editor::saveCurrentSource()
