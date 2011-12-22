@@ -1,31 +1,28 @@
-#-------------------------------------------------
-#
+# -------------------------------------------------
 # Project created by QtCreator 2011-10-03T23:07:41
-#
-#-------------------------------------------------
-
-QT       += core gui
-
+# -------------------------------------------------
+QT += core \
+    gui
 TARGET = LuaIDE
 TEMPLATE = app
-
-
-SOURCES += main.cpp\
-    luaeditor.cpp \
-    luainterpret.cpp \
+SOURCES += main.cpp \
+    interpreter.cpp \
     luacontrol.cpp \
-    luadebugger.cpp
+    debugger.cpp \
+    console.cpp \
+    breakpoint.cpp \
+    source.cpp \
+    editor.cpp
 
-HEADERS  += \
-    luaeditor.h \
-    luainterpret.h \
+HEADERS += interpreter.h \
     luacontrol.h \
-    luadebugger.h \
-    luaredirect.h
+    debugger.h \
+    console.h \
+    breakpoint.h \
+    source.h \
+    editor.h
 
-FORMS    +=
-
-LIBS	+= -lqscintilla2 -llua5.1
-
-RESOURCES += \
-    icons.qrc
+FORMS += 
+LIBS += -lqscintilla2 \
+    -llua5.1
+RESOURCES += icons.qrc

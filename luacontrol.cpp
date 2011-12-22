@@ -1,41 +1,42 @@
 #include <QtGui>
 
+#include "console.h"
 #include "luacontrol.h"
-#include "luainterpret.h"
-#include "luaeditor.h"
+#include "interpreter.h"
+#include "editor.h"
 
 LuaControl::LuaControl()
 {
-	interpret = new LuaInterpret(this);
-	editor = new LuaEditor(this);
-	setCentralWidget(editor);
+    luaConsole = new Console(this);
+    interpret = new Interpreter(this);
+    luaEditor = new Editor(this);
+    setCentralWidget(luaEditor);
 
-	createActions();
-	createMenus();
-	createToolBars();
-	createStatusBar();
-	createDockWindows();
+    createActions();
+    createMenus();
+    createToolBars();
+    createStatusBar();
+    createDockWindows();
 
-	readSettings();
+    readSettings();
 
-	setWindowIcon(QIcon(":/images/lua.png"));
-	setCurrentFile("");
+    setWindowIcon(QIcon(":/images/lua.png"));
 
-	setAttribute(Qt::WA_DeleteOnClose);
+    setAttribute(Qt::WA_DeleteOnClose);
 }
 
 void LuaControl::run()
 {
 	runAction->setEnabled(false);
 	debugAction->setEnabled(false);
-	interpret->run(editor->text());
+//	interpret->run(editor->text());
 }
 
 void LuaControl::debug()
 {
 	runAction->setEnabled(false);
 	debugAction->setEnabled(false);
-	interpret->debug(editor->text());
+//	interpret->debug(editor->text());
 }
 
 void LuaControl::stop()
@@ -46,12 +47,14 @@ void LuaControl::stop()
 
 void LuaControl::createActions()
 {
+    // NEW FILE ACTIION
 	newAction = new QAction(tr("&New"), this);
 	newAction->setIcon(QIcon(":/images/edit/new.png"));
 	newAction->setShortcut(QKeySequence::New);
 	newAction->setStatusTip(tr("Create a new file"));
-	connect(newAction, SIGNAL(triggered()), this, SLOT(newFile()));
+        connect(newAction, SIGNAL(triggered()), luaEditor, SLOT(newSource()));
 
+    // OPEN RECENT FILE ACTIONS
 	for (int i = 0; i < MaxRecentFiles; i++) {
 		recentFileActions[i] = new QAction(this);
 		recentFileActions[i]->setVisible(false);;
@@ -59,61 +62,69 @@ void LuaControl::createActions()
 				this, SLOT(openRecentFile()));
 	}
 
+    // OPEN FILE ACTION
 	openAction = new QAction(tr("&Open"), this);
 	openAction->setIcon(QIcon(":/images/edit/open.png"));
 	openAction->setShortcut(QKeySequence::Open);
 	openAction->setStatusTip(tr("Open new file"));
-	connect(openAction, SIGNAL(triggered()), this, SLOT(open()));
+        connect(openAction, SIGNAL(triggered()), luaEditor, SLOT(openSource()));
 
+    // SAVE FILE ACTION
 	saveAction = new QAction(tr("&Save"), this);
 	saveAction->setIcon(QIcon(":/images/edit/save.png"));
 	saveAction->setShortcut(QKeySequence::Save);
 	saveAction->setStatusTip(tr("Save the Lua file to disk"));
-	connect(saveAction, SIGNAL(triggered()), this, SLOT(save()));
+        connect(saveAction, SIGNAL(triggered()), luaEditor, SLOT(saveCurrentSource()));
 
+    // SAVE AS FILE ACTION
 	saveAsAction = new QAction(tr("Save &As..."), this);
 	saveAsAction->setStatusTip(tr("Save the Lua file under a new name"));
-	connect(saveAsAction, SIGNAL(triggered()), this, SLOT(saveAs()));
+        connect(saveAsAction, SIGNAL(triggered()), luaEditor, SLOT(saveCurrentSourceAs()));
 
+    // EXIT ACTION
 	exitAction = new QAction(tr("E&xit"), this);
 	exitAction->setShortcut(tr("Ctrl+Q"));
 	exitAction->setStatusTip(tr("Exit the application"));
 	connect(exitAction, SIGNAL(triggered()), qApp, SLOT(closeAllWindows()));
 
+    // CUT ACTION
 	cutAction = new QAction(tr("Cu&t"), this);
 	cutAction->setIcon(QIcon(":/images/edit/cut.png"));
 	cutAction->setShortcut(QKeySequence::Cut);
-	cutAction->setStatusTip(tr("Cut the current selection's contents "
-							   "to the clipboard"));
-	connect(cutAction, SIGNAL(triggered()), editor, SLOT(cut()));
+        cutAction->setStatusTip(tr("Cut the current selection's contents to the clipboard"));
+//	connect(cutAction, SIGNAL(triggered()), editor, SLOT(cut()));
 
+    // COPY ACTION
 	copyAction = new QAction(tr("&Copy"), this);
 	copyAction->setIcon(QIcon(":/images/edit/copy.png"));
 	copyAction->setShortcut(QKeySequence::Copy);
-	copyAction->setStatusTip(tr("Copy the current selection's contents "
-								"to the clipboard"));
-	connect(copyAction, SIGNAL(triggered()), editor, SLOT(copy()));
+        copyAction->setStatusTip(tr("Copy the current selection's contents to the clipboard"));
+//	connect(copyAction, SIGNAL(triggered()), editor, SLOT(copy()));
 
+    // PASTE ACTION
 	pasteAction = new QAction(tr("&Paste"), this);
 	pasteAction->setIcon(QIcon(":/images/edit/paste.png"));
 	pasteAction->setShortcut(QKeySequence::Paste);
-	pasteAction->setStatusTip(tr("Paste the clipboard's contents into "
-								 "the current selection"));
-	connect(pasteAction, SIGNAL(triggered()), editor, SLOT(paste()));
+        pasteAction->setStatusTip(tr("Paste the clipboard's contents into the current selection"));
+//	connect(pasteAction, SIGNAL(triggered()), editor, SLOT(paste()));
 
+    // DELETE ACTION
 	deleteAction = new QAction(tr("&Delete"), this);
 	deleteAction->setShortcut(QKeySequence::Delete);
 	deleteAction->setStatusTip(tr("Delete the current selection's contents"));
-	connect(deleteAction, SIGNAL(triggered()), editor, SLOT(removeSelectedText()));
+//	connect(deleteAction, SIGNAL(triggered()), editor, SLOT(removeSelectedText()));
 
+    // ABOUT ACTION
 	aboutAction = new QAction(tr("&About"), this);
 	aboutAction->setStatusTip(tr("Show the application's About box"));
 	connect(aboutAction, SIGNAL(triggered()), this, SLOT(about()));
 
+    // ABOUT QT ACTION
 	aboutQtAction = new QAction(tr("About &Qt"), this);
 	aboutQtAction->setStatusTip(tr("Show the Qt library's About box"));
 	connect(aboutQtAction, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
+    // RUN ACTION
 	runAction = new QAction(tr("&Run"), this);
 	runAction->setShortcut(Qt::Key_F5);
 	runAction->setIcon(QIcon(":/images/run.png"));
@@ -121,12 +132,14 @@ void LuaControl::createActions()
 	connect(runAction, SIGNAL(triggered()), this, SLOT(run()));
 	connect(interpret, SIGNAL(finished(bool)), runAction, SLOT(setEnabled(bool)));
 
+    // DEBUG ACTION
 	debugAction = new QAction(tr("&Debug"), this);
 	debugAction->setIcon(QIcon(":/images/debug/run"));
 	debugAction->setStatusTip(tr("Debug current chunk of Lua code"));
 	connect(debugAction, SIGNAL(triggered()), this, SLOT(debug()));
 	connect(interpret, SIGNAL(finished(bool)), debugAction, SLOT(setEnabled(bool)));
 
+    // STOP ACTION
 	stopAction = new QAction(tr("&Stop"), this);
 	stopAction->setIcon(QIcon(":/images/process-stop.png"));
 	stopAction->setStatusTip(tr("Stop current running program"));
@@ -197,8 +210,8 @@ void LuaControl::createDockWindows()
 	// Lua interpreter dock widget
 	QDockWidget *dock = new QDockWidget(tr("Output"), this);
 	dock->setAllowedAreas(Qt::AllDockWidgetAreas);
-	dock->setWidget(interpret);
-	addDockWidget(Qt::BottomDockWidgetArea, dock);
+        dock->setWidget(luaConsole);
+        addDockWidget(Qt::BottomDockWidgetArea, dock);
 
 	// Locals dock widget
 
@@ -209,96 +222,9 @@ void LuaControl::createDockWindows()
 	// Watches dock widget
 }
 
-bool LuaControl::okToContinue()
-{
-	if (!editor->isModified()) return true;
-
-	int r = QMessageBox::warning(this, tr("Lua IDE"),
-								 tr("The document has been modified.\n"
-									"Do you want to save your changes?"),
-								 QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-
-	if (r == QMessageBox::Save) return save();
-	else if (r == QMessageBox::Cancel) return false;
-	return true;
-}
-
-void LuaControl::newFile()
-{
-	if (okToContinue()) {
-		editor->clear();
-		editor->setModified(false);
-		setCurrentFile("");
-	}
-}
-void LuaControl::open()
-{
-	if (okToContinue()) {
-		QString fileName = QFileDialog::getOpenFileName(this,
-														tr("Open Lua file"), ".",
-														tr("Lua files (*.lua)\n"
-														   "All Files (*)"));
-		if (!fileName.isEmpty())
-			loadFile(fileName);
-	}
-}
-bool LuaControl::loadFile(const QString &fileName)
-{
-	QFile file(fileName);
-
-	if (!file.open(QIODevice::ReadOnly)) {
-		statusBar()->showMessage(tr("Cannot open file for reading"));
-		return false;
-	}
-	if (!editor->read(&file)) {
-		statusBar()->showMessage(tr("Loading canceled"), 2000);
-		return false;
-	}
-	setCurrentFile(fileName);
-	statusBar()->showMessage(tr("File loaded"), 2000);
-	file.close();
-	return true;
-}
-
-bool LuaControl::save()
-{
-	if (curFile.isEmpty()) {
-		return saveAs();
-	} else {
-		return saveFile(curFile);
-	}
-}
-bool LuaControl::saveFile(const QString &fileName)
-{
-	QFile file(fileName);
-
-	if (!file.open(QIODevice::WriteOnly)) {
-		statusBar()->showMessage(tr("Cannot open file for writting"));
-		return false;
-	}
-	if (!editor->write(&file)) {
-		statusBar()->showMessage(tr("Saving canceled"), 2000);
-		return false;
-	}
-	setCurrentFile(fileName);
-	statusBar()->showMessage(tr("File saved"), 2000);
-	file.close();
-	editor->setModified(false);
-	return true;
-}
-bool LuaControl::saveAs()
-{
-	QString fn = QFileDialog::
-			getSaveFileName(this, tr("Save as..."), QString(),
-							tr("Lua-Files (*.lua);;All Files (*)"));
-
-	if (fn.isEmpty()) return false;
-	return saveFile(fn);
-}
-
 void LuaControl::closeEvent(QCloseEvent *event)
 {
-	if (okToContinue()) {
+        if (luaEditor->closeAllSources()) {
 		writeSettings();
 		event->accept();
 	} else {
@@ -306,29 +232,8 @@ void LuaControl::closeEvent(QCloseEvent *event)
 	}
 }
 
-void LuaControl::setCurrentFile(const QString &fileName)
-{
-	curFile = fileName;
-	setWindowModified(false);
-
-	QString shownName = tr("Untitled");
-	if (!curFile.isEmpty()) {
-		shownName = strippedName(curFile);
-		recentFiles.removeAll(curFile);
-		recentFiles.prepend(curFile);
-		updateRecentFileActions();
-	}
-
-	setWindowTitle(tr("%1[*] - %2").arg(shownName)
-								   .arg(tr("Lua IDE")));
-}
-QString LuaControl::strippedName(const QString &fullFileName)
-{
-	return QFileInfo(fullFileName).fileName();
-}
-
 void LuaControl::updateRecentFileActions()
-{
+{/*
 	QMutableStringListIterator i(recentFiles);
 	while (i.hasNext()) {
 		if (!QFile::exists(i.next()))
@@ -347,18 +252,13 @@ void LuaControl::updateRecentFileActions()
 			recentFileActions[j]->setVisible(false);
 		}
 	}
-	separatorAction->setVisible(!recentFiles.isEmpty());
+        separatorAction->setVisible(!recentFiles.isEmpty());*/
 }
 
 void LuaControl::openRecentFile()
 {
-	if (okToContinue()) {
-		QAction *action = qobject_cast<QAction *>(sender());
-		if (action) {
-			loadFile(action->data().toString());
-			editor->setModified(false);
-		}
-	}
+    QAction *action = qobject_cast<QAction *>(sender());
+    if (action) luaEditor->openSource(action->data().toString());
 }
 
 void LuaControl::about()
@@ -373,14 +273,14 @@ void LuaControl::about()
 
 void LuaControl::writeSettings()
 {
-	QSettings settings("STU FIIL", "Lua IDE");
+        QSettings settings("STU FIIT", "Lua IDE");
 	settings.setValue("geometry", saveGeometry());
 	settings.setValue("recentFiles", recentFiles);
 }
 
 void LuaControl::readSettings()
 {
-	QSettings settings("STU FIIL", "Lua IDE");
+        QSettings settings("STU FIIT", "Lua IDE");
 	restoreGeometry(settings.value("geometry").toByteArray());
 	recentFiles = settings.value("recentFiles").toStringList();
 	updateRecentFileActions();

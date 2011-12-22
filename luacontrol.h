@@ -5,8 +5,9 @@
 
 class QTextEdit;
 class QsciLexerLua;
-class LuaInterpret;
-class LuaEditor;
+class Interpreter;
+class Editor;
+class Console;
 class QLabel;
 
 class LuaControl : public QMainWindow
@@ -20,10 +21,6 @@ protected:
 	void closeEvent(QCloseEvent *event);
 
 private slots:
-	void newFile();
-	void open();
-	bool save();
-	bool saveAs();
 	void about();
 	void openRecentFile();
 	void updateStatusBar();
@@ -41,19 +38,15 @@ private:
 	void readSettings();
 	void writeSettings();
 
-	bool okToContinue();
-
-	bool loadFile(const QString &fileName);
-	bool saveFile(const QString &fileName);
-	void setCurrentFile(const QString &fileName);
 	void updateRecentFileActions();
 
 	QString strippedName(const QString &fullFileName);
 	QStringList recentFiles;
 	QString curFile;
 
-	LuaInterpret *interpret;
-	LuaEditor *editor;
+        Console *luaConsole;
+        Interpreter *interpret;
+        Editor *luaEditor;
 	QLabel *statusLabel;
 
 	QMenu *fileMenu;
