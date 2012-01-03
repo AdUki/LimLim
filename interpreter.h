@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include <QProcess>
+#include <QTemporaryFile>
+
 
 #include "editor.h"
 #include "source.h"
@@ -32,6 +34,7 @@ private:
     Console* console;
     Editor* editor;
 
+    QTemporaryFile tempFile;
 
     void execute(Source* source);
     void terminate();

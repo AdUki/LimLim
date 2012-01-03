@@ -1,7 +1,6 @@
 #include "interpreter.h"
 #include "luacontrol.h"
 
-
 Interpreter::Interpreter(Editor* editor, Console* console, QWidget *parent)
     : QWidget(parent)
 {
@@ -34,9 +33,11 @@ void Interpreter::execute(Source* source)
 
     if (source->doesExist()) process->start("lua5.1", options << "-e" << "io.stdout:setvbuf 'no'" << "--" << source->getFileName());
     else {
-        process->start("lua", options << "-e" << "io.stdout:setvbuf 'no'" << "--");
-        process->write(source->text().toAscii());
-        process->closeWriteChannel();
+        if (tempFile.open()) {
+            tempFile.write(source->text().toAscii());
+            tempFile.close();
+            process->start("lua", options << "-e" << "io.stdout:setvbuf 'no'" << "--" << tempFile.fileName());
+        } // TODO add error handling
     }
 }
 
