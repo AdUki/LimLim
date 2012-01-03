@@ -1,69 +1,78 @@
 #include "interpreter.h"
-#include "lua5.1/lua.hpp"
 #include "luacontrol.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <QKeyEvent>
-#include <QTimer>
 
-/*
-	This class need to acces LuaIntrpret atributes and it just
-	filters input.
-
-	TODO Try to implement eventFilter inside LuaInterpret class
-		 or try to add more functionality from keyPressEvent
-		 from LuaInterpret here.
-*//*
-class UserInputFilter : public QObject {
-
-public:
-	UserInputFilter( QObject *parent = 0 ) : QObject( parent ) {
-		this->parent = static_cast<LuaInterpret*>(parent);
-	}
-
-private:
-	LuaInterpret *parent;
-
-protected:
-	bool eventFilter( QObject *dist, QEvent *event )
-	{
-		if (event->type() == QEvent::MouseButtonPress)
-		{
-			QMouseEvent *mousePress = static_cast<QMouseEvent*>(event);
-			if (mousePress->button() == Qt::LeftButton)
-			{
-
-				parent->setFocus();
-				return true; // block left mouse button
-			}
-		}
-		//else if (event->type() == QEvent::KeyPress)
-
-		return false;
-	}
-};*/
-
-/*
-	Main class for interpreting lua code.
-
-	You can also launch lua code with debug via this class.
-	TODO !!!!! disable left mouse button !!!!!
-*/
-Interpreter::Interpreter(QWidget *parent) :
-        QTextEdit(parent)
+Interpreter::Interpreter(Editor* editor, Console* console, QWidget *parent)
+    : QWidget(parent)
 {
-	setUndoRedoEnabled(false);
-	setReadOnly(true);
-	setOverwriteMode(false);
-	fixedPosition = 0;
-	//setAttribute(Qt::WA_TransparentForMouseEvents);
+    this->console = console;
+    this->editor = editor;
+    process = new QProcess(this);
+    options.clear();
 
-	// connect all 'observers' breakpoint()
-	// ...
+    connect(console, SIGNAL(emitInput(QByteArray)), this, SLOT(writeInput(QByteArray)));
+    connect(process, SIGNAL(readyReadStandardError()), this, SLOT(readStandardError()));
+    connect(process, SIGNAL(readyReadStandardOutput()), this, SLOT(readStandardOutput()));
+    connect(process, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(finished(int, QProcess::ExitStatus)));
+}
+
+void Interpreter::run()
+{
+    Source* current = editor->currentSource();
+    if (current != NULL)
+        execute(current);
+}
+
+void Interpreter::debug()
+{
 
 }
 
+void Interpreter::execute(Source* source)
+{
+    console->open();
+
+    if (source->doesExist()) process->start("lua5.1", options << "-e" << "io.stdout:setvbuf 'no'" << "--" << source->getFileName());
+    else {
+        process->start("lua", options << "-e" << "io.stdout:setvbuf 'no'" << "--");
+        process->write(source->text().toAscii());
+        process->closeWriteChannel();
+    }
+}
+
+void Interpreter::kill()
+{
+    process->kill();
+    terminate();
+}
+
+void Interpreter::terminate()
+{
+    console->close();
+    options.clear();
+}
+
+void Interpreter::writeInput(QByteArray input)
+{
+    process->write(input);
+}
+
+void Interpreter::readStandardOutput()
+{
+    console->writeOutput(process->readAllStandardOutput());
+}
+
+void Interpreter::readStandardError()
+{
+    console->writeError(process->readAllStandardError());
+}
+
+void Interpreter::finished(int exitCode, QProcess::ExitStatus exitStatus)
+{
+    terminate();
+}
+
+/*
 int Interpreter::run(QString code)
 {
 	clear();
@@ -82,70 +91,4 @@ int Interpreter::run(QString code)
         setTextColor(QColor::fromRgb(255,255,255,255));
 
 	return 0;
-}
-
-int Interpreter::debug(QString code)
-{
-	code = "";
-
-	return 0;
-}
-
-
-void Interpreter::writeError()
-{
-	// TODO set char format to print colorful text (setCurrentCharFormat)
-        setTextColor(QColor::fromRgb(255,100,100,255));
-        append(process->readAllStandardError());
-}
-
-void Interpreter::writeOutput()
-{
-	// TODO set char format to print colorful text (setCurrentCharFormat)
-        setTextColor(QColor::fromRgb(100,100,255,255));
-        append(process->readAllStandardOutput());
-        setTextColor(QColor::fromRgb(0,0,0,255));
-}
-
-void Interpreter::end(int value, QProcess::ExitStatus)
-{
-        setTextColor(QColor::fromRgb(0,0,0,255));
-	append(QString("Program exited with %1\n").arg(value));
-	setReadOnly(false);
-	emit finished(true);
-}
-
-void Interpreter::stop()
-{
-//        process->kill();
-}
-
-void Interpreter::keyPressEvent ( QKeyEvent * event )
-{
-    QTextEdit::keyPressEvent(event);
-    return;
-	if (!isReadOnly()) {
-		if (event->key() == Qt::Key_Return ||
-				event->key() == Qt::Key_Enter) {
-			sendInput(inputBuff);
-			inputBuff.clear();
-		// TODO next line is ugly solution... refactor
-		// TODO add this filtering to InputFilter
-		} else if (event->key() >= Qt::Key_Space &&
-				   event->key() <= Qt::Key_ydiaeresis) {
-			inputBuff.append(event->text().toAscii());
-			QTextEdit::keyPressEvent(event);
-		} else if (event->key() == Qt::Key_Backspace) {
-			inputBuff.remove(inputBuff.size()-1, 1);
-			QTextEdit::keyPressEvent(event);
-		}
-	}
-}
-
-void Interpreter::sendInput(const QByteArray& input)
-{
-	process->write(input.data(), input.size());
-	process->write(QByteArray("\n"));
-}
-
-
+}*/

@@ -45,8 +45,9 @@ private:
 	QString curFile;
 
         Console *luaConsole;
-        Interpreter *interpret;
+        Interpreter *luaInterpret;
         Editor *luaEditor;
+
 	QLabel *statusLabel;
 
 	QMenu *fileMenu;

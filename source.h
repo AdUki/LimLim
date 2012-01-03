@@ -17,7 +17,10 @@ public:
     explicit Source(const QString& sourceFile = 0, QWidget *parent = 0);
 
     bool doesExist() const { return exist; }
-    QString getShortFileName() const;
+    QString getName() const;
+    QString getFileName() const { return file; }
+
+    bool operator==(const Source &rhs);
 
 public slots:
     bool save();

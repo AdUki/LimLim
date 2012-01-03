@@ -23,6 +23,8 @@ class Editor : public QTabWidget
 public:
     explicit Editor(QWidget *parent);
 
+    Source* currentSource();
+
 public slots:
     const Source* newSource();
     const Source* openSource();
@@ -35,7 +37,6 @@ public slots:
 
 private:
     const Source* addSource(Source* source);
-    Source* currentSource();
 
 private slots:
     void closeTabWithSource(int i);

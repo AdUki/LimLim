@@ -8,8 +8,8 @@
 LuaControl::LuaControl()
 {
     luaConsole = new Console(this);
-    interpret = new Interpreter(this);
     luaEditor = new Editor(this);
+    luaInterpret = new Interpreter(luaEditor, luaConsole, this);
     setCentralWidget(luaEditor);
 
     createActions();
@@ -27,21 +27,17 @@ LuaControl::LuaControl()
 
 void LuaControl::run()
 {
-	runAction->setEnabled(false);
-	debugAction->setEnabled(false);
-//	interpret->run(editor->text());
+    luaInterpret->run();
 }
 
 void LuaControl::debug()
 {
-	runAction->setEnabled(false);
-	debugAction->setEnabled(false);
-//	interpret->debug(editor->text());
+    luaInterpret->debug();
 }
 
 void LuaControl::stop()
 {
-	interpret->stop();
+    luaInterpret->kill();
 }
 
 
@@ -130,20 +126,18 @@ void LuaControl::createActions()
 	runAction->setIcon(QIcon(":/images/run.png"));
 	runAction->setStatusTip(tr("Run current chunk of Lua code"));
 	connect(runAction, SIGNAL(triggered()), this, SLOT(run()));
-	connect(interpret, SIGNAL(finished(bool)), runAction, SLOT(setEnabled(bool)));
 
     // DEBUG ACTION
 	debugAction = new QAction(tr("&Debug"), this);
 	debugAction->setIcon(QIcon(":/images/debug/run"));
 	debugAction->setStatusTip(tr("Debug current chunk of Lua code"));
 	connect(debugAction, SIGNAL(triggered()), this, SLOT(debug()));
-	connect(interpret, SIGNAL(finished(bool)), debugAction, SLOT(setEnabled(bool)));
 
     // STOP ACTION
 	stopAction = new QAction(tr("&Stop"), this);
 	stopAction->setIcon(QIcon(":/images/process-stop.png"));
 	stopAction->setStatusTip(tr("Stop current running program"));
-	connect(stopAction, SIGNAL(triggered()), interpret, SLOT(stop()));
+        connect(stopAction, SIGNAL(triggered()), luaInterpret, SLOT(kill()));
 }
 
 void LuaControl::createMenus()
@@ -185,10 +179,6 @@ void LuaControl::createToolBars()
 	fileToolBar->addAction(newAction);
 	fileToolBar->addAction(openAction);
 	fileToolBar->addAction(saveAction);
-	editToolBar = addToolBar(tr("&Edit"));
-	editToolBar->addAction(cutAction);
-	editToolBar->addAction(copyAction);
-	editToolBar->addAction(pasteAction);
 	runToolBar = addToolBar(tr("&Run"));
 	runToolBar->addAction(runAction);
 	runToolBar->addAction(debugAction);

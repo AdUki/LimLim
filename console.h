@@ -21,7 +21,9 @@ class Console : public QTextEdit
 
 public:
     explicit Console(QWidget *parent = 0);
-    QByteArray readInput();
+
+signals:
+    void emitInput(QByteArray input);
 
 public slots:
 
@@ -38,7 +40,6 @@ private:
     QString command;
     void confirmCommand();
 
-    QBuffer inputBuffer;
     QBuffer outputBuffer;
     QBuffer errorBuffer;
 };

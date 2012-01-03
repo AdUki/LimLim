@@ -6,16 +6,9 @@ Console::Console(QWidget *parent) : QTextEdit(parent)
     setTextBackgroundColor(QColor::fromRgb(255,255,255,255));
 }
 
-
-QByteArray Console::readInput()
-{
-    return inputBuffer.readAll();
-}
-
 void Console::open()
 {
     setReadOnly(false); clear();
-    inputBuffer.open(QIODevice::Text | QIODevice::ReadWrite);
     errorBuffer.open(QIODevice::Text | QIODevice::ReadWrite);
     outputBuffer.open(QIODevice::Text | QIODevice::ReadWrite);
     command = "";
@@ -24,7 +17,6 @@ void Console::open()
 void Console::close()
 {
     setReadOnly(true);
-    inputBuffer.close();
     errorBuffer.close();
     outputBuffer.close();
 }
@@ -46,8 +38,9 @@ void Console::writeError(QByteArray data)
 void Console::confirmCommand()
 {
     // TODO check if correct, maybe enconding conflict
-    inputBuffer.write(command.toAscii());
+    QByteArray input(command.toAscii().append('\n'));
     command = "";
+    emit emitInput(input);
 }
 
 void Console::keyPressEvent ( QKeyEvent * e )
@@ -65,7 +58,7 @@ void Console::keyPressEvent ( QKeyEvent * e )
         QTextCursor cursor = textCursor();
         cursor.movePosition(QTextCursor::End);
         setTextCursor(cursor);
-        e->accept();
+        QTextEdit::keyPressEvent(e);
     }
     // Movement and copy operations
     else if (e->key() == Qt::Key_Left ||
@@ -74,7 +67,7 @@ void Console::keyPressEvent ( QKeyEvent * e )
         e->key() == Qt::Key_Down ||
         e->matches(QKeySequence::Copy))
     {
-        e->accept();
+        QTextEdit::keyPressEvent(e);
     }
     // Delete operations
     else if (e->key() == Qt::Key_Backspace ||
@@ -95,7 +88,7 @@ void Console::keyPressEvent ( QKeyEvent * e )
         if (command_pos >= 0)
         {
             command.remove(command_pos, selection_size);
-            e->accept();
+            QTextEdit::keyPressEvent(e);
         }
     }
     // Input operations
@@ -112,8 +105,7 @@ void Console::keyPressEvent ( QKeyEvent * e )
         {
             if (selection_size > 0) command.remove(command_pos, selection_size);
             command.insert(command_pos, e->text());
-            e->accept();
+            QTextEdit::keyPressEvent(e);
         }
     }
-    e->ignore();
 }

@@ -45,7 +45,7 @@ const Source* Editor::addSource(Source* source)
         setCurrentIndex(tabIndex);
         setStatusTip(tr("Source already opened"));
     } else {
-        QString sourceName = source->getShortFileName();
+        QString sourceName = source->getName();
         if (sourceName.compare("") != 0) {
             int i = addTab(source, sourceName);
             setCurrentIndex(i);
@@ -54,6 +54,7 @@ const Source* Editor::addSource(Source* source)
         }
         return NULL;
     }
+    return source;
 }
 
 void Editor::saveCurrentSource()
@@ -114,7 +115,7 @@ void Editor::updateSourceNames()
     int i;
     for (i = 0; i < count(); i++) {
         Source* src = static_cast<Source*>(widget(i));
-        setTabText(i, src->getShortFileName());
+        setTabText(i, src->getName());
     }
 }
 

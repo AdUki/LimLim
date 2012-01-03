@@ -13,7 +13,6 @@ SOURCES += main.cpp \
     breakpoint.cpp \
     source.cpp \
     editor.cpp
-
 HEADERS += interpreter.h \
     luacontrol.h \
     debugger.h \
@@ -21,8 +20,24 @@ HEADERS += interpreter.h \
     breakpoint.h \
     source.h \
     editor.h
-
 FORMS += 
 LIBS += -lqscintilla2 \
-    -llua5.1
+    -llua
 RESOURCES += icons.qrc
+OTHER_FILES += images/process-stop.png \
+    images/run.png \
+    images/process-stop.png \
+    images/lua.png \
+    images/run.png \
+    images/process-stop.png \
+    images/lua.png \
+    images/compile.png \
+    images/debug/step-over.png \
+    images/debug/step-out.png \
+    images/debug/step-into-instruction.png \
+    images/debug/step-into.png \
+    images/debug/step-instruction.png \
+    images/debug/run-cursor.png \
+    images/debug/run.png \
+    images/debug/execute-to-cursor.png \
+    images/debug/execute-from-cursor.png

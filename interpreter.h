@@ -1,40 +1,51 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 
-#include <QTextEdit>
+#include <QWidget>
 #include <QProcess>
 
-class Interpreter : public QTextEdit
+#include "editor.h"
+#include "source.h"
+#include "console.h"
+
+class Interpreter : public QWidget
 {
-    Q_OBJECT
-
+Q_OBJECT
 public:
-        explicit Interpreter(QWidget *parent = 0);
-
-	int run(QString code);
-	int debug(QString code);
-
-protected:
-	virtual void keyPressEvent ( QKeyEvent * event );
-
-signals:
-	void breakpoint(); // OK
-	void finished(bool status);
+    explicit Interpreter(Editor* editor, Console* console, QWidget *parent = 0);
 
 public slots:
-	void stop();
+    void run();
+    void debug();
+    void kill();
+
+signals:
+    void executionChanged(bool running);
 
 private:
-	QProcess *process;
-	QByteArray inputBuff;
-	int fixedPosition;
+    QProcess *process;
+    QStringList options;
 
-	void sendInput(const QByteArray& input);
+    QString compiler;
+    QString interpreter;
+
+    Console* console;
+    Editor* editor;
+
+
+    void execute(Source* source);
+    void terminate();
+
+    void ignoreEnvironmentVars() { options << "-E"; }
+    void setInteractiveMode() { options << "-i"; }
 
 private slots:
-	void writeError();
-	void writeOutput();
-	void end(int value, QProcess::ExitStatus);
+    void writeInput(QByteArray input);
+
+    void readStandardOutput();
+    void readStandardError();
+
+    void finished(int exitCode, QProcess::ExitStatus exitStatus);
 };
 
 #endif // INTERPRETER__H

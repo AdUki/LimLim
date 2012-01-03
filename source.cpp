@@ -36,7 +36,7 @@ void Source::initScintilla()
     setColor(QColor::fromRgb(255,255,255,255));    
 }
 
-QString Source::getShortFileName() const
+QString Source::getName() const
 {
     QString shortName;
 
@@ -46,6 +46,13 @@ QString Source::getShortFileName() const
 
     return shortName;
 }
+
+bool Source::operator==(const Source &rhs) {
+    if (this == &rhs) return true;
+    if (!this->exist || !rhs.exist) return false;
+    if (QFileInfo(file) == QFileInfo(rhs.file)) return true;
+    return false;
+  }
 
 bool Source::save()
 {
