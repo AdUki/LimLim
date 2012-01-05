@@ -26,17 +26,23 @@ public:
     Source* currentSource();
 
 public slots:
-    const Source* newSource();
-    const Source* openSource();
-    const Source* openSource(const QString& filename);
+    Source* newSource();
+    Source* openSource();
+    Source* openSource(const QString& filename);
 
     void saveCurrentSource();
     void saveCurrentSourceAs();
     void saveAllSources();
     bool closeAllSources(); // call this before exit
 
+    void debugLine(QString file, unsigned line);
+    void debugClear();
+
 private:
-    const Source* addSource(Source* source);
+    Source* addSource(Source* source);
+
+    int markerHandle;
+    Source *debugSource;
 
 private slots:
     void closeTabWithSource(int i);

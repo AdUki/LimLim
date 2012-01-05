@@ -6,16 +6,17 @@
 Editor::Editor(QWidget *parent) :
     QTabWidget(parent)
 {
+    markerHandle = -1;
     setTabsClosable(true);
     connect(this, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTabWithSource(int)));
 }
 
-const Source* Editor::newSource()
+Source* Editor::newSource()
 {
     return addSource(new Source(NULL, this));
 }
 
-const Source* Editor::openSource()
+Source* Editor::openSource()
 {
     QString filename = QFileDialog::getOpenFileName(this,
                 tr("Open Lua file"), ".",
@@ -25,13 +26,13 @@ const Source* Editor::openSource()
     return openSource(filename);
 }
 
-const Source* Editor::openSource(const QString &filename)
+Source* Editor::openSource(const QString &filename)
 {
     if (filename.isEmpty()) return NULL;
     return addSource(new Source(filename, this));
 }
 
-const Source* Editor::addSource(Source* source)
+Source* Editor::addSource(Source* source)
 {
     int i, tabIndex = -1;
     for (i = 0; i < count(); i++) {
@@ -124,4 +125,31 @@ Source* Editor::currentSource()
     if (count() > 0)
         return static_cast<Source*>(currentWidget());
     else return NULL;
+}
+
+void Editor::debugLine(QString file, unsigned line)
+{
+    debugSource = NULL;
+
+    int i;
+    for (i = 0; i < count(); i++) {
+        Source* src = static_cast<Source*>(widget(i));
+        if (QFileInfo(src->getFileName()) == QFileInfo(file)) {
+            debugSource = src; // Found file in tabs
+            break;
+        }
+    }
+    if (debugSource == NULL) { // Try to open referenced file
+        debugSource = openSource(file);
+        if (debugSource == NULL) return; // Failed to open file
+    }
+
+    debugClear();
+    markerHandle = debugSource->markerAdd(line, QsciScintilla::SC_MARK_ARROW);
+}
+
+void Editor::debugClear()
+{
+    if (markerHandle != -1 && debugSource != NULL)
+        debugSource->markerDeleteHandle(markerHandle);
 }

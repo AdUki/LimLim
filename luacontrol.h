@@ -40,9 +40,7 @@ private:
 
 	void updateRecentFileActions();
 
-	QString strippedName(const QString &fullFileName);
 	QStringList recentFiles;
-	QString curFile;
 
         Console *luaConsole;
         Interpreter *luaInterpret;
@@ -60,6 +58,7 @@ private:
 	QToolBar *fileToolBar;
 	QToolBar *editToolBar;
 	QToolBar *runToolBar;
+        QToolBar *debugToolBar;
 
 	enum { MaxRecentFiles = 5 };
 	QAction *recentFileActions[MaxRecentFiles];
@@ -78,9 +77,13 @@ private:
 	QAction *cutAction;
 	QAction *deleteAction;
 
-	QAction *runAction;
+        QAction *runAction;
 	QAction *debugAction;
 	QAction *stopAction;
+
+        QAction *continueAction;
+        QAction *stepOverAction;
+        QAction *stepIntoAction;
 };
 
 #endif // MAINWINDOW_H

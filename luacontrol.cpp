@@ -129,7 +129,7 @@ void LuaControl::createActions()
 
     // DEBUG ACTION
 	debugAction = new QAction(tr("&Debug"), this);
-	debugAction->setIcon(QIcon(":/images/debug/run"));
+        debugAction->setIcon(QIcon(":/images/compile.png"));
 	debugAction->setStatusTip(tr("Debug current chunk of Lua code"));
 	connect(debugAction, SIGNAL(triggered()), this, SLOT(debug()));
 
@@ -138,6 +138,24 @@ void LuaControl::createActions()
 	stopAction->setIcon(QIcon(":/images/process-stop.png"));
 	stopAction->setStatusTip(tr("Stop current running program"));
         connect(stopAction, SIGNAL(triggered()), luaInterpret, SLOT(kill()));
+
+    // CONTINUE ACTION
+        continueAction = new QAction(tr("&Continue"), this);
+        continueAction->setIcon(QIcon(":/images/debug/run.png"));
+        continueAction->setStatusTip(tr("Continue running program"));
+        //connect(continueAction, SIGNAL(triggered()), luaInterpret, SLOT(kill()));
+
+    // STEP INTO ACTION
+        stepIntoAction = new QAction(tr("&Step into"), this);
+        stepIntoAction->setIcon(QIcon(":/images/debug/step-into.png"));
+        stepIntoAction->setStatusTip(tr("Step into function"));
+        //connect(stepIntoAction, SIGNAL(triggered()), luaInterpret, SLOT(kill()));
+
+    // STEP OVER ACTION
+        stepOverAction = new QAction(tr("Step &over"), this);
+        stepOverAction->setIcon(QIcon(":/images/debug/step-over.png"));
+        stepOverAction->setStatusTip(tr("Step over function"));
+        //connect(stepOverAction, SIGNAL(triggered()), luaInterpret, SLOT(kill()));
 }
 
 void LuaControl::createMenus()
@@ -179,10 +197,16 @@ void LuaControl::createToolBars()
 	fileToolBar->addAction(newAction);
 	fileToolBar->addAction(openAction);
 	fileToolBar->addAction(saveAction);
-	runToolBar = addToolBar(tr("&Run"));
+
+        runToolBar = addToolBar(tr("&Run"));
 	runToolBar->addAction(runAction);
 	runToolBar->addAction(debugAction);
 	runToolBar->addAction(stopAction);
+
+        debugToolBar = addToolBar(tr("&Debug"));
+        debugToolBar->addAction(continueAction);
+        debugToolBar->addAction(stepIntoAction);
+        debugToolBar->addAction(stepOverAction);
 }
 
 void LuaControl::createStatusBar()
