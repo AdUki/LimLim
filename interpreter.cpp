@@ -34,7 +34,10 @@ void Interpreter::execute(Source* source)
     if (source->doesExist()) process->start("lua5.1", options << "-e" << "io.stdout:setvbuf 'no'" << "--" << source->getFileName());
     else {
         if (tempFile.open()) {
-            tempFile.write(source->text().toAscii());
+            tempFile.resize(0); // truncate file
+            if (tempFile.write(source->text().toAscii()) == -1) {
+                return; // TODO add error handling
+            }
             tempFile.close();
             process->start("lua", options << "-e" << "io.stdout:setvbuf 'no'" << "--" << tempFile.fileName());
         } // TODO add error handling
