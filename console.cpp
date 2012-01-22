@@ -91,6 +91,14 @@ void Console::keyPressEvent ( QKeyEvent * e )
             QTextEdit::keyPressEvent(e);
         }
     }
+    // Copy operation
+    else if (e->matches(QKeySequence::Copy)) { // TODO doesn't catch key sequence
+        QTextEdit::keyPressEvent(e);
+    }
+    // Paste operation
+    else if (e->matches(QKeySequence::Paste)) {
+        // TODO implement paste operation
+    }
     // Input operations
     else {
         setTextColor(QColor::fromRgb(0,0,0,255));

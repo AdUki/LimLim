@@ -7,7 +7,33 @@
 	to debbug embedded lua applications.
 
 */
-LuaDebugger::LuaDebugger(QObject *parent) :
+Debugger::Debugger(QObject *parent) :
     QObject(parent)
 {
+
+}
+
+void Debugger::start()
+{
+
+}
+
+void Debugger::stop()
+{
+
+}
+
+void Debugger::stepOver()
+{
+
+}
+
+void Debugger::stepIn()
+{
+
+}
+
+void Debugger::run()
+{
+
 }

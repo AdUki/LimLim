@@ -2,17 +2,24 @@
 #define DEBUGGER_H
 
 #include <QObject>
-#include <QFile>
+#include <QProcess>
 
-class LuaDebugger : public QObject
+class Debugger : public QObject
 {
-    Q_OBJECT
+Q_OBJECT
 public:
-    explicit LuaDebugger(QObject *parent = 0);
-
-signals:
+    explicit Debugger(QObject *parent = 0);
 
 public slots:
+    void start();
+    void stop();
+
+    void stepOver();
+    void stepIn();
+    void run();
+
+private:
+    QProcess remdebug;
 
 };
 
