@@ -9,6 +9,8 @@ class Interpreter;
 class Editor;
 class Console;
 class QLabel;
+class VariableWatcher;
+class Debugger;
 
 class LuaControl : public QMainWindow
 {
@@ -45,6 +47,8 @@ private:
         Console *luaConsole;
         Interpreter *luaInterpret;
         Editor *luaEditor;
+        Debugger *luaDebugger;
+        VariableWatcher *watcheslist;
 
 	QLabel *statusLabel;
 

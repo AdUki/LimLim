@@ -4,12 +4,16 @@
 #include "luacontrol.h"
 #include "interpreter.h"
 #include "editor.h"
+#include "variablewatcher.h"
+#include "debugger.h"
 
 LuaControl::LuaControl()
 {
     luaConsole = new Console(this);
     luaEditor = new Editor(this);
     luaInterpret = new Interpreter(luaEditor, luaConsole, this);
+    luaDebugger = new Debugger(this);
+    watcheslist = new VariableWatcher(luaDebugger);
     setCentralWidget(luaEditor);
 
     createActions();
@@ -234,6 +238,10 @@ void LuaControl::createDockWindows()
 	// Breakpoints dock widget
 
 	// Watches dock widget
+        dock = new QDockWidget(tr("Watches"), this);
+        dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+        dock->setWidget(watcheslist);
+        addDockWidget(Qt::BottomDockWidgetArea, dock);
 }
 
 void LuaControl::closeEvent(QCloseEvent *event)
