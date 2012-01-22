@@ -4,6 +4,7 @@ Console::Console(QWidget *parent) : QTextEdit(parent)
 {
     setReadOnly(true);
     setTextBackgroundColor(QColor::fromRgb(255,255,255,255));
+    setLineWrapMode(QTextEdit::NoWrap);
 }
 
 void Console::open()
