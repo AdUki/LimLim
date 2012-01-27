@@ -5,15 +5,9 @@
 VariableWatcher::VariableWatcher(const Debugger *debugger)
 {
     setColumnCount(3);
-    setHorizontalHeaderItem(0,
-        new QTableWidgetItem(tr("Name"), QTableWidgetItem::Type)
-    );
-    setHorizontalHeaderItem(1,
-        new QTableWidgetItem(tr("Type"), QTableWidgetItem::Type)
-    );
-    setHorizontalHeaderItem(2,
-        new QTableWidgetItem(tr("Value"), QTableWidgetItem::Type)
-    );
+    setHorizontalHeaderItem(0, new QTableWidgetItem(tr("Name"), QTableWidgetItem::Type));
+    setHorizontalHeaderItem(1, new QTableWidgetItem(tr("Type"), QTableWidgetItem::Type));
+    setHorizontalHeaderItem(2, new QTableWidgetItem(tr("Value"), QTableWidgetItem::Type));
 
     setContextMenuPolicy(Qt::ActionsContextMenu);
 
@@ -24,7 +18,7 @@ VariableWatcher::VariableWatcher(const Debugger *debugger)
     addAction(newAction);
 
     newAction = new QAction(tr("&Delete watch"), this);
-    newAction->setShortcut(QKeySequence::Delete);
+    newAction->setShortcut(QKeySequence("Ctrl+d"));
     newAction->setStatusTip(tr("Deletes selected watches"));
     connect(newAction, SIGNAL(triggered()), this, SLOT(deleteWatch()));
     addAction(newAction);
@@ -42,7 +36,7 @@ void VariableWatcher::deleteWatch()
     while(iter.hasPrevious()) {
         QTableWidgetSelectionRange range = iter.previous();
 
-        for (int n = range.topRow(); n <= range.bottomRow(); n++) {
+        for (int n = range.bottomRow(); n >= range.topRow(); n--) {
             this->removeRow(n);
         }
     }

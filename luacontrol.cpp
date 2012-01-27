@@ -29,6 +29,9 @@ LuaControl::LuaControl()
     setAttribute(Qt::WA_DeleteOnClose);
 }
 
+// TODO add disabling of buttons when launching program and
+//      enabling buttons when program has finished
+
 void LuaControl::run()
 {
     luaInterpret->run();
@@ -36,11 +39,13 @@ void LuaControl::run()
 
 void LuaControl::debug()
 {
+    luaDebugger->start();
     luaInterpret->debug();
 }
 
 void LuaControl::stop()
 {
+    luaDebugger->stop();
     luaInterpret->kill();
 }
 
@@ -141,25 +146,25 @@ void LuaControl::createActions()
 	stopAction = new QAction(tr("&Stop"), this);
 	stopAction->setIcon(QIcon(":/images/process-stop.png"));
 	stopAction->setStatusTip(tr("Stop current running program"));
-        connect(stopAction, SIGNAL(triggered()), luaInterpret, SLOT(kill()));
+        connect(stopAction, SIGNAL(triggered()), this, SLOT(stop()));
 
     // CONTINUE ACTION
         continueAction = new QAction(tr("&Continue"), this);
         continueAction->setIcon(QIcon(":/images/debug/run.png"));
         continueAction->setStatusTip(tr("Continue running program"));
-        //connect(continueAction, SIGNAL(triggered()), luaInterpret, SLOT(kill()));
+        connect(continueAction, SIGNAL(triggered()), luaDebugger, SLOT(run()));
 
     // STEP INTO ACTION
         stepIntoAction = new QAction(tr("&Step into"), this);
         stepIntoAction->setIcon(QIcon(":/images/debug/step-into.png"));
         stepIntoAction->setStatusTip(tr("Step into function"));
-        //connect(stepIntoAction, SIGNAL(triggered()), luaInterpret, SLOT(kill()));
+        connect(stepIntoAction, SIGNAL(triggered()), luaDebugger, SLOT(stepIn()));
 
     // STEP OVER ACTION
         stepOverAction = new QAction(tr("Step &over"), this);
         stepOverAction->setIcon(QIcon(":/images/debug/step-over.png"));
         stepOverAction->setStatusTip(tr("Step over function"));
-        //connect(stepOverAction, SIGNAL(triggered()), luaInterpret, SLOT(kill()));
+        connect(stepOverAction, SIGNAL(triggered()), luaDebugger, SLOT(stepOver()));
 }
 
 void LuaControl::createMenus()
@@ -241,6 +246,14 @@ void LuaControl::createDockWindows()
         dock = new QDockWidget(tr("Watches"), this);
         dock->setAllowedAreas(Qt::AllDockWidgetAreas);
         dock->setWidget(watcheslist);
+        addDockWidget(Qt::BottomDockWidgetArea, dock);
+
+        // Controller dock widget for debug
+        dock = new QDockWidget(tr("RemDebug"), this);
+        dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+        Console *console = new Console(this);
+        luaDebugger->setConsole(console);
+        dock->setWidget(console);
         addDockWidget(Qt::BottomDockWidgetArea, dock);
 }
 

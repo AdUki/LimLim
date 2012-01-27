@@ -24,13 +24,18 @@ void Interpreter::run()
 
 void Interpreter::debug()
 {
-
+    options << "-e" << "require 'remdebug.engine'.start()";
+    this->run();
 }
 
+// TODO add lua 5.0 and 5.2 support
 void Interpreter::execute(Source* source)
 {
     console->open();
+    process->terminate();
 
+    // TODO platform specific, lua5.1 mustn't be found
+    // TODO implement specifiing path to lua executable
     if (source->doesExist()) process->start("lua5.1", options << "-e" << "io.stdout:setvbuf 'no'" << "--" << source->getFileName());
     else {
         if (tempFile.open()) {
@@ -47,10 +52,10 @@ void Interpreter::execute(Source* source)
 void Interpreter::kill()
 {
     process->kill();
-    terminate();
+    onClose();
 }
 
-void Interpreter::terminate()
+void Interpreter::onClose()
 {
     console->close();
     options.clear();
@@ -73,7 +78,7 @@ void Interpreter::readStandardError()
 
 void Interpreter::finished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    terminate();
+    onClose();
 }
 
 /*

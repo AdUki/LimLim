@@ -37,7 +37,7 @@ private:
     QTemporaryFile tempFile;
 
     void execute(Source* source);
-    void terminate();
+    void onClose();
 
     void ignoreEnvironmentVars() { options << "-E"; }
     void setInteractiveMode() { options << "-i"; }
