@@ -42,4 +42,5 @@ OTHER_FILES += images/process-stop.png \
     images/debug/run-cursor.png \
     images/debug/run.png \
     images/debug/execute-to-cursor.png \
-    images/debug/execute-from-cursor.png
+    images/debug/execute-from-cursor.png \
+    controller.lua
