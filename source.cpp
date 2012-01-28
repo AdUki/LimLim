@@ -33,7 +33,9 @@ void Source::initScintilla()
     setMarginType(1, NumberMargin);
     setMarginWidth(1, 40);
     setUtf8(true);
-    setColor(QColor::fromRgb(255,255,255,255));    
+    setColor(QColor::fromRgb(255,255,255,255));
+    markerDefine('>', RightArrow);
+    markerDefine('O', Circle);
 }
 
 QString Source::getName() const

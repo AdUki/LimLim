@@ -5,10 +5,13 @@
 
 local socket = require "socket"
 
-print("Lua Remote Debugger")
-print("Run the program you wish to debug")
+print("Program started")
 
 local server = socket.bind("*", 8171)
+if server == nil then 
+  print "Error: Remdebug already running"
+  os.exit()
+end
 local client = server:accept()
 
 local breakpoints = {}
@@ -20,7 +23,7 @@ client:receive()
 local breakpoint = client:receive()
 local _, _, file, line = string.find(breakpoint, "^202 Paused%s+([%w%p]+)%s+(%d+)$")
 if file and line then
-  print("Paused at file " .. file )
+  print("Paused:" .. " file " .. file )
   print("Type 'help' for commands")
 else
   local _, _, size = string.find(breakpoint, "^401 Error in Execution (%d+)$")
@@ -48,12 +51,12 @@ while true do
     if status == "202" then
       local _, _, file, line = string.find(breakpoint, "^202 Paused%s+([%w%p]+)%s+(%d+)$")
       if file and line then 
-        print("Paused at file " .. file .. " line " .. line)
+        print("Paused:"  .. " line " .. line .. " file " .. file)
       end
     elseif status == "203" then
       local _, _, file, line, watch_idx = string.find(breakpoint, "^203 Paused%s+([%w%p]+)%s+(%d+)%s+(%d+)$")
       if file and line and watch_idx then
-        print("Paused at file " .. file .. " line " .. line .. " (watch expression " .. watch_idx .. ": [" .. watches[watch_idx] .. "])")
+        print("Paused:" .. " line " .. line .. " watch " .. watch_idx .. " file " .. file)
       end
     elseif status == "401" then 
       local _, _, size = string.find(breakpoint, "^401 Error in Execution (%d+)$")

@@ -8,6 +8,9 @@
 
 #include "breakpoint.h"
 
+// TODO add function lock() to prevent source editting when debugging
+//      when executing program all sources will lock
+//      locking includes file save
 
 class Source : public QsciScintilla
 

@@ -7,10 +7,11 @@
 	to debbug embedded lua applications.
 
 */
-Debugger::Debugger(QObject *parent) :
+Debugger::Debugger(Editor *editor, QObject *parent) :
     QObject(parent)
 {
     remdebug = new QProcess(this);
+    this->editor = editor;
 
     connect(remdebug, SIGNAL(readyRead()), this, SLOT(controlParser()));
     connect(remdebug, SIGNAL(finished(int,QProcess::ExitStatus)),
@@ -58,14 +59,35 @@ void Debugger::run()
 
 void Debugger::controlParser()
 {
-    QByteArray output = remdebug->readAll();
+    output.append(remdebug->readAll());
+
+    if (!output.endsWith("> ") && !output.endsWith("Program finished\n") && !output.endsWith("Program started\n"))
+        return;
 
     if (console != NULL) console->writeOutput(output);
+
+    if (output.startsWith("Paused:")) {
+        QRegExp rx("^Paused:( line ){0,1}(\\d*)( watch ){0,1}(\\d*) file (.*)\n.*");
+
+        rx.indexIn(output);
+
+        int line = rx.cap(2).toInt();
+        int watch = rx.cap(4).toInt();
+        QString file = rx.cap(5);
+
+        editor->debugLine(file, line);
+
+    } else if (output.startsWith("Program finished")) {
+
+    }
+
+    output.clear();
 }
 
 void Debugger::controlFinish(int exitCode, QProcess::ExitStatus exitStatus)
 {
     status = Off;
+    editor->debugClear();
 
     if (console != NULL) console->close();
 }

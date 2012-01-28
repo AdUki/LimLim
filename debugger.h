@@ -3,13 +3,14 @@
 
 #include <QObject>
 #include <QProcess>
+#include "editor.h"
 #include "console.h"
 
 class Debugger : public QObject
 {
 Q_OBJECT
 public:
-    explicit Debugger(QObject *parent = 0);
+    explicit Debugger(Editor *editor, QObject *parent = 0);
 
     void setConsole(Console *console);
 
@@ -26,9 +27,12 @@ public slots:
     DebugStatus getStatus() { return status; }
 
 private:
-    QProcess *remdebug;
     Console *console;
+    Editor *editor;
+    QProcess *remdebug;
+
     DebugStatus status;
+    QByteArray output;
 
 private slots:
     void controlParser();

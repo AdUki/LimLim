@@ -7,7 +7,9 @@ Editor::Editor(QWidget *parent) :
     QTabWidget(parent)
 {
     markerHandle = -1;
+
     setTabsClosable(true);
+
     connect(this, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTabWithSource(int)));
 }
 
@@ -145,7 +147,7 @@ void Editor::debugLine(QString file, unsigned line)
     }
 
     debugClear();
-    markerHandle = debugSource->markerAdd(line, QsciScintilla::SC_MARK_ARROW);
+    markerHandle = debugSource->markerAdd(line-1, QsciScintilla::RightArrow);
 }
 
 void Editor::debugClear()

@@ -12,7 +12,7 @@ LuaControl::LuaControl()
     luaConsole = new Console(this);
     luaEditor = new Editor(this);
     luaInterpret = new Interpreter(luaEditor, luaConsole, this);
-    luaDebugger = new Debugger(this);
+    luaDebugger = new Debugger(luaEditor, this);
     watcheslist = new VariableWatcher(luaDebugger);
     setCentralWidget(luaEditor);
 
