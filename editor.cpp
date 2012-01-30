@@ -131,12 +131,15 @@ Source* Editor::currentSource()
 
 void Editor::debugLine(QString file, unsigned line)
 {
+    debugClear();
+
     debugSource = NULL;
 
     int i;
     for (i = 0; i < count(); i++) {
         Source* src = static_cast<Source*>(widget(i));
         if (QFileInfo(src->getFileName()) == QFileInfo(file)) {
+            setCurrentIndex(i);
             debugSource = src; // Found file in tabs
             break;
         }
@@ -146,7 +149,6 @@ void Editor::debugLine(QString file, unsigned line)
         if (debugSource == NULL) return; // Failed to open file
     }
 
-    debugClear();
     markerHandle = debugSource->markerAdd(line-1, QsciScintilla::RightArrow);
 }
 
