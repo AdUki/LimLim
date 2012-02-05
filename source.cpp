@@ -139,7 +139,7 @@ void Source::marginBreakpoint(int margin, int line, Qt::KeyboardModifiers state)
     case DebugMargin:
         unsigned mark = markersAtLine(line);
         if (mark & (1 << Circle)) {
-            markerDelete(line, markerFindNext(line, Circle));
+            markerDelete(line, Circle);
             emit breakpointDeleted(line + 1, getFileName());
         } else {
             markerAdd(line, Circle);
