@@ -150,3 +150,15 @@ void Source::linesChanged()
 {
     setMarginWidth(LineMargin, QString::number(lines()) + 1);
 }
+
+void Source::lock()
+{
+    lexer()->setPaper(QColor::fromRgb(250,250,250), -1);
+    setReadOnly(true);
+}
+
+void Source::unlock()
+{
+    lexer()->setPaper(QColor::fromRgb(255,255,255), -1);
+    setReadOnly(false);
+}

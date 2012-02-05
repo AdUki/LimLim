@@ -158,3 +158,20 @@ void Editor::debugClear()
         debugSource->markerDeleteHandle(markerHandle);
 }
 
+void Editor::lock()
+{
+    int i;
+    for (i = 0; i < count(); i++) {
+        Source* src = static_cast<Source*>(widget(i));
+        src->lock();
+    }
+}
+
+void Editor::unlock()
+{
+    int i;
+    for (i = 0; i < count(); i++) {
+        Source* src = static_cast<Source*>(widget(i));
+        src->unlock();
+    }
+}

@@ -34,7 +34,7 @@ void Debugger::start()
     remdebug->start("lua5.1", QStringList() << "-e" << "io.stdout:setvbuf 'no'" << "--" << "controller.lua");
 
     // set breakpoints from editor
-
+    editor->lock();
 }
 
 void Debugger::stop()
@@ -93,6 +93,7 @@ void Debugger::controlFinish(int exitCode, QProcess::ExitStatus exitStatus)
 {
     status = Off;
     editor->debugClear();
+    editor->unlock();
 
     if (console != NULL) console->close();
 }

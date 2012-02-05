@@ -27,6 +27,9 @@ public:
     Source* currentSource();
     QList<Breakpoint*> getBreakpoints() { return breakpoints; }
 
+    void lock();
+    void unlock();
+
 public slots:
     Source* newSource();
     Source* openSource();
