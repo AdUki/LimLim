@@ -1,6 +1,6 @@
 #include "debugger.h"
 
-static const QByteArray StartMessage = QByteArray("Program started\n");
+static const QByteArray StartMessage = QByteArray("Start program you want to debug\n");
 static const QByteArray EndMessage = QByteArray("Program finished\n");
 
 /*
@@ -87,7 +87,7 @@ void Debugger::controlParser()
 
         // Controller initialization
         if (status == On) {
-            status = Running;
+            status = Waiting;
 
             // Lock editor for editing
             editor->lock();
@@ -110,6 +110,7 @@ void Debugger::controlParser()
         } else {
             static QBuffer buffer(&input);
 
+            status = Running;
             if (!buffer.isOpen()) buffer.open(QIODevice::ReadOnly);
 
             QByteArray command(buffer.readLine());

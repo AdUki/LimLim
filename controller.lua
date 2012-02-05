@@ -5,7 +5,7 @@
 
 local socket = require "socket"
 
-print("Program started")
+print("Start program you want to debug")
 
 local server = socket.bind("*", 8171)
 if server == nil then 

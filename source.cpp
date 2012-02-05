@@ -173,7 +173,8 @@ QList<Breakpoint*> Source::getBreakpoints()
 
     while (true) {
         line = markerFindNext(line, 1 << Circle);
-        if (line > 0) breakpoints.append(new Breakpoint(file, ++line, this));
+        line++;
+        if (line > 0) breakpoints.append(new Breakpoint(file, line, this));
         else break;
     }
 
