@@ -1,6 +1,9 @@
 #ifndef SOURCE_H
 #define SOURCE_H
 
+#define MARK_RIGHTARROW 1
+#define MARK_BREAKPOINT 4
+
 #include <QWidget>
 #include <QFile>
 #include <Qsci/qsciscintilla.h>
@@ -21,6 +24,8 @@ public:
 
     void lock();
     void unlock();
+
+    QList<Breakpoint*> getBreakpoints();
 
     bool operator==(const Source &rhs);
 

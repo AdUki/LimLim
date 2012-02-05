@@ -36,6 +36,7 @@ Source* Editor::openSource(const QString &filename)
 
 Source* Editor::addSource(Source* source)
 {
+    // Search for source in tabs
     int i, tabIndex = -1;
     for (i = 0; i < count(); i++) {
         Source* src = static_cast<Source*>(widget(i));
@@ -45,14 +46,22 @@ Source* Editor::addSource(Source* source)
         }
     }
     if (tabIndex >= 0) {
+        // Source already opened
         setCurrentIndex(tabIndex);
         setStatusTip(tr("Source already opened"));
     } else {
+        // Try to open source
         QString sourceName = source->getName();
         if (sourceName.compare("") != 0) {
             int i = addTab(source, sourceName);
             setCurrentIndex(i);
+
+            // connect signals and slots
             connect(source, SIGNAL(modificationChanged(bool)), this, SLOT(updateSourceNames()));
+            connect(source, SIGNAL(breakpointDeleted(int,QString)), this, SIGNAL(breakpointDeleted(int,QString)));
+            connect(source, SIGNAL(breakpointSet(int,QString)), this, SIGNAL(breakpointSet(int,QString)));
+
+            // return newly opened source
             return source;
         }
         return NULL;
@@ -174,4 +183,17 @@ void Editor::unlock()
         Source* src = static_cast<Source*>(widget(i));
         src->unlock();
     }
+}
+
+QList<Breakpoint*> Editor::getBreakpoints()
+{
+    QList<Breakpoint*> breakpoints;
+
+    int i;
+    for (i = 0; i < count(); i++) {
+        Source* src = static_cast<Source*>(widget(i));
+        breakpoints.append(src->getBreakpoints());
+    }
+
+    return breakpoints;
 }

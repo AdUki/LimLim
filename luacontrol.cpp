@@ -40,6 +40,7 @@ void LuaControl::run()
 void LuaControl::debug()
 {
     luaDebugger->start();
+    sleep(1); // TODO quick fix - program will wait until remdebug's controller starts
     luaInterpret->debug();
 }
 
@@ -135,6 +136,7 @@ void LuaControl::createActions()
 	runAction->setIcon(QIcon(":/images/run.png"));
 	runAction->setStatusTip(tr("Run current chunk of Lua code"));
 	connect(runAction, SIGNAL(triggered()), this, SLOT(run()));
+        connect(luaDebugger, SIGNAL(waitingForCommand(bool)), debugAction, SLOT(setEnabled(bool)));
 
     // DEBUG ACTION
 	debugAction = new QAction(tr("&Debug"), this);
@@ -152,19 +154,25 @@ void LuaControl::createActions()
         continueAction = new QAction(tr("&Continue"), this);
         continueAction->setIcon(QIcon(":/images/debug/run.png"));
         continueAction->setStatusTip(tr("Continue running program"));
+        continueAction->setEnabled(false);
         connect(continueAction, SIGNAL(triggered()), luaDebugger, SLOT(run()));
+        connect(luaDebugger, SIGNAL(waitingForCommand(bool)), continueAction, SLOT(setEnabled(bool)));
 
     // STEP INTO ACTION
         stepIntoAction = new QAction(tr("&Step into"), this);
         stepIntoAction->setIcon(QIcon(":/images/debug/step-into.png"));
         stepIntoAction->setStatusTip(tr("Step into function"));
+        stepIntoAction->setEnabled(false);
         connect(stepIntoAction, SIGNAL(triggered()), luaDebugger, SLOT(stepIn()));
+        connect(luaDebugger, SIGNAL(waitingForCommand(bool)), stepIntoAction, SLOT(setEnabled(bool)));
 
     // STEP OVER ACTION
         stepOverAction = new QAction(tr("Step &over"), this);
         stepOverAction->setIcon(QIcon(":/images/debug/step-over.png"));
         stepOverAction->setStatusTip(tr("Step over function"));
+        stepOverAction->setEnabled(false);
         connect(stepOverAction, SIGNAL(triggered()), luaDebugger, SLOT(stepOver()));
+        connect(luaDebugger, SIGNAL(waitingForCommand(bool)), stepOverAction, SLOT(setEnabled(bool)));
 }
 
 void LuaControl::createMenus()

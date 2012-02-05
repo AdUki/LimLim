@@ -8,6 +8,9 @@
 #include "console.h"
 #include "breakpoint.h"
 
+static const QByteArray Commands[3] = { "step\n", "over\n", "run\n" };
+
+
 class Debugger : public QObject
 {
 Q_OBJECT
@@ -16,15 +19,18 @@ public:
 
     void setConsole(Console *console);
 
-    enum DebugStatus { Running, Off };
+    enum DebugStatus { Running, Waiting, On, Off };
+
+signals:
+    void waitingForCommand(bool flag);
 
 public slots:
     void start();
     void stop();
 
-    void stepOver();
-    void stepIn();
-    void run();
+    void stepOver() { giveCommand(StepOver); }
+    void stepIn() { giveCommand(StepInto); }
+    void run() { giveCommand(Continue); }
 
     DebugStatus getStatus() { return status; }
 
@@ -35,12 +41,19 @@ private:
 
     DebugStatus status;
     QByteArray output;
+    QByteArray input;
+
+    enum Command { StepInto, StepOver, Continue };
+    void giveCommand(Command command);
 
 private slots:
     void controlParser();
     void controlFinish(int exitCode, QProcess::ExitStatus exitStatus);
 
     void controlWrite(QByteArray input) { remdebug->write(input); }
+    
+    void breakpointSet(int line, QString file);
+    void breakpointDeleted(int line, QString file);
 };
 
 #endif // DEBUGGER_H

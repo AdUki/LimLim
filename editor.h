@@ -25,10 +25,14 @@ public:
     explicit Editor(QWidget *parent);
 
     Source* currentSource();
-    QList<Breakpoint*> getBreakpoints() { return breakpoints; }
+    QList<Breakpoint*> getBreakpoints();
 
     void lock();
     void unlock();
+
+signals:
+    void breakpointSet(int line, QString file);
+    void breakpointDeleted(int line, QString file);
 
 public slots:
     Source* newSource();
@@ -48,8 +52,6 @@ private:
 
     int markerHandle;
     Source *debugSource;
-
-    QList<Breakpoint*> breakpoints;
 
 private slots:
     void closeTabWithSource(int i);

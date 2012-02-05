@@ -3,13 +3,16 @@
 
 #include <QObject>
 
-class Breakpoint : public QObject
+class Breakpoint
+    : public QObject
 {
-Q_OBJECT
-public:
-    Breakpoint(QString *file, int line, QObject *parent);
 
-    QString* file;
+    Q_OBJECT
+
+public:
+    explicit Breakpoint(const QString &file, int line, QObject *parent = 0);
+
+    QString file;
     int line;
 };
 

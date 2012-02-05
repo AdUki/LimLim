@@ -36,22 +36,25 @@ void Source::initScintilla()
     QsciLexer* lexer = new QsciLexerLua(this);
     setLexer(lexer);
     setUtf8(true);
-    setColor(QColor::fromRgb(255,255,255,255));
 
     // Marker setup
-    markerDefine('>', RightArrow);
-    markerDefine('B', Circle);
+    markerDefine(Circle, Circle);
+    setMarkerBackgroundColor(QColor::fromRgb(255,0,0), Circle);
+    markerDefine(RightArrow, RightArrow);
+    setMarkerBackgroundColor(QColor::fromRgb(255,255,0), RightArrow);
 
     // Margin setup
     // TODO it is weird but it works
-    setMarginType(LineMargin, TextMargin);
+    setMarginType(LineMargin, NumberMargin);
     setMarginSensitivity(LineMargin, true);
     setMarginLineNumbers(LineMargin, true);
     setMarginSensitivity(LineMargin, true);
+    setMarginMarkerMask(LineMargin, 0);
 
-    setMarginType(DebugMargin, NumberMargin);
+    setMarginType(DebugMargin, SymbolMargin);
     setMarginLineNumbers(DebugMargin, false);
     setMarginSensitivity(DebugMargin, true);
+    setMarginMarkerMask(DebugMargin, (1<<Circle)|(1<<RightArrow));
 
     linesChanged();
 }
@@ -135,12 +138,12 @@ void Source::marginBreakpoint(int margin, int line, Qt::KeyboardModifiers state)
     switch (margin) {
     case DebugMargin:
         unsigned mark = markersAtLine(line);
-        if (mark | Circle) {
+        if (mark & (1 << Circle)) {
             markerDelete(line, markerFindNext(line, Circle));
-            emit breakpointDeleted(line, getFileName());
+            emit breakpointDeleted(line + 1, getFileName());
         } else {
             markerAdd(line, Circle);
-            emit breakpointSet(line, getFileName());
+            emit breakpointSet(line + 1, getFileName());
         }
         break;
     }
@@ -161,4 +164,18 @@ void Source::unlock()
 {
     lexer()->setPaper(QColor::fromRgb(255,255,255), -1);
     setReadOnly(false);
+}
+
+QList<Breakpoint*> Source::getBreakpoints()
+{
+    QList<Breakpoint*> breakpoints;
+    int line = 0;
+
+    while (true) {
+        line = markerFindNext(line, 1 << Circle);
+        if (line > 0) breakpoints.append(new Breakpoint(file, ++line, this));
+        else break;
+    }
+
+    return breakpoints;
 }

@@ -1,5 +1,8 @@
 #include "debugger.h"
 
+static const QByteArray StartMessage = QByteArray("Program started\n");
+static const QByteArray EndMessage = QByteArray("Program finished\n");
+
 /*
 	Lua debugger class
 
@@ -16,6 +19,9 @@ Debugger::Debugger(Editor *editor, QObject *parent) :
     connect(remdebug, SIGNAL(readyRead()), this, SLOT(controlParser()));
     connect(remdebug, SIGNAL(finished(int,QProcess::ExitStatus)),
             this, SLOT(controlFinish(int, QProcess::ExitStatus)));
+
+    connect(editor, SIGNAL(breakpointSet(int,QString)), this, SLOT(breakpointSet(int,QString)));
+    connect(editor, SIGNAL(breakpointDeleted(int,QString)), this, SLOT(breakpointDeleted(int,QString)));
 }
 
 void Debugger::setConsole(Console *console)
@@ -26,15 +32,13 @@ void Debugger::setConsole(Console *console)
 
 void Debugger::start()
 {
-    status = Running;
     if (console != NULL) console->open();
-    // TODO platform specific, controller.lua mustn't be found
+    // TODO platform specific, controller.lua or lua5.1 mustn't be found
 
     // start RemDebug controller
     remdebug->start("lua5.1", QStringList() << "-e" << "io.stdout:setvbuf 'no'" << "--" << "controller.lua");
 
-    // set breakpoints from editor
-    editor->lock();
+
 }
 
 void Debugger::stop()
@@ -44,29 +48,20 @@ void Debugger::stop()
 
 // TODO change strings with commands to macros or functions or something
 
-void Debugger::stepOver()
+void Debugger::giveCommand(Command command)
 {
-    remdebug->write("over\n");
-    if (console != NULL) console->writeError("over\n");
-}
-
-void Debugger::stepIn()
-{
-    remdebug->write("step\n");
-    if (console != NULL) console->writeError("step\n");
-}
-
-void Debugger::run()
-{
-    remdebug->write("run\n");
-    if (console != NULL) console->writeError("run\n");
+    status = Running;
+    emit waitingForCommand(false);
+    remdebug->write(Commands[command]);
+    if (console != NULL) console->writeError(Commands[command]);
 }
 
 void Debugger::controlParser()
 {
     output.append(remdebug->readAll());
 
-    if (!output.endsWith("> ") && !output.endsWith("Program finished\n") && !output.endsWith("Program started\n"))
+    // Return if RemDebug didn't write whole status
+    if (!output.endsWith("> ") && !output.endsWith(EndMessage) && !output.endsWith(StartMessage))
         return;
 
     if (console != NULL) console->writeOutput(output);
@@ -82,8 +77,50 @@ void Debugger::controlParser()
 
         editor->debugLine(file, line);
 
-    } else if (output.startsWith("Program finished")) {
+    } else if (output.startsWith(EndMessage)) {
 
+    } else if (output.startsWith(StartMessage)) {
+        status = On;
+    }
+
+    if (output.endsWith("> ")) {
+
+        // Controller initialization
+        if (status == On) {
+            status = Running;
+
+            // Lock editor for editing
+            editor->lock();
+
+            // Read breakpoints
+            QList<Breakpoint*> breakpoints = editor->getBreakpoints();
+            QList<Breakpoint*>::iterator iter = breakpoints.begin();
+
+            for (; iter != breakpoints.end(); iter++) {
+                Breakpoint *br = static_cast<Breakpoint*> (*iter);
+                QString command = QString("setb %1 %2\n").arg(br->file).arg(br->line);
+                input.append(command.toAscii());
+            }
+        }
+
+        // If there is input, write as command to console.
+        if (input.isEmpty()) {
+            status = Waiting;
+            emit waitingForCommand(true);
+        } else {
+            static QBuffer buffer(&input);
+
+            if (!buffer.isOpen()) buffer.open(QIODevice::ReadOnly);
+
+            QByteArray command(buffer.readLine());
+            if (console != NULL) console->writeError(command);
+            remdebug->write(command);
+
+            if (buffer.atEnd()) {
+                buffer.close();
+                input.clear();
+            }
+        }
     }
 
     output.clear();
@@ -95,5 +132,32 @@ void Debugger::controlFinish(int exitCode, QProcess::ExitStatus exitStatus)
     editor->debugClear();
     editor->unlock();
 
+    input.clear();
     if (console != NULL) console->close();
+}
+
+void Debugger::breakpointSet(int line, QString file)
+{
+    QByteArray command(QString("setb %1 %2\n").arg(file).arg(line).toAscii());
+
+    switch (status) {
+    case Waiting:
+        remdebug->write(command);
+        if (console != NULL) console->writeError(command);
+        break;
+    case Running: input.append(command);
+    }
+}
+
+void Debugger::breakpointDeleted(int line, QString file)
+{
+    QByteArray command(QString("delb %1 %2\n").arg(file).arg(line).toAscii());
+
+    switch (status) {
+    case Waiting:
+        remdebug->write(command);
+        if (console != NULL) console->writeError(command);
+        break;
+    case Running: input.append(command);
+    }
 }
