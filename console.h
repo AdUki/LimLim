@@ -2,7 +2,6 @@
 #define CONSOLE_H
 
 #include <QTextEdit>
-#include <QStringBuilder>
 #include <QBuffer>
 #include <QKeyEvent>
 

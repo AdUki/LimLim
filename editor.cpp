@@ -157,3 +157,4 @@ void Editor::debugClear()
     if (markerHandle != -1 && debugSource != NULL)
         debugSource->markerDeleteHandle(markerHandle);
 }
+

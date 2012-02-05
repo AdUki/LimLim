@@ -3,8 +3,10 @@
 
 #include <QObject>
 #include <QProcess>
+
 #include "editor.h"
 #include "console.h"
+#include "breakpoint.h"
 
 class Debugger : public QObject
 {

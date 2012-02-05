@@ -8,6 +8,7 @@
 #include <Qsci/qscilexerlua.h>
 
 #include "source.h"
+#include "breakpoint.h"
 
 /** This is manager for files with source code. Manager have some opened
   * files and some of these files are modified. It can create, open, save,
@@ -24,6 +25,7 @@ public:
     explicit Editor(QWidget *parent);
 
     Source* currentSource();
+    QList<Breakpoint*> getBreakpoints() { return breakpoints; }
 
 public slots:
     Source* newSource();
@@ -43,6 +45,8 @@ private:
 
     int markerHandle;
     Source *debugSource;
+
+    QList<Breakpoint*> breakpoints;
 
 private slots:
     void closeTabWithSource(int i);

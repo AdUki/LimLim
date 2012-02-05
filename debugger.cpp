@@ -29,7 +29,12 @@ void Debugger::start()
     status = Running;
     if (console != NULL) console->open();
     // TODO platform specific, controller.lua mustn't be found
+
+    // start RemDebug controller
     remdebug->start("lua5.1", QStringList() << "-e" << "io.stdout:setvbuf 'no'" << "--" << "controller.lua");
+
+    // set breakpoints from editor
+
 }
 
 void Debugger::stop()

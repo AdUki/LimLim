@@ -2,22 +2,16 @@
 #define BREAKPOINT_H
 
 #include <QObject>
-#include <QFile>
 
 class Breakpoint : public QObject
 {
 Q_OBJECT
 public:
-    explicit Breakpoint(QFile* source, unsigned line, QObject *parent = 0);
+    Breakpoint(QString *file, int line, QObject *parent);
 
-    void setLine(unsigned line) {this->line = line; }
-
-    QString getFileName() { return source->fileName(); }
-    unsigned getLine() { return line; }
-
-private:
-    QFile* source;
-    unsigned line;
+    QString* file;
+    int line;
 };
+
 
 #endif // BREAKPOINT_H

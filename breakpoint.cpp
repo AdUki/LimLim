@@ -1,8 +1,8 @@
 #include "breakpoint.h"
 
-Breakpoint::Breakpoint(QFile* source, unsigned line, QObject *parent) :
-        QObject(parent)
+Breakpoint::Breakpoint(QString *file, int line, QObject *parent)
+    : QObject(parent)
 {
-    this->source = source;
+    this->file = file;
     this->line = line;
 }

@@ -24,18 +24,36 @@ Source::Source(const QString& sourceFile, QWidget *parent) :
                 QMessageBox::Ok);
         }
     }
+
+    connect(this, SIGNAL(marginClicked(int,int,Qt::KeyboardModifiers)),
+            this, SLOT(marginBreakpoint(int,int,Qt::KeyboardModifiers)));
+    connect(this, SIGNAL(linesChanged()), this, SLOT(linesChanged()));
 }
 
 void Source::initScintilla()
 {
+    // Lexer setup
     QsciLexer* lexer = new QsciLexerLua(this);
     setLexer(lexer);
-    setMarginType(1, NumberMargin);
-    setMarginWidth(1, 40);
     setUtf8(true);
     setColor(QColor::fromRgb(255,255,255,255));
+
+    // Marker setup
     markerDefine('>', RightArrow);
-    markerDefine('O', Circle);
+    markerDefine('B', Circle);
+
+    // Margin setup
+    // TODO it is weird but it works
+    setMarginType(LineMargin, TextMargin);
+    setMarginSensitivity(LineMargin, true);
+    setMarginLineNumbers(LineMargin, true);
+    setMarginSensitivity(LineMargin, true);
+
+    setMarginType(DebugMargin, NumberMargin);
+    setMarginLineNumbers(DebugMargin, false);
+    setMarginSensitivity(DebugMargin, true);
+
+    linesChanged();
 }
 
 QString Source::getName() const
@@ -110,4 +128,25 @@ bool Source::canClose()
         if (r == QMessageBox::Cancel) return false;
     }
     return true;
+}
+
+void Source::marginBreakpoint(int margin, int line, Qt::KeyboardModifiers state)
+{
+    switch (margin) {
+    case DebugMargin:
+        unsigned mark = markersAtLine(line);
+        if (mark | Circle) {
+            markerDelete(line, markerFindNext(line, Circle));
+            emit breakpointDeleted(line, getFileName());
+        } else {
+            markerAdd(line, Circle);
+            emit breakpointSet(line, getFileName());
+        }
+        break;
+    }
+}
+
+void Source::linesChanged()
+{
+    setMarginWidth(LineMargin, QString::number(lines()) + 1);
 }

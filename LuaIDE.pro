@@ -10,18 +10,18 @@ SOURCES += main.cpp \
     luacontrol.cpp \
     debugger.cpp \
     console.cpp \
-    breakpoint.cpp \
     source.cpp \
     editor.cpp \
-    variablewatcher.cpp
+    variablewatcher.cpp \
+    breakpoint.cpp
 HEADERS += interpreter.h \
     luacontrol.h \
     debugger.h \
     console.h \
-    breakpoint.h \
     source.h \
     editor.h \
-    variablewatcher.h
+    variablewatcher.h \
+    breakpoint.h
 FORMS += 
 LIBS += -lqscintilla2 \
     -llua
