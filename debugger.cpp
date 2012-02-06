@@ -16,6 +16,8 @@ Debugger::Debugger(Editor *editor, QObject *parent) :
     remdebug = new QProcess(this);
     this->editor = editor;
 
+    autoRun = true;
+
     connect(remdebug, SIGNAL(readyRead()), this, SLOT(controlParser()));
     connect(remdebug, SIGNAL(finished(int,QProcess::ExitStatus)),
             this, SLOT(controlFinish(int, QProcess::ExitStatus)));
@@ -46,14 +48,13 @@ void Debugger::stop()
     remdebug->terminate();
 }
 
-// TODO change strings with commands to macros or functions or something
-
-void Debugger::giveCommand(Command command)
+void Debugger::giveCommand(QByteArray command)
 {
     status = Running;
     emit waitingForCommand(false);
-    remdebug->write(Commands[command]);
-    if (console != NULL) console->writeError(Commands[command]);
+    remdebug->write(command);
+    if (console != NULL) console->writeError(command);
+
 }
 
 void Debugger::controlParser()
@@ -71,8 +72,8 @@ void Debugger::controlParser()
 
         rx.indexIn(output);
 
-        int line = rx.cap(2).toInt();
-        int watch = rx.cap(4).toInt();
+        int line = rx.cap(2).toInt();   // get line number
+        int watch = rx.cap(4).toInt();  // get watch id
         QString file = rx.cap(5);
 
         editor->debugLine(file, line);
@@ -101,6 +102,8 @@ void Debugger::controlParser()
                 QString command = QString("setb %1 %2\n").arg(br->file).arg(br->line);
                 input.append(command.toAscii());
             }
+
+            if (autoRun) input.append("run\n");
         }
 
         // If there is input, write as command to console.
@@ -134,7 +137,12 @@ void Debugger::controlFinish(int exitCode, QProcess::ExitStatus exitStatus)
     editor->unlock();
 
     input.clear();
-    if (console != NULL) console->close();
+    if (console != NULL) {
+        console->writeOutput(QString("Process exit code %1\nProcess exit status %2\n")
+                .arg(exitCode)
+                .arg(exitStatus).toAscii());
+        console->close();
+    }
 }
 
 void Debugger::breakpointSet(int line, QString file)
@@ -147,6 +155,7 @@ void Debugger::breakpointSet(int line, QString file)
         if (console != NULL) console->writeError(command);
         break;
     case Running: input.append(command);
+    default: ;
     }
 }
 
@@ -160,5 +169,6 @@ void Debugger::breakpointDeleted(int line, QString file)
         if (console != NULL) console->writeError(command);
         break;
     case Running: input.append(command);
+    default: ;
     }
 }

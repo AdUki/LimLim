@@ -8,9 +8,6 @@
 #include "console.h"
 #include "breakpoint.h"
 
-static const QByteArray Commands[3] = { "step\n", "over\n", "run\n" };
-
-
 class Debugger : public QObject
 {
 Q_OBJECT
@@ -28,11 +25,14 @@ public slots:
     void start();
     void stop();
 
-    void stepOver() { giveCommand(StepOver); }
-    void stepIn() { giveCommand(StepInto); }
-    void run() { giveCommand(Continue); }
+    void stepOver() { giveCommand(QByteArray("over\n")); }
+    void stepIn() { giveCommand(QByteArray("step\n")); }
+    void run() { giveCommand(QByteArray("run\n")); }
+
+    void setAutoRun(bool enabled) { autoRun = enabled; }
 
     DebugStatus getStatus() { return status; }
+    void giveCommand(QByteArray command);
 
 private:
     Console *console;
@@ -43,8 +43,7 @@ private:
     QByteArray output;
     QByteArray input;
 
-    enum Command { StepInto, StepOver, Continue };
-    void giveCommand(Command command);
+    bool autoRun;
 
 private slots:
     void controlParser();
