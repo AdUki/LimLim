@@ -16,7 +16,7 @@ Debugger::Debugger(Editor *editor, QObject *parent) :
     remdebug = new QProcess(this);
     this->editor = editor;
 
-    autoRun = true;
+    autoRun = false;
 
     connect(remdebug, SIGNAL(readyRead()), this, SLOT(controlParser()));
     connect(remdebug, SIGNAL(finished(int,QProcess::ExitStatus)),
