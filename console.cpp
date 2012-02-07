@@ -1,9 +1,12 @@
 #include "console.h"
 
+#include <QApplication>
+#include <QClipboard>
+
 Console::Console(QWidget *parent) : QTextEdit(parent)
 {
     setReadOnly(true);
-    setTextBackgroundColor(QColor::fromRgb(255,255,255,255));
+    setTextBackgroundColor(QColor::fromRgb(255,255,255));
     setLineWrapMode(QTextEdit::NoWrap);
 }
 
@@ -22,10 +25,37 @@ void Console::close()
     outputBuffer.close();
 }
 
+void Console::writeSystem(QString message)
+{
+    setTextColor(QColor::fromRgb(0,0,200));
+    insertPlainText(message);
+    ensureCursorVisible();
+}
+
+// TODO bind function to paste action
+// TODO maybe this function must be executed in thread
+void Console::writeInput(QByteArray data)
+{
+    setTextColor(QColor::fromRgb(0,0,0));
+    QList<QByteArray> commands = data.split('\n');
+    QList<QByteArray>::iterator iter = commands.begin();
+    while (true) {
+        insertPlainText(*iter);
+        command.append(*iter);
+        iter++;
+        if (iter == commands.end()) break;
+        else {
+            insertPlainText("\n");
+            confirmCommand();
+        }
+    }
+    ensureCursorVisible();
+}
+
 void Console::writeOutput(QByteArray data)
 {
     outputBuffer.write(data);
-    setTextColor(QColor::fromRgb(0,200,0,255));
+    setTextColor(QColor::fromRgb(0,200,0));
     insertPlainText(data);
     ensureCursorVisible();
 }
@@ -33,7 +63,7 @@ void Console::writeOutput(QByteArray data)
 void Console::writeError(QByteArray data)
 {
     errorBuffer.write(data);
-    setTextColor(QColor::fromRgb(200,0,0,255));
+    setTextColor(QColor::fromRgb(200,0,0));
     insertPlainText(data);
     ensureCursorVisible();
 }
@@ -100,11 +130,12 @@ void Console::keyPressEvent ( QKeyEvent * e )
     }
     // Paste operation
     else if (e->matches(QKeySequence::Paste)) {
-        // TODO implement paste operation
+        QClipboard *clipboard = QApplication::clipboard();
+        writeInput(clipboard->text().toAscii());
     }
     // Input operations
     else {
-        setTextColor(QColor::fromRgb(0,0,0,255));
+        setTextColor(QColor::fromRgb(0,0,0));
            
         int selection_size = textCursor().selectedText().length();
         if (selection_size > 0) cursor_pos = textCursor().selectionStart();

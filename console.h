@@ -29,8 +29,10 @@ public slots:
     void open();
     void close();
 
+    void writeInput (QByteArray data);
     void writeOutput(QByteArray data);
     void writeError(QByteArray data);
+    void writeSystem(QString message);
 
 protected:
     void keyPressEvent ( QKeyEvent * e );

@@ -1,6 +1,8 @@
 #include "interpreter.h"
 #include "luacontrol.h"
 
+#include <QFileInfo>
+
 Interpreter::Interpreter(Console* console, QWidget *parent)
     : QWidget(parent)
 {
@@ -18,10 +20,7 @@ Interpreter::Interpreter(Console* console, QWidget *parent)
 
 void Interpreter::run(Source* source)
 {
-    //Source* current = editor->currentSource();
     if (source == NULL) return;
-
-    options << "-e" << "io.stdout:setvbuf 'no'";
 
     if (source->doesExist()) {
         fileName = source->getFileName();
@@ -39,6 +38,13 @@ void Interpreter::run(Source* source)
         }
     }
 }
+void Interpreter::runFile(const QString &file)
+{
+    if (QFileInfo(file).exists()) {
+        fileName = file;
+        execute();
+    }
+}
 
 void Interpreter::debug(Source* source)
 {
@@ -54,6 +60,7 @@ void Interpreter::execute()
 
     console->open();
     process->terminate();
+    options << "-e" << "io.stdout:setvbuf 'no'";
     process->start(luaPath, options << "--" << fileName);
 }
 
@@ -72,6 +79,7 @@ void Interpreter::onClose()
 void Interpreter::writeInput(QByteArray input)
 {
     process->write(input);
+
 }
 
 void Interpreter::readStandardOutput()

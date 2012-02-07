@@ -16,9 +16,12 @@ Q_OBJECT
 public:
     explicit Interpreter(Console* console, QWidget *parent = 0);
 
-public slots:
     void run(Source* source);
     void debug(Source* source);
+
+    void runFile(const QString &file);
+
+public slots:
     void kill();
 
 signals:
