@@ -21,6 +21,7 @@ public:
     bool doesExist() const { return exist; }
     QString getName() const;
     QString getFileName() const { return file; }
+    void setTempFileName(const QString &tempName) { file = tempName; }
 
     void lock();
     void unlock();
