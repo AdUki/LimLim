@@ -1,13 +1,14 @@
 #include "interpreter.h"
 #include "luacontrol.h"
 
-Interpreter::Interpreter(Editor* editor, Console* console, QWidget *parent)
+Interpreter::Interpreter(Console* console, QWidget *parent)
     : QWidget(parent)
 {
     this->console = console;
-    this->editor = editor;
     process = new QProcess(this);
     options.clear();
+
+    luaPath = "lua";
 
     connect(console, SIGNAL(emitInput(QByteArray)), this, SLOT(writeInput(QByteArray)));
     connect(process, SIGNAL(readyReadStandardError()), this, SLOT(readStandardError()));
@@ -15,38 +16,45 @@ Interpreter::Interpreter(Editor* editor, Console* console, QWidget *parent)
     connect(process, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(finished(int, QProcess::ExitStatus)));
 }
 
-void Interpreter::run()
+void Interpreter::run(Source* source)
 {
-    Source* current = editor->currentSource();
-    if (current != NULL)
-        execute(current);
-}
+    //Source* current = editor->currentSource();
+    if (source == NULL) return;
 
-void Interpreter::debug()
-{
-    options << "-e" << "require 'remdebug.engine'.start()";
-    this->run();
-}
+    options << "-e" << "io.stdout:setvbuf 'no'";
 
-// TODO add lua 5.0 and 5.2 support
-void Interpreter::execute(Source* source)
-{
-    console->open();
-    process->terminate();
-
-    // TODO platform specific, lua5.1 mustn't be found
-    // TODO implement specifiing path to lua executable
-    if (source->doesExist()) process->start("lua5.1", options << "-e" << "io.stdout:setvbuf 'no'" << "--" << source->getFileName());
-    else {
+    if (source->doesExist()) {
+        fileName = source->getFileName();
+        execute();
+    } else {
         if (tempFile.open()) {
             tempFile.resize(0); // truncate file
             if (tempFile.write(source->text().toAscii()) == -1) {
+                // failed to create temp file
                 return; // TODO add error handling
             }
             tempFile.close();
-            process->start("lua", options << "-e" << "io.stdout:setvbuf 'no'" << "--" << tempFile.fileName());
-        } // TODO add error handling
+            fileName = tempFile.fileName();
+            execute();
+        }
     }
+}
+
+void Interpreter::debug(Source* source)
+{
+    options << "-e" << "require 'remdebug.engine'.start()";
+    this->run(source);
+}
+
+// TODO add lua 5.0 and 5.2 support
+void Interpreter::execute()
+{
+    // TODO platform specific, lua mustn't be found
+    // TODO implement specifiing path to lua executable
+
+    console->open();
+    process->terminate();
+    process->start(luaPath, options << "--" << fileName);
 }
 
 void Interpreter::kill()

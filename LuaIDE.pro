@@ -23,8 +23,7 @@ HEADERS += interpreter.h \
     variablewatcher.h \
     breakpoint.h
 FORMS += 
-LIBS += -lqscintilla2 \
-    -llua
+LIBS += -lqscintilla2
 RESOURCES += icons.qrc
 OTHER_FILES += images/process-stop.png \
     images/run.png \

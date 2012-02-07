@@ -14,17 +14,20 @@ class Interpreter : public QWidget
 {
 Q_OBJECT
 public:
-    explicit Interpreter(Editor* editor, Console* console, QWidget *parent = 0);
+    explicit Interpreter(Console* console, QWidget *parent = 0);
 
 public slots:
-    void run();
-    void debug();
+    void run(Source* source);
+    void debug(Source* source);
     void kill();
 
 signals:
     void executionChanged(bool running);
 
 private:
+    QString fileName;
+    QString luaPath;
+
     QProcess *process;
     QStringList options;
 
@@ -32,11 +35,10 @@ private:
     QString interpreter;
 
     Console* console;
-    Editor* editor;
 
     QTemporaryFile tempFile;
 
-    void execute(Source* source);
+    void execute();
     void onClose();
 
     void ignoreEnvironmentVars() { options << "-E"; }

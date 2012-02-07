@@ -1,5 +1,9 @@
 #include <QtGui>
 
+#ifdef Q_WS_WIN
+#include <windows.h>
+#endif
+
 #include "console.h"
 #include "luacontrol.h"
 #include "interpreter.h"
@@ -11,7 +15,7 @@ LuaControl::LuaControl()
 {
     luaConsole = new Console(this);
     luaEditor = new Editor(this);
-    luaInterpret = new Interpreter(luaEditor, luaConsole, this);
+    luaInterpret = new Interpreter(luaConsole, this);
     luaDebugger = new Debugger(luaEditor, this);
     watcheslist = new VariableWatcher(luaDebugger);
     setCentralWidget(luaEditor);
@@ -34,14 +38,21 @@ LuaControl::LuaControl()
 
 void LuaControl::run()
 {
-    luaInterpret->run();
+    luaInterpret->run(luaEditor->currentSource());
 }
 
 void LuaControl::debug()
 {
     luaDebugger->start();
-    sleep(1); // TODO quick fix - program will wait until remdebug's controller starts
-    luaInterpret->debug();
+	
+	// TODO quick fix - program will wait until remdebug's controller starts
+	#ifndef Q_WS_WIN
+	Sleep(1000);
+	#elseif
+    sleep(1);
+	#endif
+	
+    luaInterpret->debug(luaEditor->currentSource());
 }
 
 void LuaControl::stop()
@@ -55,7 +66,7 @@ void LuaControl::createActions()
 {
     // NEW FILE ACTIION
 	newAction = new QAction(tr("&New"), this);
-	newAction->setIcon(QIcon(":/images/edit/new.png"));
+	newAction->setIcon(QIcon(":/images/new.png"));
 	newAction->setShortcut(QKeySequence::New);
 	newAction->setStatusTip(tr("Create a new file"));
         connect(newAction, SIGNAL(triggered()), luaEditor, SLOT(newSource()));
@@ -70,22 +81,22 @@ void LuaControl::createActions()
 
     // OPEN FILE ACTION
 	openAction = new QAction(tr("&Open"), this);
-	openAction->setIcon(QIcon(":/images/edit/open.png"));
+	openAction->setIcon(QIcon(":/images/open.png"));
 	openAction->setShortcut(QKeySequence::Open);
 	openAction->setStatusTip(tr("Open new file"));
-        connect(openAction, SIGNAL(triggered()), luaEditor, SLOT(openSource()));
+    connect(openAction, SIGNAL(triggered()), luaEditor, SLOT(openSource()));
 
     // SAVE FILE ACTION
 	saveAction = new QAction(tr("&Save"), this);
-	saveAction->setIcon(QIcon(":/images/edit/save.png"));
+	saveAction->setIcon(QIcon(":/images/save.png"));
 	saveAction->setShortcut(QKeySequence::Save);
 	saveAction->setStatusTip(tr("Save the Lua file to disk"));
-        connect(saveAction, SIGNAL(triggered()), luaEditor, SLOT(saveCurrentSource()));
+    connect(saveAction, SIGNAL(triggered()), luaEditor, SLOT(saveCurrentSource()));
 
     // SAVE AS FILE ACTION
 	saveAsAction = new QAction(tr("Save &As..."), this);
 	saveAsAction->setStatusTip(tr("Save the Lua file under a new name"));
-        connect(saveAsAction, SIGNAL(triggered()), luaEditor, SLOT(saveCurrentSourceAs()));
+    connect(saveAsAction, SIGNAL(triggered()), luaEditor, SLOT(saveCurrentSourceAs()));
 
     // EXIT ACTION
 	exitAction = new QAction(tr("E&xit"), this);
@@ -95,23 +106,23 @@ void LuaControl::createActions()
 
     // CUT ACTION
 	cutAction = new QAction(tr("Cu&t"), this);
-	cutAction->setIcon(QIcon(":/images/edit/cut.png"));
+	cutAction->setIcon(QIcon(":/images/cut.png"));
 	cutAction->setShortcut(QKeySequence::Cut);
-        cutAction->setStatusTip(tr("Cut the current selection's contents to the clipboard"));
+    cutAction->setStatusTip(tr("Cut the current selection's contents to the clipboard"));
 //	connect(cutAction, SIGNAL(triggered()), editor, SLOT(cut()));
 
     // COPY ACTION
 	copyAction = new QAction(tr("&Copy"), this);
-	copyAction->setIcon(QIcon(":/images/edit/copy.png"));
+	copyAction->setIcon(QIcon(":/images/copy.png"));
 	copyAction->setShortcut(QKeySequence::Copy);
-        copyAction->setStatusTip(tr("Copy the current selection's contents to the clipboard"));
+    copyAction->setStatusTip(tr("Copy the current selection's contents to the clipboard"));
 //	connect(copyAction, SIGNAL(triggered()), editor, SLOT(copy()));
 
     // PASTE ACTION
 	pasteAction = new QAction(tr("&Paste"), this);
-	pasteAction->setIcon(QIcon(":/images/edit/paste.png"));
+	pasteAction->setIcon(QIcon(":/images/paste.png"));
 	pasteAction->setShortcut(QKeySequence::Paste);
-        pasteAction->setStatusTip(tr("Paste the clipboard's contents into the current selection"));
+    pasteAction->setStatusTip(tr("Paste the clipboard's contents into the current selection"));
 //	connect(pasteAction, SIGNAL(triggered()), editor, SLOT(paste()));
 
     // DELETE ACTION
@@ -136,11 +147,10 @@ void LuaControl::createActions()
 	runAction->setIcon(QIcon(":/images/run.png"));
 	runAction->setStatusTip(tr("Run current chunk of Lua code"));
 	connect(runAction, SIGNAL(triggered()), this, SLOT(run()));
-        connect(luaDebugger, SIGNAL(waitingForCommand(bool)), debugAction, SLOT(setEnabled(bool)));
 
     // DEBUG ACTION
 	debugAction = new QAction(tr("&Debug"), this);
-        debugAction->setIcon(QIcon(":/images/compile.png"));
+    debugAction->setIcon(QIcon(":/images/compile.png"));
 	debugAction->setStatusTip(tr("Debug current chunk of Lua code"));
 	connect(debugAction, SIGNAL(triggered()), this, SLOT(debug()));
 
@@ -148,31 +158,31 @@ void LuaControl::createActions()
 	stopAction = new QAction(tr("&Stop"), this);
 	stopAction->setIcon(QIcon(":/images/process-stop.png"));
 	stopAction->setStatusTip(tr("Stop current running program"));
-        connect(stopAction, SIGNAL(triggered()), this, SLOT(stop()));
+    connect(stopAction, SIGNAL(triggered()), this, SLOT(stop()));
 
     // CONTINUE ACTION
-        continueAction = new QAction(tr("&Continue"), this);
-        continueAction->setIcon(QIcon(":/images/debug/run.png"));
-        continueAction->setStatusTip(tr("Continue running program"));
-        continueAction->setEnabled(false);
-        connect(continueAction, SIGNAL(triggered()), luaDebugger, SLOT(run()));
-        connect(luaDebugger, SIGNAL(waitingForCommand(bool)), continueAction, SLOT(setEnabled(bool)));
+    continueAction = new QAction(tr("&Continue"), this);
+    continueAction->setIcon(QIcon(":/images/debug/run.png"));
+    continueAction->setStatusTip(tr("Continue running program"));
+    continueAction->setEnabled(false);
+    connect(continueAction, SIGNAL(triggered()), luaDebugger, SLOT(run()));
+    connect(luaDebugger, SIGNAL(waitingForCommand(bool)), continueAction, SLOT(setEnabled(bool)));
 
     // STEP INTO ACTION
-        stepIntoAction = new QAction(tr("&Step into"), this);
-        stepIntoAction->setIcon(QIcon(":/images/debug/step-into.png"));
-        stepIntoAction->setStatusTip(tr("Step into function"));
-        stepIntoAction->setEnabled(false);
-        connect(stepIntoAction, SIGNAL(triggered()), luaDebugger, SLOT(stepIn()));
-        connect(luaDebugger, SIGNAL(waitingForCommand(bool)), stepIntoAction, SLOT(setEnabled(bool)));
+    stepIntoAction = new QAction(tr("&Step into"), this);
+    stepIntoAction->setIcon(QIcon(":/images/debug/step-into.png"));
+    stepIntoAction->setStatusTip(tr("Step into function"));
+    stepIntoAction->setEnabled(false);
+    connect(stepIntoAction, SIGNAL(triggered()), luaDebugger, SLOT(stepIn()));
+    connect(luaDebugger, SIGNAL(waitingForCommand(bool)), stepIntoAction, SLOT(setEnabled(bool)));
 
     // STEP OVER ACTION
-        stepOverAction = new QAction(tr("Step &over"), this);
-        stepOverAction->setIcon(QIcon(":/images/debug/step-over.png"));
-        stepOverAction->setStatusTip(tr("Step over function"));
-        stepOverAction->setEnabled(false);
-        connect(stepOverAction, SIGNAL(triggered()), luaDebugger, SLOT(stepOver()));
-        connect(luaDebugger, SIGNAL(waitingForCommand(bool)), stepOverAction, SLOT(setEnabled(bool)));
+    stepOverAction = new QAction(tr("Step &over"), this);
+    stepOverAction->setIcon(QIcon(":/images/debug/step-over.png"));
+    stepOverAction->setStatusTip(tr("Step over function"));
+    stepOverAction->setEnabled(false);
+    connect(stepOverAction, SIGNAL(triggered()), luaDebugger, SLOT(stepOver()));
+    connect(luaDebugger, SIGNAL(waitingForCommand(bool)), stepOverAction, SLOT(setEnabled(bool)));
 }
 
 void LuaControl::createMenus()
