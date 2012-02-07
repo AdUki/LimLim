@@ -1,14 +1,14 @@
 <RCC>
     <qresource prefix="/">
         <file>images/lua.png</file>
-        <file>images/edit/undo.png</file>
-        <file>images/edit/save.png</file>
-        <file>images/edit/redo.png</file>
-        <file>images/edit/paste.png</file>
-        <file>images/edit/open.png</file>
-        <file>images/edit/new.png</file>
-        <file>images/edit/cut.png</file>
-        <file>images/edit/copy.png</file>
+        <file>images/undo.png</file>
+        <file>images/save.png</file>
+        <file>images/redo.png</file>
+        <file>images/paste.png</file>
+        <file>images/open.png</file>
+        <file>images/new.png</file>
+        <file>images/cut.png</file>
+        <file>images/copy.png</file>
         <file>images/run.png</file>
         <file>images/compile.png</file>
         <file>images/debug/step-over.png</file>
