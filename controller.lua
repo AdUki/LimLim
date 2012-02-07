@@ -43,7 +43,6 @@ while true do
     client:send(string.upper(command) .. "\n")
     client:receive()
     local breakpoint = client:receive()
-	print (breakpoint)
     if not breakpoint then
       print("Program finished")
       os.exit()
