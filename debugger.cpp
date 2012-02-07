@@ -18,7 +18,7 @@ Debugger::Debugger(Editor *editor, QObject *parent) :
 
     autoRun = false;
 
-    connect(remdebug, SIGNAL(readyRead()), this, SLOT(controlParser()));
+    connect(remdebug, SIGNAL(readyReadStandardOutput()), this, SLOT(controlParser()));
     connect(remdebug, SIGNAL(finished(int,QProcess::ExitStatus)),
             this, SLOT(controlFinish(int, QProcess::ExitStatus)));
 
@@ -30,6 +30,7 @@ void Debugger::setConsole(Console *console)
 {
     this->console = console;
     connect(console, SIGNAL(emitInput(QByteArray)), this, SLOT(controlWrite(QByteArray)));
+    connect(remdebug, SIGNAL(readyReadStandardError()), this, SLOT(writeError()));
 }
 
 void Debugger::start()
@@ -51,9 +52,8 @@ void Debugger::giveCommand(QByteArray command)
 {
     status = Running;
     emit waitingForCommand(false);
-    remdebug->write(command);
-    if (console != NULL) console->writeSystem(command);
-
+    if (console != NULL) console->writeInput(command);
+    else remdebug->write(command);
 }
 
 void Debugger::controlParser()
@@ -116,8 +116,8 @@ void Debugger::controlParser()
             if (!buffer.isOpen()) buffer.open(QIODevice::ReadOnly);
 
             QByteArray command(buffer.readLine());
-            if (console != NULL) console->writeError(command);
-            remdebug->write(command);
+            if (console != NULL) console->writeInput(command);
+            else remdebug->write(command);
 
             if (buffer.atEnd()) {
                 buffer.close();
@@ -137,7 +137,7 @@ void Debugger::controlFinish(int exitCode, QProcess::ExitStatus exitStatus)
 
     input.clear();
     if (console != NULL) {
-        console->writeOutput(QString("Process exit code %1\nProcess exit status %2\n")
+        console->writeSystem(QString("Process exit code %1\nProcess exit status %2\n")
                 .arg(exitCode)
                 .arg(exitStatus).toAscii());
         console->close();
@@ -150,8 +150,8 @@ void Debugger::breakpointSet(int line, QString file)
 
     switch (status) {
     case Waiting:
-        remdebug->write(command);
-        if (console != NULL) console->writeError(command);
+        if (console != NULL) console->writeInput(command);
+        else remdebug->write(command);
         break;
     case Running: input.append(command);
     default: ;
@@ -164,8 +164,8 @@ void Debugger::breakpointDeleted(int line, QString file)
 
     switch (status) {
     case Waiting:
-        remdebug->write(command);
-        if (console != NULL) console->writeError(command);
+        if (console != NULL) console->writeInput(command);
+        else remdebug->write(command);
         break;
     case Running: input.append(command);
     default: ;
