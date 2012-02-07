@@ -28,7 +28,7 @@ void Console::close()
 void Console::writeSystem(QString message)
 {
     setTextColor(QColor::fromRgb(0,0,200));
-    insertPlainText(message.append('\n'));
+    insertPlainText(message);
     ensureCursorVisible();
 }
 

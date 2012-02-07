@@ -156,6 +156,7 @@ void Editor::debugLine(QString file, unsigned line)
     if (debugSource == NULL) { // Try to open referenced file
         debugSource = openSource(file);
         if (debugSource == NULL) return; // Failed to open file
+        debugSource->lock();
     }
 
     markerHandle = debugSource->markerAdd(line-1, QsciScintilla::RightArrow);

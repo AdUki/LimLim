@@ -50,6 +50,8 @@ private slots:
     void controlFinish(int exitCode, QProcess::ExitStatus exitStatus);
 
     void controlWrite(QByteArray input) { remdebug->write(input); }
+
+    void writeError() { console->writeError(remdebug->readAllStandardError()); }
     
     void breakpointSet(int line, QString file);
     void breakpointDeleted(int line, QString file);

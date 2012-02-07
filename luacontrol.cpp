@@ -46,10 +46,10 @@ void LuaControl::debug()
     luaDebugger->start();
 	
 	// TODO quick fix - program will wait until remdebug's controller starts
-	#ifndef Q_WS_WIN
+        #ifdef Q_WS_WIN
 	Sleep(1000);
-	#elseif
-    sleep(1);
+        #else
+        sleep(1);
 	#endif
 	
     luaInterpret->debug(luaEditor->currentSource());

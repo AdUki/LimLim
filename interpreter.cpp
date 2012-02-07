@@ -34,6 +34,7 @@ void Interpreter::run(Source* source)
             }
             tempFile.close();
             fileName = tempFile.fileName();
+            source->setTempFileName(fileName);
             execute();
         }
     }
