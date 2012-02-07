@@ -49,12 +49,12 @@ while true do
     end
     local _, _, status = string.find(breakpoint, "^(%d+)")
     if status == "202" then
-      local _, _, file, line = string.find(breakpoint, "^202 Paused%s+([%w%p]+)%s+(%d+)$")
+      local _, _, file, line = string.find(breakpoint, "^202 Paused (.+) (%d+)$")
       if file and line then 
         print("Paused:"  .. " line " .. line .. " file " .. file)
       end
     elseif status == "203" then
-      local _, _, file, line, watch_idx = string.find(breakpoint, "^203 Paused%s+([%w%p]+)%s+(%d+)%s+(%d+)$")
+      local _, _, file, line, watch_idx = string.find(breakpoint, "^203 Paused (.+) (%d+) (%d+)$")
       if file and line and watch_idx then
         print("Paused:" .. " line " .. line .. " watch " .. watch_idx .. " file " .. file)
       end

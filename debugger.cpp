@@ -38,7 +38,7 @@ void Debugger::start()
     // TODO platform specific, controller.lua or lua5.1 mustn't be found
 
     // start RemDebug controller
-    remdebug->start("lua5.1", QStringList() << "-e" << "io.stdout:setvbuf 'no'" << "--" << "controller.lua");
+    remdebug->start("lua", QStringList() << "-e" << "io.stdout:setvbuf 'no'" << "--" << "controller.lua");
 
 
 }

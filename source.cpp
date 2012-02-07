@@ -140,10 +140,10 @@ void Source::marginBreakpoint(int margin, int line, Qt::KeyboardModifiers state)
         unsigned mark = markersAtLine(line);
         if (mark & (1 << Circle)) {
             markerDelete(line, Circle);
-            emit breakpointDeleted(line + 1, getFileName());
+            emit breakpointDeleted(line + 1, file);
         } else {
             markerAdd(line, Circle);
-            emit breakpointSet(line + 1, getFileName());
+            emit breakpointSet(line + 1, file);
         }
         break;
     }
