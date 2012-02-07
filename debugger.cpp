@@ -35,7 +35,6 @@ void Debugger::setConsole(Console *console)
 void Debugger::start()
 {
     if (console != NULL) console->open();
-    // TODO platform specific, controller.lua or lua5.1 mustn't be found
 
     // start RemDebug controller
     remdebug->start("lua", QStringList() << "-e" << "io.stdout:setvbuf 'no'" << "--" << "controller.lua");
@@ -45,7 +44,7 @@ void Debugger::start()
 
 void Debugger::stop()
 {
-    remdebug->terminate();
+    remdebug->kill();
 }
 
 void Debugger::giveCommand(QByteArray command)

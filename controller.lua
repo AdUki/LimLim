@@ -8,7 +8,7 @@ local socket = require "socket"
 print("Start program you want to debug")
 
 local server = socket.bind("*", 8171)
-if server == nil then 
+if server == nil then
   print "Error: Remdebug already running"
   os.exit()
 end
@@ -43,6 +43,7 @@ while true do
     client:send(string.upper(command) .. "\n")
     client:receive()
     local breakpoint = client:receive()
+	print (breakpoint)
     if not breakpoint then
       print("Program finished")
       os.exit()
@@ -50,7 +51,7 @@ while true do
     local _, _, status = string.find(breakpoint, "^(%d+)")
     if status == "202" then
       local _, _, file, line = string.find(breakpoint, "^202 Paused (.+) (%d+)$")
-      if file and line then 
+      if file and line then
         print("Paused:"  .. " line " .. line .. " file " .. file)
       end
     elseif status == "203" then
@@ -58,7 +59,7 @@ while true do
       if file and line and watch_idx then
         print("Paused:" .. " line " .. line .. " watch " .. watch_idx .. " file " .. file)
       end
-    elseif status == "401" then 
+    elseif status == "401" then
       local _, _, size = string.find(breakpoint, "^401 Error in Execution (%d+)$")
       if size then
         print("Error in remote application: ")
@@ -78,7 +79,7 @@ while true do
       filename = basedir .. filename
       if not breakpoints[filename] then breakpoints[filename] = {} end
       client:send("SETB " .. string.gsub(filename, " ", "%%20") .. " " .. line .. "\n")
-      if client:receive() == "200 OK" then 
+      if client:receive() == "200 OK" then
         breakpoints[filename][line] = true
       else
         print("Error: breakpoint not inserted")
@@ -107,7 +108,7 @@ while true do
       filename = basedir .. filename
       if not breakpoints[filename] then breakpoints[filename] = {} end
       client:send("DELB " .. filename .. " " .. line .. "\n")
-      if client:receive() == "200 OK" then 
+      if client:receive() == "200 OK" then
         breakpoints[filename][line] = nil
       else
         print("Error: breakpoint not removed")
@@ -119,7 +120,7 @@ while true do
     for filename, breaks in pairs(breakpoints) do
       for line, _ in pairs(breaks) do
         client:send("DELB " .. filename .. " " .. line .. "\n")
-        if client:receive() == "200 OK" then 
+        if client:receive() == "200 OK" then
           breakpoints[filename][line] = nil
         else
           print("Error: breakpoint at file " .. filename .. " line " .. line .. " not removed")
@@ -130,7 +131,7 @@ while true do
     local _, _, index = string.find(line, "^[a-z]+%s+(%d+)$")
     if index then
       client:send("DELW " .. index .. "\n")
-      if client:receive() == "200 OK" then 
+      if client:receive() == "200 OK" then
       watches[index] = nil
       else
         print("Error: watch expression not removed")
@@ -141,15 +142,15 @@ while true do
   elseif command == "delallw" then
     for index, exp in pairs(watches) do
       client:send("DELW " .. index .. "\n")
-      if client:receive() == "200 OK" then 
+      if client:receive() == "200 OK" then
       watches[index] = nil
       else
         print("Error: watch expression at index " .. index .. " [" .. exp .. "] not removed")
       end
-    end    
+    end
   elseif command == "eval" then
     local _, _, exp = string.find(line, "^[a-z]+%s+(.+)$")
-    if exp then 
+    if exp then
       client:send("EXEC return (" .. exp .. ")\n")
       local line = client:receive()
       local _, _, status, len = string.find(line, "^(%d+)[a-zA-Z ]+(%d+)$")
@@ -170,7 +171,7 @@ while true do
     end
   elseif command == "exec" then
     local _, _, exp = string.find(line, "^[a-z]+%s+(.+)$")
-    if exp then 
+    if exp then
       client:send("EXEC " .. exp .. "\n")
       local line = client:receive()
       local _, _, status, len = string.find(line, "^(%d+)[%s%w]+(%d+)$")
@@ -200,7 +201,7 @@ while true do
   elseif command == "listw" then
     for i, v in pairs(watches) do
       print("Watch exp. " .. i .. ": " .. v)
-    end    
+    end
   elseif command == "basedir" then
     local _, _, dir = string.find(line, "^[a-z]+%s+(.+)$")
     if dir then
