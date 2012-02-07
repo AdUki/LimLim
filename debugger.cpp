@@ -52,7 +52,7 @@ void Debugger::giveCommand(QByteArray command)
     status = Running;
     emit waitingForCommand(false);
     remdebug->write(command);
-    if (console != NULL) console->writeError(command);
+    if (console != NULL) console->writeSystem(command);
 
 }
 
