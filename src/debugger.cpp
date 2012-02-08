@@ -100,8 +100,7 @@ void Debugger::controlParser()
             for (; iter != breakpoints.end(); iter++) {
                 Breakpoint *br = static_cast<Breakpoint*> (*iter);
                 QString command = QString("setb %1 %2\n").arg(br->file).arg(br->line);
-                if (console != NULL) console->writeInput(command.toAscii());
-                else remdebug->write(command.toAscii());
+                input.append(command.toAscii());
             }
 
             if (autoRun) input.append("run\n");
