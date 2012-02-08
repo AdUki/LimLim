@@ -5,15 +5,10 @@
 #include <QBuffer>
 #include <QKeyEvent>
 
-
-/** TODO
-  * Console is for input and output. Write output is simple,
-  * you just use QPlaingTextEdit append function. Writing
-  * is handled by commandQueue. When user types something into
-  * console and presses enter, typed line enqueues into command
-  * queue. You can get commands by popCommand. With flushConsole
-  * you will get console clear of all commands and text.
-  */
+/*
+  TODO refactor this class so that programer cannot have
+       access to inherited members
+*/
 class Console : public QTextEdit
 {
     Q_OBJECT

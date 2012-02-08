@@ -9,8 +9,6 @@ static const QByteArray PauseMessage = QByteArray("Paused:");
 
 	This debugger can be used remotely, whitout lua interpreter,
 	to debbug embedded lua applications.
-
-        TODO refactor some connections with interpreter
 */
 Debugger::Debugger(Editor *editor, Console *console, QObject *parent) :
     QObject(parent)
