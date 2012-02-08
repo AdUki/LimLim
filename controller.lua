@@ -22,7 +22,6 @@ local breakpoint = client:receive()
 local _, _, file, line = string.find(breakpoint, "^202 Paused%s+([%w%p]+)%s+(%d+)$")
 if file and line then
   print("Paused:" .. " file " .. file )
-  print("Type 'help' for commands")
 else
   local _, _, size = string.find(breakpoint, "^401 Error in Execution (%d+)$")
   if size then
