@@ -20,6 +20,7 @@ public:
 
 signals:
     void waitingForCommand(bool flag);
+    void changedRunningState(bool running);
 
 public slots:
     void start();

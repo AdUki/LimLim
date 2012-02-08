@@ -143,6 +143,7 @@ void Editor::debugLine(QString file, unsigned line)
     debugClear();
 
     debugSource = NULL;
+    file = file.trimmed(); // Damn you whitespace! Give me back my 3 hours!!!
 
     int i;
     for (i = 0; i < count(); i++) {

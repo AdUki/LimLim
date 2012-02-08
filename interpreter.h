@@ -25,7 +25,7 @@ public slots:
     void kill();
 
 signals:
-    void executionChanged(bool running);
+    void changedRunningState(bool running);
 
 private:
     QString fileName;

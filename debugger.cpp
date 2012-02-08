@@ -1,6 +1,6 @@
 #include "debugger.h"
 
-static const QByteArray StartMessage = QByteArray("Start program you want to debug\n");
+static const QByteArray StartMessage = QByteArray("Start program you want to debug");
 static const QByteArray EndMessage = QByteArray("Program finished\n");
 
 /*
@@ -40,7 +40,6 @@ void Debugger::start()
     // start RemDebug controller
     remdebug->start("lua", QStringList() << "-e" << "io.stdout:setvbuf 'no'" << "--" << "controller.lua");
 
-
 }
 
 void Debugger::stop()
@@ -58,11 +57,12 @@ void Debugger::giveCommand(QByteArray command)
 
 void Debugger::controlParser()
 {
-    output.append(remdebug->readAll());
+    output.append(remdebug->readAllStandardOutput());
 
     // Return if RemDebug didn't write whole status
-    if (!output.endsWith("> ") && !output.endsWith(EndMessage) && !output.endsWith(StartMessage))
-        return;
+    if (!output.endsWith("> ") &&
+        !output.endsWith(EndMessage) &&
+        !output.endsWith(StartMessage)) return;
 
     if (console != NULL) console->writeOutput(output);
 
@@ -81,6 +81,7 @@ void Debugger::controlParser()
 
     } else if (output.startsWith(StartMessage)) {
         status = On;
+        emit changedRunningState(true);
     }
 
     if (output.endsWith("> ")) {
@@ -99,7 +100,8 @@ void Debugger::controlParser()
             for (; iter != breakpoints.end(); iter++) {
                 Breakpoint *br = static_cast<Breakpoint*> (*iter);
                 QString command = QString("setb %1 %2\n").arg(br->file).arg(br->line);
-                input.append(command.toAscii());
+                if (console != NULL) console->writeInput(command.toAscii());
+                else remdebug->write(command.toAscii());
             }
 
             if (autoRun) input.append("run\n");
@@ -135,6 +137,7 @@ void Debugger::controlFinish(int exitCode, QProcess::ExitStatus exitStatus)
     editor->debugClear();
     editor->unlock();
 
+    output.clear();
     input.clear();
     if (console != NULL) {
         console->writeSystem(QString("Process exit code %1\nProcess exit status %2\n")
@@ -142,6 +145,7 @@ void Debugger::controlFinish(int exitCode, QProcess::ExitStatus exitStatus)
                 .arg(exitStatus).toAscii());
         console->close();
     }
+    emit changedRunningState(false);
 }
 
 void Debugger::breakpointSet(int line, QString file)

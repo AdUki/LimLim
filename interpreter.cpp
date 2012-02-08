@@ -63,6 +63,7 @@ void Interpreter::execute()
     process->terminate();
     options << "-e" << "io.stdout:setvbuf 'no'";
     process->start(luaPath, options << "--" << fileName);
+    emit changedRunningState(true);
 }
 
 void Interpreter::kill()
@@ -75,6 +76,7 @@ void Interpreter::onClose()
 {
     console->close();
     options.clear();
+    emit changedRunningState(false);
 }
 
 void Interpreter::writeInput(QByteArray input)

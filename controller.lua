@@ -73,11 +73,11 @@ while true do
     client:close()
     os.exit()
   elseif command == "setb" then
-    local _, _, _, filename, line = string.find(line, "^([a-z]+)%s+([%w%p]+)%s+(%d+)$")
+    local _, _, filename, line = string.find(line, "^.... (.+) (%d+)$")
     if filename and line then
       filename = basedir .. filename
       if not breakpoints[filename] then breakpoints[filename] = {} end
-      client:send("SETB " .. string.gsub(filename, " ", "%%20") .. " " .. line .. "\n")
+      client:send("SETB " .. filename .. " " .. line .. "\n")
       if client:receive() == "200 OK" then
         breakpoints[filename][line] = true
       else
@@ -102,7 +102,7 @@ while true do
       print("Invalid command")
     end
   elseif command == "delb" then
-    local _, _, _, filename, line = string.find(line, "^([a-z]+)%s+([%w%p]+)%s+(%d+)$")
+    local _, _, filename, line = string.find(line, "^.... (.+) (%d+)$")
     if filename and line then
       filename = basedir .. filename
       if not breakpoints[filename] then breakpoints[filename] = {} end

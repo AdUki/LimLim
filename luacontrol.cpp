@@ -46,11 +46,11 @@ void LuaControl::debug()
     luaDebugger->start();
 	
 	// TODO quick fix - program will wait until remdebug's controller starts
-        #ifdef Q_WS_WIN
+#ifdef Q_WS_WIN
 	Sleep(1000);
-        #else
-        sleep(1);
-	#endif
+#else
+    sleep(1);
+#endif
 	
     luaInterpret->debug(luaEditor->currentSource());
 }
@@ -147,18 +147,23 @@ void LuaControl::createActions()
 	runAction->setIcon(QIcon(":/images/run.png"));
 	runAction->setStatusTip(tr("Run current chunk of Lua code"));
 	connect(runAction, SIGNAL(triggered()), this, SLOT(run()));
+    connect(luaInterpret, SIGNAL(changedRunningState(bool)), runAction, SLOT(setDisabled(bool)));
+
 
     // DEBUG ACTION
 	debugAction = new QAction(tr("&Debug"), this);
     debugAction->setIcon(QIcon(":/images/compile.png"));
 	debugAction->setStatusTip(tr("Debug current chunk of Lua code"));
 	connect(debugAction, SIGNAL(triggered()), this, SLOT(debug()));
+    connect(luaDebugger, SIGNAL(changedRunningState(bool)), debugAction, SLOT(setDisabled(bool)));
 
     // STOP ACTION
 	stopAction = new QAction(tr("&Stop"), this);
 	stopAction->setIcon(QIcon(":/images/process-stop.png"));
 	stopAction->setStatusTip(tr("Stop current running program"));
+    stopAction->setDisabled(true);
     connect(stopAction, SIGNAL(triggered()), this, SLOT(stop()));
+    connect(luaInterpret, SIGNAL(changedRunningState(bool)), stopAction, SLOT(setEnabled(bool)));
 
     // CONTINUE ACTION
     continueAction = new QAction(tr("&Continue"), this);
