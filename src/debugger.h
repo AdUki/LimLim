@@ -19,7 +19,7 @@ public:
 
 signals:
     void waitingForCommand(bool flag);
-    void changedRunningState(bool running);
+
     void started();
     void finished();
 
@@ -49,7 +49,7 @@ private:
 
 private slots:
     void parseInput(QByteArray remdebugOutput);
-    void atFinish();
+    void stateChange(bool running);
 
     void breakpointSet(int line, QString file);
     void breakpointDeleted(int line, QString file);

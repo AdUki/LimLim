@@ -1,7 +1,7 @@
 #include "debugger.h"
 
-static const QByteArray StartMessage = QByteArray("Start program you want to debug");
-static const QByteArray EndMessage = QByteArray("Program finished\n");
+static const QByteArray StartCommand = QByteArray("> ");
+static const QByteArray PauseMessage = QByteArray("Paused:");
 
 /*
 	Lua debugger class
@@ -20,7 +20,7 @@ Debugger::Debugger(Editor *editor, Console *console, QObject *parent) :
     autoRun = false;
 
     connect(console, SIGNAL(emitOutput(QByteArray)), this, SLOT(parseInput(QByteArray)));
-    connect(remdebug, SIGNAL(finished()), this, SLOT(atFinish()));
+    connect(remdebug, SIGNAL(changedRunningState(bool)), this, SLOT(stateChange(bool)));
     connect(editor, SIGNAL(breakpointSet(int,QString)), this, SLOT(breakpointSet(int,QString)));
     connect(editor, SIGNAL(breakpointDeleted(int,QString)), this, SLOT(breakpointDeleted(int,QString)));
 
@@ -51,12 +51,11 @@ void Debugger::parseInput(QByteArray remdebugOutput)
     output.append(remdebugOutput);
 
     // Return if RemDebug didn't write whole status
-    if (!output.endsWith("> ") &&
-        !output.endsWith(EndMessage) &&
-        !output.startsWith(StartMessage)) return;
+    if (!output.endsWith(StartCommand)) return;
 
-    if (output.startsWith("Paused:")) {
-        QRegExp rx("^Paused:( line ){0,1}(\\d*)( watch ){0,1}(\\d*) file (.*)\n.*");
+    if (output.startsWith(PauseMessage)) {
+        QRegExp rx(QString("^").append(PauseMessage)
+                   .append("( line ){0,1}(\\d*)( watch ){0,1}(\\d*) file (.*)\n.*"));
 
         rx.indexIn(output);
 
@@ -66,15 +65,9 @@ void Debugger::parseInput(QByteArray remdebugOutput)
 
         editor->debugLine(file, line);
 
-    } else if (output.startsWith(EndMessage)) {
-
-    } else if (output.startsWith(StartMessage)) {
-        status = On;
-        emit started();
-        emit changedRunningState(true);
     }
 
-    if (output.endsWith("> ")) {
+    if (output.endsWith(StartCommand)) {
 
         // Controller initialization
         if (status == On) {
@@ -119,17 +112,19 @@ void Debugger::parseInput(QByteArray remdebugOutput)
     output.clear();
 }
 
-void Debugger::atFinish()
+void Debugger::stateChange(bool running)
 {
-    status = Off;
-    editor->debugClear();
-    editor->unlock();
-
-    output.clear();
-    input.clear();
-
-    emit changedRunningState(false);
-    emit finished();
+    if (running) {
+        status = On;
+        emit started();
+    } else {
+        status = Off;
+        editor->debugClear();
+        editor->unlock();
+        output.clear();
+        input.clear();
+        emit finished();
+    }
 }
 
 void Debugger::breakpointSet(int line, QString file)

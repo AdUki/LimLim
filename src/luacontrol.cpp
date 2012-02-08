@@ -150,7 +150,7 @@ void LuaControl::createActions()
     debugAction->setIcon(QIcon(":/images/compile.png"));
 	debugAction->setStatusTip(tr("Debug current chunk of Lua code"));
 	connect(debugAction, SIGNAL(triggered()), this, SLOT(debug()));
-    connect(luaDebugger, SIGNAL(changedRunningState(bool)), debugAction, SLOT(setDisabled(bool)));
+    connect(luaInterpret, SIGNAL(changedRunningState(bool)), debugAction, SLOT(setDisabled(bool)));
 
     // STOP ACTION
 	stopAction = new QAction(tr("&Stop"), this);

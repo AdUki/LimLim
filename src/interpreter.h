@@ -17,6 +17,10 @@ public:
     explicit Interpreter(Console* console, QWidget *parent = 0);
 
     void run(Source* source);
+
+    /** Function adds debug mode
+      * when you want to debug code run this ALWAYS before run()
+      */
     void addDebug() { options << "-e" << "require 'remdebug.engine'.start()"; }
 
     void runFile(const QString &file);

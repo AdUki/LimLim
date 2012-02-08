@@ -5,8 +5,6 @@
 
 local socket = require "socket"
 
-print("Start program you want to debug")
-
 local server = socket.bind("*", 8171)
 if server == nil then
   print "Error: Remdebug already running"
@@ -44,7 +42,6 @@ while true do
     client:receive()
     local breakpoint = client:receive()
     if not breakpoint then
-      print("Program finished")
       os.exit()
     end
     local _, _, status = string.find(breakpoint, "^(%d+)")
