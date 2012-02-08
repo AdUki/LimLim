@@ -62,7 +62,7 @@ while true do
         os.exit()
       end
     else
-      print("Unknown error")
+      print("Error: Unknown error")
       os.exit()
     end
   elseif command == "exit" then
@@ -172,7 +172,7 @@ while true do
       if status == "200" then
         len = tonumber(len)
         local res = client:receive(len)
-        print(res)
+--        print(res)  -- for output use eval
       elseif status == "401" then
         len = tonumber(len)
         local res = client:receive(len)
