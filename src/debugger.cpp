@@ -3,6 +3,7 @@
 static const QByteArray StartCommand = QByteArray("> ");
 static const QByteArray PauseMessage = QByteArray("Paused:");
 
+
 /*
 	Lua debugger class
 
@@ -36,14 +37,26 @@ void Debugger::start()
 
 void Debugger::stop()
 {
-    remdebug->kill();
+    if (status != Off) remdebug->kill();
 }
 
 void Debugger::giveCommand(QByteArray command)
 {
-    status = Running;
-    emit waitingForCommand(false);
-    console->writeInput(command);
+    // check if after command starts execution of debugging program
+    bool execCommand = false;
+    if (command == StepIntoCommand ||
+        command == StepOverCommand ||
+        command == RunCommand) execCommand = true;
+
+    if (status == Waiting) {
+        console->writeInput(command);
+        if (execCommand) {
+            status = Running;
+            emit waitingForCommand(false);
+        }
+    } else {
+        input.append(command);
+    }
 }
 
 void Debugger::parseInput(QByteArray remdebugOutput)
@@ -82,18 +95,17 @@ void Debugger::parseInput(QByteArray remdebugOutput)
 
             for (; iter != breakpoints.end(); iter++) {
                 Breakpoint *br = static_cast<Breakpoint*> (*iter);
-                QString command = QString("setb %1 %2\n").arg(br->file).arg(br->line);
-                input.append(command.toAscii());
+                giveCommand(QString("setb %1 %2\n").arg(br->file).arg(br->line).toAscii());
             }
 
-            if (autoRun) input.append("run\n");
+            if (autoRun) giveCommand(RunCommand);
         }
 
-        // If there is input, write as command to console.
+        // Check if there is input waiting for controller
         if (input.isEmpty()) {
             status = Waiting;
             emit waitingForCommand(true);
-        } else {
+        } else { // There is input, write as command to console.
             static QBuffer buffer(&input);
 
             status = Running;
@@ -114,41 +126,26 @@ void Debugger::parseInput(QByteArray remdebugOutput)
 
 void Debugger::stateChange(bool running)
 {
-    if (running) {
+    if (running) { // controller started
         status = On;
         emit started();
-    } else {
+    } else { // controller ended
         status = Off;
         editor->debugClear();
         editor->unlock();
         output.clear();
         input.clear();
+        emit waitingForCommand(false);
         emit finished();
     }
 }
 
 void Debugger::breakpointSet(int line, QString file)
 {
-    QByteArray command(QString("setb %1 %2\n").arg(file).arg(line).toAscii());
-
-    switch (status) {
-    case Waiting:
-        console->writeInput(command);
-        break;
-    case Running: input.append(command);
-    default: ;
-    }
+    giveCommand(QString("setb %1 %2\n").arg(file).arg(line).toAscii());
 }
 
 void Debugger::breakpointDeleted(int line, QString file)
 {
-    QByteArray command(QString("delb %1 %2\n").arg(file).arg(line).toAscii());
-
-    switch (status) {
-    case Waiting:
-        console->writeInput(command);
-        break;
-    case Running: input.append(command);
-    default: ;
-    }
+    giveCommand(QString("delb %1 %2\n").arg(file).arg(line).toAscii());
 }

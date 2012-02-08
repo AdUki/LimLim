@@ -9,6 +9,10 @@
 #include "breakpoint.h"
 #include "interpreter.h"
 
+static const QByteArray RunCommand = QByteArray("run\n");
+static const QByteArray StepOverCommand = QByteArray("over\n");
+static const QByteArray StepIntoCommand = QByteArray("step\n");
+
 class Debugger : public QObject
 {
 Q_OBJECT
@@ -27,9 +31,9 @@ public slots:
     void start();
     void stop();
 
-    void stepOver() { giveCommand(QByteArray("over\n")); }
-    void stepIn() { giveCommand(QByteArray("step\n")); }
-    void run() { giveCommand(QByteArray("run\n")); }
+    void stepOver() { giveCommand(StepOverCommand); }
+    void stepIn() { giveCommand(StepIntoCommand); }
+    void run() { giveCommand(RunCommand); }
 
     void setAutoRun(bool enabled) { autoRun = enabled; }
 
