@@ -60,63 +60,21 @@ void Interpreter::execute()
     // TODO implement specifiing path to lua executable
 
     console->open();
-    process->terminate();
+    console->writeSystem(QString("Starting program ")
+        .append(QFileInfo(fileName).baseName()).append('\n'));
+
     options << "-e" << "io.stdout:setvbuf 'no'";
     process->start(luaPath, options << "--" << fileName);
-    emit changedRunningState(true);
 }
 
-void Interpreter::kill()
+void Interpreter::finished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    process->kill();
-    onClose();
-}
-
-void Interpreter::onClose()
-{
+    console->writeSystem(QString("Program exit code ")
+        .append(QString::number(exitCode)).append('\n')
+        .append("Program exit status ")
+        .append(QString::number(exitStatus)).append('\n'));
     console->close();
     options.clear();
     emit changedRunningState(false);
 }
 
-void Interpreter::writeInput(QByteArray input)
-{
-    process->write(input);
-
-}
-
-void Interpreter::readStandardOutput()
-{
-    console->writeOutput(process->readAllStandardOutput());
-}
-
-void Interpreter::readStandardError()
-{
-    console->writeError(process->readAllStandardError());
-}
-
-void Interpreter::finished(int exitCode, QProcess::ExitStatus exitStatus)
-{
-    onClose();
-}
-
-/*
-int Interpreter::run(QString code)
-{
-	clear();
-	setReadOnly(false);
-	process = new QProcess(this);
-	// TODO WARINING next line is platform specific
-	// TODO change next line so that lua will execute code from file path
-	process->start("lua", QStringList() << "-e" << "io.stdout:setvbuf 'no'" << "-e" << code << "--");
-	connect(process, SIGNAL(readyReadStandardError()), this, SLOT(writeError()));
-	connect(process, SIGNAL(readyReadStandardOutput()), this, SLOT(writeOutput()));
-	connect(process, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(end(int, QProcess::ExitStatus)));
-
-	//installEventFilter(new UserInputFilter(this));
-
-        // TODO change colors of text according to System color setup
-        setTextColor(QColor::fromRgb(255,255,255,255));
-
-	return 0;
-}*/

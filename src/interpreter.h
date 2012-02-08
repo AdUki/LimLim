@@ -22,7 +22,7 @@ public:
     void runFile(const QString &file);
 
 public slots:
-    void kill();
+    void kill() { process->kill(); }
 
 signals:
     void changedRunningState(bool running);
@@ -42,17 +42,21 @@ private:
     QTemporaryFile tempFile;
 
     void execute();
-    void onClose();
 
     void ignoreEnvironmentVars() { options << "-E"; }
     void setInteractiveMode() { options << "-i"; }
 
 private slots:
-    void writeInput(QByteArray input);
+    void writeInput(QByteArray input) { process->write(input); }
 
-    void readStandardOutput();
-    void readStandardError();
+    void readStandardOutput() {
+        console->writeOutput(process->readAllStandardOutput());
+    }
+    void readStandardError() {
+        console->writeError(process->readAllStandardError());
+    }
 
+    void started() { emit changedRunningState(true); }
     void finished(int exitCode, QProcess::ExitStatus exitStatus);
 };
 
