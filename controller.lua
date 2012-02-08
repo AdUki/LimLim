@@ -166,11 +166,11 @@ while true do
       print("Invalid command")
     end
   elseif command == "exec" then
-    local _, _, exp = string.find(line, "^[a-z]+%s+(.+)$")
+    local _, _, exp = string.find(line, "^.... (.+)$")
     if exp then
       client:send("EXEC " .. exp .. "\n")
       local line = client:receive()
-      local _, _, status, len = string.find(line, "^(%d+)[%s%w]+(%d+)$")
+      local _, _, status, len = string.find(line, "^(%d+)[%s%w]+ (%d+)$")
       if status == "200" then
         len = tonumber(len)
         local res = client:receive(len)
