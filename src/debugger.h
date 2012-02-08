@@ -7,20 +7,21 @@
 #include "editor.h"
 #include "console.h"
 #include "breakpoint.h"
+#include "interpreter.h"
 
 class Debugger : public QObject
 {
 Q_OBJECT
 public:
-    explicit Debugger(Editor *editor, QObject *parent = 0);
-
-    void setConsole(Console *console);
+    explicit Debugger(Editor *editor, Console *console, QObject *parent = 0);
 
     enum DebugStatus { Running, Waiting, On, Off };
 
 signals:
     void waitingForCommand(bool flag);
     void changedRunningState(bool running);
+    void started();
+    void finished();
 
 public slots:
     void start();
@@ -38,7 +39,7 @@ public slots:
 private:
     Console *console;
     Editor *editor;
-    QProcess *remdebug;
+    Interpreter *remdebug;
 
     DebugStatus status;
     QByteArray output;
@@ -47,13 +48,9 @@ private:
     bool autoRun;
 
 private slots:
-    void controlParser();
-    void controlFinish(int exitCode, QProcess::ExitStatus exitStatus);
+    void parseInput(QByteArray remdebugOutput);
+    void atFinish();
 
-    void controlWrite(QByteArray input) { remdebug->write(input); }
-
-    void writeError() { console->writeError(remdebug->readAllStandardError()); }
-    
     void breakpointSet(int line, QString file);
     void breakpointDeleted(int line, QString file);
 };

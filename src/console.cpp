@@ -58,6 +58,7 @@ void Console::writeOutput(QByteArray data)
     setTextColor(QColor::fromRgb(0,200,0));
     insertPlainText(data);
     ensureCursorVisible();
+    emit emitOutput(data);
 }
 
 void Console::writeError(QByteArray data)
@@ -66,6 +67,7 @@ void Console::writeError(QByteArray data)
     setTextColor(QColor::fromRgb(200,0,0));
     insertPlainText(data);
     ensureCursorVisible();
+    emit emitError(data);
 }
 
 void Console::confirmCommand()

@@ -16,7 +16,8 @@ LuaControl::LuaControl()
     luaConsole = new Console(this);
     luaEditor = new Editor(this);
     luaInterpret = new Interpreter(luaConsole, this);
-    luaDebugger = new Debugger(luaEditor, this);
+    debugConsole = new Console(this);
+    luaDebugger = new Debugger(luaEditor, debugConsole, this);
     watcheslist = new VariableWatcher(luaDebugger);
     setCentralWidget(luaEditor);
 
@@ -31,6 +32,8 @@ LuaControl::LuaControl()
     setWindowIcon(QIcon(":/images/lua.png"));
 
     setAttribute(Qt::WA_DeleteOnClose);
+    
+    connect(luaDebugger, SIGNAL(started()), this, SLOT(run()));
 }
 
 // TODO add disabling of buttons when launching program and
@@ -43,16 +46,8 @@ void LuaControl::run()
 
 void LuaControl::debug()
 {
+    luaInterpret->addDebug();
     luaDebugger->start();
-	
-	// TODO quick fix - program will wait until remdebug's controller starts
-#ifdef Q_WS_WIN
-	Sleep(1000);
-#else
-    sleep(1);
-#endif
-	
-    luaInterpret->debug(luaEditor->currentSource());
 }
 
 void LuaControl::stop()
@@ -274,9 +269,7 @@ void LuaControl::createDockWindows()
         // Controller dock widget for debug
         dock = new QDockWidget(tr("RemDebug"), this);
         dock->setAllowedAreas(Qt::AllDockWidgetAreas);
-        Console *console = new Console(this);
-        luaDebugger->setConsole(console);
-        dock->setWidget(console);
+        dock->setWidget(debugConsole);
         addDockWidget(Qt::BottomDockWidgetArea, dock);
 }
 

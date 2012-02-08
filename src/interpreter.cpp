@@ -15,7 +15,8 @@ Interpreter::Interpreter(Console* console, QWidget *parent)
     connect(console, SIGNAL(emitInput(QByteArray)), this, SLOT(writeInput(QByteArray)));
     connect(process, SIGNAL(readyReadStandardError()), this, SLOT(readStandardError()));
     connect(process, SIGNAL(readyReadStandardOutput()), this, SLOT(readStandardOutput()));
-    connect(process, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(finished(int, QProcess::ExitStatus)));
+    connect(process, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(atFinish(int, QProcess::ExitStatus)));
+    connect(process, SIGNAL(started()), this, SLOT(atStart()));
 }
 
 void Interpreter::run(Source* source)
@@ -47,11 +48,6 @@ void Interpreter::runFile(const QString &file)
     }
 }
 
-void Interpreter::debug(Source* source)
-{
-    options << "-e" << "require 'remdebug.engine'.start()";
-    this->run(source);
-}
 
 // TODO add lua 5.0 and 5.2 support
 void Interpreter::execute()
@@ -61,20 +57,24 @@ void Interpreter::execute()
 
     console->open();
     console->writeSystem(QString("Starting program ")
-        .append(QFileInfo(fileName).baseName()).append('\n'));
+        .append(fileName).append('\n'));
 
     options << "-e" << "io.stdout:setvbuf 'no'";
     process->start(luaPath, options << "--" << fileName);
 }
 
-void Interpreter::finished(int exitCode, QProcess::ExitStatus exitStatus)
+void Interpreter::atFinish(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    console->writeSystem(QString("Program exit code ")
-        .append(QString::number(exitCode)).append('\n')
-        .append("Program exit status ")
-        .append(QString::number(exitStatus)).append('\n'));
+    console->writeSystem(QString("Program exited whit code ")
+        .append(QString::number(exitCode)).append('\n'));
     console->close();
     options.clear();
     emit changedRunningState(false);
+    emit finished();
 }
 
+void Interpreter::atStart()
+{
+    emit started();
+    emit changedRunningState(true);
+}

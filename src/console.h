@@ -23,6 +23,8 @@ public:
 
 signals:
     void emitInput(QByteArray input);
+    void emitOutput(QByteArray output);
+    void emitError(QByteArray error);
 
 public slots:
 

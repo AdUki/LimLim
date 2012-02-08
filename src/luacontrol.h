@@ -45,6 +45,7 @@ private:
 	QStringList recentFiles;
 
         Console *luaConsole;
+        Console *debugConsole;
         Interpreter *luaInterpret;
         Editor *luaEditor;
         Debugger *luaDebugger;
