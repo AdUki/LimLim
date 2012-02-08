@@ -80,7 +80,7 @@ while true do
         print("Error: breakpoint not inserted")
       end
     else
-      print("Invalid command")
+      print("Error: Invalid command")
     end
   elseif command == "setw" then
     local _, _, exp = string.find(line, "^[a-z]+%s+(.+)$")
@@ -95,7 +95,7 @@ while true do
         print("Error: Watch expression not inserted")
       end
     else
-      print("Invalid command")
+      print("Error: Invalid command")
     end
   elseif command == "delb" then
     local _, _, filename, line = string.find(line, "^.... (.+) (%d+)$")
@@ -109,7 +109,7 @@ while true do
         print("Error: breakpoint not removed")
       end
     else
-      print("Invalid command")
+      print("Error: Invalid command")
     end
   elseif command == "delallb" then
     for filename, breaks in pairs(breakpoints) do
@@ -132,7 +132,7 @@ while true do
         print("Error: watch expression not removed")
       end
     else
-      print("Invalid command")
+      print("Error: Invalid command")
     end
   elseif command == "delallw" then
     for index, exp in pairs(watches) do
@@ -156,13 +156,12 @@ while true do
       elseif status == "401" then
         len = tonumber(len)
         local res = client:receive(len)
-        print("Error in expression:")
-        print(res)
+        print("Error: Invalid expression:")
       else
-        print("Unknown error")
+        print("Error: Unknown error")
       end
     else
-      print("Invalid command")
+      print("Error: Invalid command")
     end
   elseif command == "exec" then
     local _, _, exp = string.find(line, "^.... (.+)$")
@@ -177,13 +176,12 @@ while true do
       elseif status == "401" then
         len = tonumber(len)
         local res = client:receive(len)
-        print("Error in expression:")
-        print(res)
+        print("Error: Invalid expression")
       else
-        print("Unknown error")
+        print("Error: Unknown error")
       end
     else
-      print("Invalid command")
+      print("Error: Invalid command")
     end
   elseif command == "listb" then
     for k, v in pairs(breakpoints) do
@@ -226,7 +224,7 @@ while true do
   else
     local _, _, spaces = string.find(line, "^(%s*)$")
     if not spaces then
-      print("Invalid command")
+      print("Error: Invalid command")
     end
   end
 end
