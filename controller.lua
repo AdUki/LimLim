@@ -149,7 +149,7 @@ while true do
     if exp then
       client:send("EXEC return (" .. exp .. ")\n")
       local line = client:receive()
-      local _, _, status, len = string.find(line, "^(%d+)[a-zA-Z ]+(%d+)$")
+      local _, _, status, len = string.find(line, "^(%d+)[a-zA-Z ]+ (%d+)$")
       if status == "200" then
         len = tonumber(len)
         local res = client:receive(len)
