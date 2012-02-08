@@ -5,41 +5,26 @@ QT += core \
     gui
 TARGET = LuaIDE
 TEMPLATE = app
-SOURCES += main.cpp \
-    interpreter.cpp \
-    luacontrol.cpp \
-    debugger.cpp \
-    console.cpp \
-    source.cpp \
-    editor.cpp \
-    variablewatcher.cpp \
-    breakpoint.cpp
-HEADERS += interpreter.h \
-    luacontrol.h \
-    debugger.h \
-    console.h \
-    source.h \
-    editor.h \
-    variablewatcher.h \
-    breakpoint.h
-FORMS += 
+SOURCES += src/main.cpp \
+    src/interpreter.cpp \
+    src/luacontrol.cpp \
+    src/debugger.cpp \
+    src/console.cpp \
+    src/source.cpp \
+    src/editor.cpp \
+    src/variablewatcher.cpp \
+    src/breakpoint.cpp
+HEADERS += src/interpreter.h \
+    src/luacontrol.h \
+    src/debugger.h \
+    src/console.h \
+    src/source.h \
+    src/editor.h \
+    src/variablewatcher.h \
+    src/breakpoint.h
 LIBS += -lqscintilla2
 RESOURCES += icons.qrc
-OTHER_FILES += images/process-stop.png \
-    images/run.png \
-    images/process-stop.png \
-    images/lua.png \
-    images/run.png \
-    images/process-stop.png \
-    images/lua.png \
-    images/compile.png \
-    images/debug/step-over.png \
-    images/debug/step-out.png \
-    images/debug/step-into-instruction.png \
-    images/debug/step-into.png \
-    images/debug/step-instruction.png \
-    images/debug/run-cursor.png \
-    images/debug/run.png \
-    images/debug/execute-to-cursor.png \
-    images/debug/execute-from-cursor.png \
-    controller.lua
+OTHER_FILES += controller.lua
+OBJECTS_DIR = build/
+MOC_DIR = build/
+RCC_DIR = build/
