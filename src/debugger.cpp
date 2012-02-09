@@ -17,6 +17,7 @@ Debugger::Debugger(Editor *editor, Console *console, QObject *parent) :
     this->editor = editor;
 
     autoRun = false;
+    status = Off;
 
     connect(console, SIGNAL(emitOutput(QByteArray)), this, SLOT(parseInput(QByteArray)));
     connect(remdebug, SIGNAL(changedRunningState(bool)), this, SLOT(stateChange(bool)));
@@ -40,20 +41,19 @@ void Debugger::stop()
 
 void Debugger::giveCommand(QByteArray command)
 {
-    // check if after command starts execution of debugging program
-    bool execCommand = false;
-    if (command == StepIntoCommand ||
-        command == StepOverCommand ||
-        command == RunCommand) execCommand = true;
-
-    if (status == Waiting) {
+    switch (status) {
+    case Waiting:
+        status = Running;
         console->writeInput(command);
-        if (execCommand) {
-            status = Running;
-            emit waitingForCommand(false);
-        }
-    } else {
+        emit waitingForCommand(false);
+        break;
+    case Running:
         input.append(command);
+        break;
+    case On:
+        break;
+    case Off:
+        break;
     }
 }
 
@@ -82,7 +82,7 @@ void Debugger::parseInput(QByteArray remdebugOutput)
 
         // Controller initialization
         if (status == On) {
-            status = Waiting;
+            status = Running;
 
             // Lock editor for editing
             editor->lock();
@@ -104,13 +104,12 @@ void Debugger::parseInput(QByteArray remdebugOutput)
             status = Waiting;
             emit waitingForCommand(true);
         } else { // There is input, write as command to console.
-            static QBuffer buffer(&input);
-
             status = Running;
-            if (!buffer.isOpen()) buffer.open(QIODevice::ReadOnly);
 
-            QByteArray command(buffer.readLine());
-            console->writeInput(command);
+            static QBuffer buffer(&input);
+            if (!buffer.isOpen()) buffer.open(QIODevice::ReadOnly | QIODevice::Text);
+
+            console->writeInput(buffer.readLine());
 
             if (buffer.atEnd()) {
                 buffer.close();

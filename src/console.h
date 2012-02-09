@@ -17,9 +17,9 @@ public:
     explicit Console(QWidget *parent = 0);
 
 signals:
-    void emitInput(QByteArray input);
+    void emitInput (QByteArray input);
     void emitOutput(QByteArray output);
-    void emitError(QByteArray error);
+    void emitError (QByteArray error);
 
 public slots:
 
@@ -28,7 +28,7 @@ public slots:
 
     void writeInput (QByteArray data);
     void writeOutput(QByteArray data);
-    void writeError(QByteArray data);
+    void writeError (QByteArray data);
     void writeSystem(QString message);
 
 protected:
