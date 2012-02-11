@@ -33,12 +33,10 @@ public:
 
 signals:
     void waitingForCommand(bool status);
-    void watchesUpdated();
+    void watchUpdated(const QString& exp);
 
     void started();
     void finished();
-
-    void commandOutput(const QByteArray& result);
 
 public slots:
     void start();
@@ -51,7 +49,6 @@ public slots:
     void setAutoRun(bool enabled) { autoRun = enabled; }
 
     DebugStatus getStatus() { return status; }
-    bool giveCommand(const QByteArray& command);
 
 private:
     Console *console;
@@ -65,6 +62,9 @@ private:
     QMap <QString, QString> watches;
 
     bool autoRun;
+
+    inline void giveCommand(const QByteArray& command);
+    inline void updateWatch(const QString &exp);
 
 private slots:
     void parseInput(const QByteArray& remdebugOutput);

@@ -152,7 +152,7 @@ while true do
       if status == "200" then
         len = tonumber(len)
         local res = client:receive(len)
-        print(res)
+        print("Evaluate: " .. exp .. '\n' .. res)
       elseif status == "401" then
         len = tonumber(len)
         local res = client:receive(len)

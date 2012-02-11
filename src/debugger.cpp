@@ -2,6 +2,7 @@
 
 static const QByteArray StartCommand = QByteArray("> ");
 static const QByteArray PauseMessage = QByteArray("Paused:");
+static const QByteArray EvaluateMessage = QByteArray("Evaluate:");
 
 
 /*
@@ -9,6 +10,8 @@ static const QByteArray PauseMessage = QByteArray("Paused:");
 
 	This debugger can be used remotely, whitout lua interpreter,
 	to debbug embedded lua applications.
+
+        TODO in final version of program remove console for better performance
 */
 Debugger::Debugger(Editor *editor, Console *console, QObject *parent) :
     QObject(parent)
@@ -30,7 +33,7 @@ Debugger::Debugger(Editor *editor, Console *console, QObject *parent) :
 
 void Debugger::start()
 {
-    // start RemDebug controller
+    // Start RemDebug controller
     remdebug->runFile("controller.lua");
 }
 
@@ -39,10 +42,8 @@ void Debugger::stop()
     if (status != Off) remdebug->kill();
 }
 
-bool Debugger::giveCommand(const QByteArray& command)
+inline void Debugger::giveCommand(const QByteArray& command)
 {
-    // TODO add validation of command
-
     switch (status) {
     case Waiting:
         status = Running;
@@ -79,7 +80,7 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
 
         for (; iter != breakpoints.end(); iter++) {
             Breakpoint *br = static_cast<Breakpoint*> (*iter);
-            giveCommand(QString("setb %1 %2\n").arg(br->file).arg(br->line).toAscii());
+            breakpointSet(br->line, br->file);
         }
 
         if (autoRun) giveCommand(RunCommand);
@@ -88,8 +89,9 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
     // Parse status messages from output
     if (output.startsWith(PauseMessage)) {
         QRegExp rx(QString("^").append(PauseMessage)
-                   .append("( line ){0,1}(\\d*)( watch ){0,1}(\\d*) file (.*)\n.*"));
-
+                   .append("( line )?(\\d*)( watch )?(\\d*) file (.*)\n")
+                   .append(StartCommand)
+                   .append('$'));
         rx.indexIn(output);
 
         int line = rx.cap(2).toInt();   // get line number
@@ -98,13 +100,27 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
 
         editor->debugLine(file, line);
 
-// TODO update all watched expressions after execution step
-//        emit updateVariables();
+        // Update all watched expressions
+        QMap<QString, QString>::const_iterator i;
+        for (i = watches.constBegin(); i != watches.constEnd(); ++i) {
+            if (i.key().isEmpty()) continue;
+            updateWatch(i.key());
+        }
 
-    } else { // TODO add status message for output
-        // Parse output and emit
-        output.chop(StartCommand.length() + 1);
-        if (!output.isEmpty()) emit commandOutput(output);
+    } else if (output.startsWith(EvaluateMessage)) {
+        QRegExp rx(QString("^").append(EvaluateMessage)
+                   .append(" ([^\n]*)\n(.*)\n")
+                   .append(StartCommand)
+                   .append('$'));
+        rx.indexIn(output);
+
+        QString exp = rx.cap(1);
+        QString val = rx.cap(2);
+
+        if (watches[exp].compare(val) != 0) {
+            watches[exp] = val;
+            emit watchUpdated(exp);
+        }
     }
 
     output.clear();
@@ -161,23 +177,31 @@ void Debugger::breakpointDeleted(int line, QString file)
   */
 void Debugger::addWatchExp(const QString& exp)
 {
-    if (watches.contains(exp)) {
-        // TODO update expression
-        ;
-    } else watches[exp] = "";
+    QString validExp = exp.trimmed();
+    // TODO add more expression checks
+
+    if (watches.contains(validExp)) updateWatch(validExp);
+    else watches[validExp] = "";
 }
 
 void Debugger::removeWatchExp(const QString& exp)
 {
-    watches.remove(exp);
+    watches.remove(exp.trimmed());
 }
 
 const QString& Debugger::getWatchExp(const QString& exp) const
 {
-    return watches[exp];
+    return watches[exp.trimmed()];
 }
 
 bool Debugger::hasWatchExp(const QString &exp) const
 {
-    return watches.contains(exp);
+    return watches.contains(exp.trimmed());
+}
+
+inline void Debugger::updateWatch(const QString &exp)
+{
+    giveCommand(QByteArray(EvaluateCommand)
+                .append(exp.toAscii())
+                .append('\n'));
 }

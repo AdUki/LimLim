@@ -53,7 +53,7 @@ private:
     void setInteractiveMode() { options << "-i"; }
 
 private slots:
-    void writeInput(QByteArray input) { process->write(input); }
+    void writeInput(const QByteArray& input) { process->write(input); }
 
     void readStandardOutput() {
         console->writeOutput(process->readAllStandardOutput());
