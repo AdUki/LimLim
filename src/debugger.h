@@ -16,6 +16,7 @@ static const QByteArray StepIntoCommand = QByteArray("step\n");
 static const QByteArray ExecuteCommand = QByteArray("exec ");
 static const QByteArray EvaluateCommand = QByteArray("eval ");
 
+
 class Debugger : public QObject
 {
 Q_OBJECT
@@ -24,11 +25,20 @@ public:
 
     enum DebugStatus { Running, Waiting, On, Off };
 
+    void addWatchExp(const QString &exp);
+    void removeWatchExp(const QString &exp);
+
+    const QString& getWatchExp(const QString &exp) const;
+    bool hasWatchExp(const QString &exp) const;
+
 signals:
-    void waitingForCommand(bool flag);
+    void waitingForCommand(bool status);
+    void watchesUpdated();
 
     void started();
     void finished();
+
+    void commandOutput(const QByteArray& result);
 
 public slots:
     void start();
@@ -41,7 +51,7 @@ public slots:
     void setAutoRun(bool enabled) { autoRun = enabled; }
 
     DebugStatus getStatus() { return status; }
-    void giveCommand(QByteArray command);
+    bool giveCommand(const QByteArray& command);
 
 private:
     Console *console;
@@ -52,10 +62,12 @@ private:
     QByteArray output;
     QByteArray input;
 
+    QMap <QString, QString> watches;
+
     bool autoRun;
 
 private slots:
-    void parseInput(QByteArray remdebugOutput);
+    void parseInput(const QByteArray& remdebugOutput);
     void stateChange(bool running);
 
     void breakpointSet(int line, QString file);
