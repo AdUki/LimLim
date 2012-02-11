@@ -25,7 +25,7 @@ void Console::close()
     outputBuffer.close();
 }
 
-void Console::writeSystem(QString message)
+void Console::writeSystem(const QString& message)
 {
     setTextColor(QColor::fromRgb(0,0,200));
     insertPlainText(message);
@@ -34,7 +34,7 @@ void Console::writeSystem(QString message)
 
 // TODO bind function to paste action
 // TODO maybe this function must be executed in thread
-void Console::writeInput(QByteArray data)
+void Console::writeInput(const QByteArray& data)
 {
     setTextColor(QColor::fromRgb(0,0,0));
     QList<QByteArray> commands = data.split('\n');
@@ -52,7 +52,7 @@ void Console::writeInput(QByteArray data)
     ensureCursorVisible();
 }
 
-void Console::writeOutput(QByteArray data)
+void Console::writeOutput(const QByteArray& data)
 {
     outputBuffer.write(data);
     setTextColor(QColor::fromRgb(0,200,0));
@@ -61,7 +61,7 @@ void Console::writeOutput(QByteArray data)
     emit emitOutput(data);
 }
 
-void Console::writeError(QByteArray data)
+void Console::writeError(const QByteArray& data)
 {
     errorBuffer.write(data);
     setTextColor(QColor::fromRgb(200,0,0));

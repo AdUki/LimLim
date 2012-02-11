@@ -17,19 +17,19 @@ public:
     explicit Console(QWidget *parent = 0);
 
 signals:
-    void emitInput (QByteArray input);
-    void emitOutput(QByteArray output);
-    void emitError (QByteArray error);
+    void emitInput (const QByteArray& input);
+    void emitOutput(const QByteArray& output);
+    void emitError (const QByteArray& error);
 
 public slots:
 
     void open();
     void close();
 
-    void writeInput (QByteArray data);
-    void writeOutput(QByteArray data);
-    void writeError (QByteArray data);
-    void writeSystem(QString message);
+    void writeInput (const QByteArray& data);
+    void writeOutput(const QByteArray& data);
+    void writeError (const QByteArray& data);
+    void writeSystem(const QString& message);
 
 protected:
     void keyPressEvent ( QKeyEvent * e );
