@@ -28,7 +28,7 @@ public:
     void addWatchExp(const QString &exp);
     void removeWatchExp(const QString &exp);
 
-    const QString& getWatchExp(const QString &exp) const;
+    QString getWatchExp(const QString &exp) const;
     bool hasWatchExp(const QString &exp) const;
 
 signals:

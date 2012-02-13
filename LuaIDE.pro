@@ -14,7 +14,6 @@ SOURCES += src/main.cpp \
     src/editor.cpp \
     src/variablewatcher.cpp \
     src/breakpoint.cpp \
-    src/variable.cpp \
     src/variablemodel.cpp
 HEADERS += src/interpreter.h \
     src/luacontrol.h \
@@ -24,7 +23,6 @@ HEADERS += src/interpreter.h \
     src/editor.h \
     src/variablewatcher.h \
     src/breakpoint.h \
-    src/variable.h \
     src/variablemodel.h
 LIBS += -lqscintilla2
 RESOURCES += icons.qrc

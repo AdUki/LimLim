@@ -189,7 +189,7 @@ void Debugger::removeWatchExp(const QString& exp)
     watches.remove(exp.trimmed());
 }
 
-const QString& Debugger::getWatchExp(const QString& exp) const
+ QString Debugger::getWatchExp(const QString& exp) const
 {
     return watches[exp.trimmed()];
 }

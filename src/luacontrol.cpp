@@ -21,6 +21,17 @@ LuaControl::LuaControl()
     watcheslist = new VariableWatcher(luaDebugger);
     setCentralWidget(luaEditor);
 
+    luaDebugger->addWatchExp("a");
+    luaDebugger->addWatchExp("io");
+    luaDebugger->addWatchExp("socket");
+    luaDebugger->addWatchExp("remdebug");
+    luaDebugger->addWatchExp("e");
+
+    luaDebugger->removeWatchExp("remdebug");
+    luaDebugger->removeWatchExp("socket");
+    luaDebugger->removeWatchExp("io");
+    luaDebugger->removeWatchExp("e");
+    
     createActions();
     createMenus();
     createToolBars();
