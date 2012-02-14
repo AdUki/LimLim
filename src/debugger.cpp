@@ -151,10 +151,11 @@ void Debugger::stateChange(bool running)
         emit started();
     } else { // controller ended
         status = Off;
-        editor->debugClear();
-        editor->unlock();
         output.clear();
         input.clear();
+        watches.clear();
+        editor->debugClear();
+        editor->unlock();
         emit waitingForCommand(false);
         emit finished();
     }

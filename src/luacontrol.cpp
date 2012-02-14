@@ -8,29 +8,22 @@
 #include "luacontrol.h"
 #include "interpreter.h"
 #include "editor.h"
-#include "variablewatcher.h"
 #include "debugger.h"
+
+#include "watches/treeview.h"
+#include "watches/treemodel.h"
 
 LuaControl::LuaControl()
 {
-    luaConsole = new Console(this);
-    luaEditor = new Editor(this);
-    luaInterpret = new Interpreter(luaConsole, this);
-    debugConsole = new Console(this);
-    luaDebugger = new Debugger(luaEditor, debugConsole, this);
-    watcheslist = new VariableWatcher(luaDebugger);
+    luaConsole      = new Console(this);
+    luaEditor       = new Editor(this);
+    luaInterpret    = new Interpreter(luaConsole, this);
+    debugConsole    = new Console(this);
+    luaDebugger     = new Debugger(luaEditor, debugConsole, this);
+    luaWatchesModel = new TreeModel(this);
+    luaWatchesView  = new TreeView(luaWatchesModel, this);
+
     setCentralWidget(luaEditor);
-
-    luaDebugger->addWatchExp("a");
-    luaDebugger->addWatchExp("io");
-    luaDebugger->addWatchExp("socket");
-    luaDebugger->addWatchExp("remdebug");
-    luaDebugger->addWatchExp("e");
-
-    luaDebugger->removeWatchExp("remdebug");
-    luaDebugger->removeWatchExp("socket");
-    luaDebugger->removeWatchExp("io");
-    luaDebugger->removeWatchExp("e");
     
     createActions();
     createMenus();
@@ -274,7 +267,7 @@ void LuaControl::createDockWindows()
 	// Watches dock widget
         dock = new QDockWidget(tr("Watches"), this);
         dock->setAllowedAreas(Qt::AllDockWidgetAreas);
-        dock->setWidget(watcheslist);
+        dock->setWidget(luaWatchesView);
         addDockWidget(Qt::BottomDockWidgetArea, dock);
 
         // Controller dock widget for debug

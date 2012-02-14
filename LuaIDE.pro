@@ -12,18 +12,20 @@ SOURCES += src/main.cpp \
     src/console.cpp \
     src/source.cpp \
     src/editor.cpp \
-    src/variablewatcher.cpp \
     src/breakpoint.cpp \
-    src/variablemodel.cpp
+    src/watches/treeitem.cpp \
+    src/watches/treemodel.cpp \
+    src/watches/treeview.cpp
 HEADERS += src/interpreter.h \
     src/luacontrol.h \
     src/debugger.h \
     src/console.h \
     src/source.h \
     src/editor.h \
-    src/variablewatcher.h \
     src/breakpoint.h \
-    src/variablemodel.h
+    src/watches/treeitem.h \
+    src/watches/treemodel.h \
+    src/watches/treeview.h
 LIBS += -lqscintilla2
 RESOURCES += icons.qrc
 OTHER_FILES += controller.lua
