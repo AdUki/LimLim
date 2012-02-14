@@ -45,6 +45,7 @@
 #include <QModelIndex>
 #include <QVariant>
 
+class Debugger;
 class TreeItem;
 
 //! [0]
@@ -53,7 +54,7 @@ class TreeModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    TreeModel(QObject *parent = 0);
+    TreeModel(Debugger *debugger, QObject *parent = 0);
     ~TreeModel();
 
     QVariant data(const QModelIndex &index, int role) const;
@@ -83,10 +84,11 @@ public:
                     const QModelIndex &parent = QModelIndex());
 
 private:
-    void setupModelData(const QStringList &lines, TreeItem *parent);
     TreeItem *getItem(const QModelIndex &index) const;
 
     TreeItem *rootItem;
+
+    Debugger *debugger;
 };
 //! [2]
 
