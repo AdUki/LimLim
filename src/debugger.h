@@ -63,7 +63,7 @@ private:
 
     bool autoRun;
 
-    inline void giveCommand(const QByteArray& command);
+    /*inline*/ void giveCommand(const QByteArray& command);
     inline void updateWatch(const QString &exp);
 
 private slots:

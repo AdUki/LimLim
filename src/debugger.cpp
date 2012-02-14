@@ -42,7 +42,7 @@ void Debugger::stop()
     if (status != Off) remdebug->kill();
 }
 
-inline void Debugger::giveCommand(const QByteArray& command)
+/*inline*/ void Debugger::giveCommand(const QByteArray& command)
 {
     switch (status) {
     case Waiting:
@@ -96,6 +96,7 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
 
         int line = rx.cap(2).toInt();   // get line number
         int watch = rx.cap(4).toInt();  // get watch id
+        Q_UNUSED(watch);
         QString file = rx.cap(5);
 
         editor->debugLine(file, line);

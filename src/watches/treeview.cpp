@@ -3,6 +3,8 @@
 
 #include <QAction>
 
+const QString InitValue = "";
+
 TreeView::TreeView(TreeModel *model, QWidget *parent)
     : QTreeView(parent)
 {
@@ -37,6 +39,11 @@ TreeView::TreeView(TreeModel *model, QWidget *parent)
 
     updateActions();
 
+    addAction(insertRowAction);
+    addAction(removeRowAction);
+    addAction(insertChildAction);
+
+    setContextMenuPolicy(Qt::ActionsContextMenu);
 }
 
 void TreeView::insertChild()
@@ -54,7 +61,7 @@ void TreeView::insertChild()
 
     for (int column = 0; column < model->columnCount(index); ++column) {
         QModelIndex child = model->index(0, column, index);
-        model->setData(child, QVariant("[No data]"), Qt::EditRole);
+        model->setData(child, QVariant(InitValue), Qt::EditRole);
         if (!model->headerData(column, Qt::Horizontal).isValid())
             model->setHeaderData(column, Qt::Horizontal, QVariant("[No header]"),
                                  Qt::EditRole);
@@ -83,17 +90,15 @@ bool TreeView::insertColumn(const QModelIndex &parent)
 
 void TreeView::insertRow()
 {
-    QModelIndex index = this->selectionModel()->currentIndex();
-    QAbstractItemModel *model = this->model();
+    QModelIndex index = this->rootIndex();
 
-    if (!model->insertRow(index.row()+1, index.parent()))
-        return;
+    if (!model()->insertRow(model()->rowCount(), index)) return;
 
     updateActions();
 
-    for (int column = 0; column < model->columnCount(index.parent()); ++column) {
-        QModelIndex child = model->index(index.row()+1, column, index.parent());
-        model->setData(child, QVariant("[No data]"), Qt::EditRole);
+    for (int column = 0; column < model()->columnCount(index); ++column) {
+        QModelIndex child = model()->index(model()->rowCount(), column, index);
+        model()->setData(child, QVariant(InitValue), Qt::EditRole);
     }
 }
 
@@ -125,8 +130,8 @@ void TreeView::updateActions()
     removeRowAction->setEnabled(hasSelection);
 
     bool hasCurrent = this->selectionModel()->currentIndex().isValid();
-    insertRowAction->setEnabled(hasCurrent);
+    //insertRowAction->setEnabled(hasCurrent);
 
-    if (hasCurrent)
-        closePersistentEditor(selectionModel()->currentIndex());
+    //if (hasCurrent)
+    //    closePersistentEditor(selectionModel()->currentIndex());
 }
