@@ -17,9 +17,7 @@ public slots:
 
 private slots:
     void insertChild();
-    bool insertColumn(const QModelIndex &parent = QModelIndex());
     void insertRow();
-    bool removeColumn(const QModelIndex &parent = QModelIndex());
     void removeRow();
 
 private:

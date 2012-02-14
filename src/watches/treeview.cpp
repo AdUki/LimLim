@@ -72,22 +72,6 @@ void TreeView::insertChild()
     updateActions();
 }
 
-bool TreeView::insertColumn(const QModelIndex &parent)
-{
-    QAbstractItemModel *model = this->model();
-    int column = this->selectionModel()->currentIndex().column();
-
-    // Insert a column in the parent item.
-    bool changed = model->insertColumn(column + 1, parent);
-    if (changed)
-        model->setHeaderData(column + 1, Qt::Horizontal, QVariant("[No header]"),
-                             Qt::EditRole);
-
-    updateActions();
-
-    return changed;
-}
-
 void TreeView::insertRow()
 {
     QModelIndex index = this->rootIndex();
@@ -100,20 +84,6 @@ void TreeView::insertRow()
         QModelIndex child = model()->index(model()->rowCount(), column, index);
         model()->setData(child, QVariant(InitValue), Qt::EditRole);
     }
-}
-
-bool TreeView::removeColumn(const QModelIndex &parent)
-{
-    QAbstractItemModel *model = this->model();
-    int column = this->selectionModel()->currentIndex().column();
-
-    // Insert columns in each child of the parent item.
-    bool changed = model->removeColumn(column, parent);
-
-    if (!parent.isValid() && changed)
-        updateActions();
-
-    return changed;
 }
 
 void TreeView::removeRow()
@@ -129,8 +99,11 @@ void TreeView::updateActions()
     bool hasSelection = !this->selectionModel()->selection().isEmpty();
     removeRowAction->setEnabled(hasSelection);
 
-    bool hasCurrent = this->selectionModel()->currentIndex().isValid();
-    //insertRowAction->setEnabled(hasCurrent);
+    QString text = model()->data(currentIndex()
+                                 .sibling(currentIndex().row(), 2))
+            .toString();
+    // TODO get text "table" via global constant
+    insertChildAction->setEnabled(text.compare("table", Qt::CaseInsensitive) == 0);
 
     //if (hasCurrent)
     //    closePersistentEditor(selectionModel()->currentIndex());
