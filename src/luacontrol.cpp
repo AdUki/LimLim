@@ -20,7 +20,7 @@ LuaControl::LuaControl()
     luaInterpret    = new Interpreter(luaConsole, this);
     debugConsole    = new Console(this);
     luaDebugger     = new Debugger(luaEditor, debugConsole, this);
-    luaWatchesModel = new TreeModel(this);
+    luaWatchesModel = new TreeModel(luaDebugger, this);
     luaWatchesView  = new TreeView(luaWatchesModel, this);
 
     setCentralWidget(luaEditor);

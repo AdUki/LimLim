@@ -26,7 +26,7 @@ TreeView::TreeView(TreeModel *model, QWidget *parent)
             this, SLOT(updateActions()));
 
     actionsMenu = new QAction(tr("Actions menu"), this);
-    connect(actionsMenu, SIGNAL(aboutToShow()), this, SLOT(updateActions()));
+    //connect(actionsMenu, SIGNAL(aboutToShow()), this, SLOT(updateActions()));
 
     insertRowAction = new QAction(tr("New watch"), this);
     connect(insertRowAction, SIGNAL(triggered()), this, SLOT(insertRow()));
