@@ -49,7 +49,7 @@ class Debugger;
 class TreeItem;
 
 //! [0]
-class TreeModel : public QAbstractItemModel
+class TreeModel : public QAbstractItemModel /* Standard Item Model */
 {
     Q_OBJECT
 

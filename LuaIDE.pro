@@ -15,7 +15,8 @@ SOURCES += src/main.cpp \
     src/breakpoint.cpp \
     src/watches/treeitem.cpp \
     src/watches/treemodel.cpp \
-    src/watches/treeview.cpp
+    src/watches/treeview.cpp \
+    src/watchmodel.cpp
 HEADERS += src/interpreter.h \
     src/luacontrol.h \
     src/debugger.h \
@@ -25,7 +26,8 @@ HEADERS += src/interpreter.h \
     src/breakpoint.h \
     src/watches/treeitem.h \
     src/watches/treemodel.h \
-    src/watches/treeview.h
+    src/watches/treeview.h \
+    src/watchmodel.h
 LIBS += -lqscintilla2
 RESOURCES += icons.qrc
 OTHER_FILES += controller.lua

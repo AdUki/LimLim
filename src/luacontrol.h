@@ -4,15 +4,15 @@
 #include <QMainWindow>
 
 class QTextEdit;
+class QLabel;
+class QTreeView;
 class QsciLexerLua;
+
+class Debugger;
 class Interpreter;
 class Editor;
 class Console;
-class QLabel;
-class TreeModel;
-class TreeView;
-class Debugger;
-class QTreeView;
+class WatchModel;
 
 class LuaControl : public QMainWindow
 {
@@ -38,6 +38,7 @@ private:
 	void createToolBars();
 	void createStatusBar();
 	void createDockWindows();
+        void createWatchers();
 
 	void readSettings();
 	void writeSettings();
@@ -51,8 +52,10 @@ private:
         Interpreter *luaInterpret;
         Editor *luaEditor;
         Debugger *luaDebugger;
-        TreeView *luaWatchesView;
-        TreeModel *luaWatchesModel;
+
+        QTreeView *luaWatchesView;
+        QTreeView *luaGlobalsView;
+        QTreeView *luaLocalsView;
 
 	QLabel *statusLabel;
 

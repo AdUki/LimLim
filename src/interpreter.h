@@ -10,6 +10,7 @@
 #include "source.h"
 #include "console.h"
 
+// TODO implement argument managment to lua programs
 class Interpreter : public QWidget
 {
 Q_OBJECT

@@ -10,8 +10,7 @@
 #include "editor.h"
 #include "debugger.h"
 
-#include "watches/treeview.h"
-#include "watches/treemodel.h"
+#include "watchmodel.h"
 
 LuaControl::LuaControl()
 {
@@ -20,8 +19,9 @@ LuaControl::LuaControl()
     luaInterpret    = new Interpreter(luaConsole, this);
     debugConsole    = new Console(this);
     luaDebugger     = new Debugger(luaEditor, debugConsole, this);
-    luaWatchesModel = new TreeModel(luaDebugger, this);
-    luaWatchesView  = new TreeView(luaWatchesModel, this);
+    luaWatchesView  = new QTreeView(this);
+    luaGlobalsView  = new QTreeView(this);
+    luaLocalsView  = new QTreeView(this);
 
     setCentralWidget(luaEditor);
     
@@ -29,6 +29,7 @@ LuaControl::LuaControl()
     createMenus();
     createToolBars();
     createStatusBar();
+    createWatchers();
     createDockWindows();
 
     readSettings();
@@ -252,22 +253,30 @@ void LuaControl::updateStatusBar()
 
 void LuaControl::createDockWindows()
 {
+        QDockWidget *dock;
+
 	// Lua interpreter dock widget
-	QDockWidget *dock = new QDockWidget(tr("Output"), this);
+        dock = new QDockWidget(tr("Output"), this);
 	dock->setAllowedAreas(Qt::AllDockWidgetAreas);
         dock->setWidget(luaConsole);
         addDockWidget(Qt::BottomDockWidgetArea, dock);
 
-	// Locals dock widget
-
-	// Globals dock widget
-
-	// Breakpoints dock widget
-
-	// Watches dock widget
+        // Watches dock widget
         dock = new QDockWidget(tr("Watches"), this);
         dock->setAllowedAreas(Qt::AllDockWidgetAreas);
         dock->setWidget(luaWatchesView);
+        addDockWidget(Qt::BottomDockWidgetArea, dock);
+
+	// Locals dock widget
+        dock = new QDockWidget(tr("Locals"), this);
+        dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+        dock->setWidget(luaLocalsView);
+        addDockWidget(Qt::BottomDockWidgetArea, dock);
+
+	// Globals dock widget
+        dock = new QDockWidget(tr("Globals"), this);
+        dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+        dock->setWidget(luaGlobalsView);
         addDockWidget(Qt::BottomDockWidgetArea, dock);
 
         // Controller dock widget for debug
@@ -275,6 +284,18 @@ void LuaControl::createDockWindows()
         dock->setAllowedAreas(Qt::AllDockWidgetAreas);
         dock->setWidget(debugConsole);
         addDockWidget(Qt::BottomDockWidgetArea, dock);
+
+        // Breakpoints dock widget
+        // TODO implement breakpoint managment
+}
+
+void LuaControl::createWatchers()
+{
+    WatchModel *watchModel;
+
+    watchModel = new WatchModel(luaWatchesView, this);
+    watchModel = new WatchModel(luaLocalsView, this);
+    watchModel = new WatchModel(luaGlobalsView, this);
 }
 
 void LuaControl::closeEvent(QCloseEvent *event)
