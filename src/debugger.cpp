@@ -1,5 +1,7 @@
 #include "debugger.h"
 
+#include <QStandardItem>
+
 static const QByteArray StartCommand = QByteArray("> ");
 static const QByteArray PauseMessage = QByteArray("Paused:");
 static const QByteArray EvaluateMessage = QByteArray("Evaluate:");
@@ -102,11 +104,13 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
         editor->debugLine(file, line);
 
         // Update all watched expressions
+        /*
         QMap<QString, QString>::const_iterator i;
         for (i = watches.constBegin(); i != watches.constEnd(); ++i) {
             if (i.key().isEmpty()) continue;
             updateWatch(i.key());
         }
+        */
 
     } else if (output.startsWith(EvaluateMessage)) {
         QRegExp rx(QString("^").append(EvaluateMessage)
@@ -117,11 +121,12 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
 
         QString exp = rx.cap(1);
         QString val = rx.cap(2);
-
+        /*
         if (watches[exp].compare(val) != 0) {
             watches[exp] = val;
             emit watchUpdated(exp);
         }
+        */
     }
 
     output.clear();
@@ -177,6 +182,7 @@ void Debugger::breakpointDeleted(int line, QString file)
   * When expression is already in the map, expression is not added but
   * updated.
   */
+/*
 void Debugger::addWatchExp(const QString& exp)
 {
     QString validExp = exp.trimmed();
@@ -205,5 +211,14 @@ inline void Debugger::updateWatch(const QString &exp)
 {
     giveCommand(QByteArray(EvaluateCommand)
                 .append(exp.toAscii())
+                .append('\n'));
+}
+*/
+void Debugger::updateWatch(QStandardItem *watch)
+{
+    watches.append(watch);
+
+    giveCommand(QByteArray(EvaluateCommand)
+                .append(watch->data(Qt::EditRole).toString())
                 .append('\n'));
 }

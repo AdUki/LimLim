@@ -161,6 +161,7 @@ void Editor::debugLine(QString file, unsigned line)
     }
 
     markerHandle = debugSource->markerAdd(line-1, QsciScintilla::RightArrow);
+    debugSource->setCursorPosition(line-1, 0);
 }
 
 void Editor::debugClear()

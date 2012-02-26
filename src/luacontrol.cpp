@@ -9,8 +9,7 @@
 #include "interpreter.h"
 #include "editor.h"
 #include "debugger.h"
-
-#include "watchmodel.h"
+#include "watcher.h"
 
 LuaControl::LuaControl()
 {
@@ -19,7 +18,7 @@ LuaControl::LuaControl()
     luaInterpret    = new Interpreter(luaConsole, this);
     debugConsole    = new Console(this);
     luaDebugger     = new Debugger(luaEditor, debugConsole, this);
-    luaWatchesView  = new QTreeView(this);
+    luaWatchesView  = new Watcher(this);
     luaGlobalsView  = new QTreeView(this);
     luaLocalsView  = new QTreeView(this);
 
@@ -65,102 +64,102 @@ void LuaControl::stop()
 void LuaControl::createActions()
 {
     // NEW FILE ACTIION
-	newAction = new QAction(tr("&New"), this);
-	newAction->setIcon(QIcon(":/images/new.png"));
-	newAction->setShortcut(QKeySequence::New);
-	newAction->setStatusTip(tr("Create a new file"));
-        connect(newAction, SIGNAL(triggered()), luaEditor, SLOT(newSource()));
+    newAction = new QAction(tr("&New"), this);
+    newAction->setIcon(QIcon(":/images/new.png"));
+    newAction->setShortcut(QKeySequence::New);
+    newAction->setStatusTip(tr("Create a new file"));
+    connect(newAction, SIGNAL(triggered()), luaEditor, SLOT(newSource()));
 
     // OPEN RECENT FILE ACTIONS
-	for (int i = 0; i < MaxRecentFiles; i++) {
-		recentFileActions[i] = new QAction(this);
-		recentFileActions[i]->setVisible(false);;
-		connect(recentFileActions[i], SIGNAL(triggered()),
-				this, SLOT(openRecentFile()));
-	}
+    for (int i = 0; i < MaxRecentFiles; i++) {
+        recentFileActions[i] = new QAction(this);
+        recentFileActions[i]->setVisible(false);
+        connect(recentFileActions[i], SIGNAL(triggered()),
+                        this, SLOT(openRecentFile()));
+    }
 
     // OPEN FILE ACTION
-	openAction = new QAction(tr("&Open"), this);
-	openAction->setIcon(QIcon(":/images/open.png"));
-	openAction->setShortcut(QKeySequence::Open);
-	openAction->setStatusTip(tr("Open new file"));
+    openAction = new QAction(tr("&Open"), this);
+    openAction->setIcon(QIcon(":/images/open.png"));
+    openAction->setShortcut(QKeySequence::Open);
+    openAction->setStatusTip(tr("Open new file"));
     connect(openAction, SIGNAL(triggered()), luaEditor, SLOT(openSource()));
 
     // SAVE FILE ACTION
-	saveAction = new QAction(tr("&Save"), this);
-	saveAction->setIcon(QIcon(":/images/save.png"));
-	saveAction->setShortcut(QKeySequence::Save);
-	saveAction->setStatusTip(tr("Save the Lua file to disk"));
+    saveAction = new QAction(tr("&Save"), this);
+    saveAction->setIcon(QIcon(":/images/save.png"));
+    saveAction->setShortcut(QKeySequence::Save);
+    saveAction->setStatusTip(tr("Save the Lua file to disk"));
     connect(saveAction, SIGNAL(triggered()), luaEditor, SLOT(saveCurrentSource()));
 
     // SAVE AS FILE ACTION
-	saveAsAction = new QAction(tr("Save &As..."), this);
-	saveAsAction->setStatusTip(tr("Save the Lua file under a new name"));
+    saveAsAction = new QAction(tr("Save &As..."), this);
+    saveAsAction->setStatusTip(tr("Save the Lua file under a new name"));
     connect(saveAsAction, SIGNAL(triggered()), luaEditor, SLOT(saveCurrentSourceAs()));
 
     // EXIT ACTION
-	exitAction = new QAction(tr("E&xit"), this);
-	exitAction->setShortcut(tr("Ctrl+Q"));
-	exitAction->setStatusTip(tr("Exit the application"));
-	connect(exitAction, SIGNAL(triggered()), qApp, SLOT(closeAllWindows()));
+    exitAction = new QAction(tr("E&xit"), this);
+    exitAction->setShortcut(tr("Ctrl+Q"));
+    exitAction->setStatusTip(tr("Exit the application"));
+    connect(exitAction, SIGNAL(triggered()), qApp, SLOT(closeAllWindows()));
 
     // CUT ACTION
-	cutAction = new QAction(tr("Cu&t"), this);
-	cutAction->setIcon(QIcon(":/images/cut.png"));
-	cutAction->setShortcut(QKeySequence::Cut);
+    cutAction = new QAction(tr("Cu&t"), this);
+    cutAction->setIcon(QIcon(":/images/cut.png"));
+    cutAction->setShortcut(QKeySequence::Cut);
     cutAction->setStatusTip(tr("Cut the current selection's contents to the clipboard"));
-//	connect(cutAction, SIGNAL(triggered()), editor, SLOT(cut()));
+    //	connect(cutAction, SIGNAL(triggered()), editor, SLOT(cut()));
 
     // COPY ACTION
-	copyAction = new QAction(tr("&Copy"), this);
-	copyAction->setIcon(QIcon(":/images/copy.png"));
-	copyAction->setShortcut(QKeySequence::Copy);
+    copyAction = new QAction(tr("&Copy"), this);
+    copyAction->setIcon(QIcon(":/images/copy.png"));
+    copyAction->setShortcut(QKeySequence::Copy);
     copyAction->setStatusTip(tr("Copy the current selection's contents to the clipboard"));
-//	connect(copyAction, SIGNAL(triggered()), editor, SLOT(copy()));
+    //	connect(copyAction, SIGNAL(triggered()), editor, SLOT(copy()));
 
     // PASTE ACTION
-	pasteAction = new QAction(tr("&Paste"), this);
-	pasteAction->setIcon(QIcon(":/images/paste.png"));
-	pasteAction->setShortcut(QKeySequence::Paste);
+    pasteAction = new QAction(tr("&Paste"), this);
+    pasteAction->setIcon(QIcon(":/images/paste.png"));
+    pasteAction->setShortcut(QKeySequence::Paste);
     pasteAction->setStatusTip(tr("Paste the clipboard's contents into the current selection"));
-//	connect(pasteAction, SIGNAL(triggered()), editor, SLOT(paste()));
+    //	connect(pasteAction, SIGNAL(triggered()), editor, SLOT(paste()));
 
     // DELETE ACTION
-	deleteAction = new QAction(tr("&Delete"), this);
-	deleteAction->setShortcut(QKeySequence::Delete);
-	deleteAction->setStatusTip(tr("Delete the current selection's contents"));
-//	connect(deleteAction, SIGNAL(triggered()), editor, SLOT(removeSelectedText()));
+    deleteAction = new QAction(tr("&Delete"), this);
+    deleteAction->setShortcut(QKeySequence::Delete);
+    deleteAction->setStatusTip(tr("Delete the current selection's contents"));
+    //	connect(deleteAction, SIGNAL(triggered()), editor, SLOT(removeSelectedText()));
 
     // ABOUT ACTION
-	aboutAction = new QAction(tr("&About"), this);
-	aboutAction->setStatusTip(tr("Show the application's About box"));
-	connect(aboutAction, SIGNAL(triggered()), this, SLOT(about()));
+    aboutAction = new QAction(tr("&About"), this);
+    aboutAction->setStatusTip(tr("Show the application's About box"));
+    connect(aboutAction, SIGNAL(triggered()), this, SLOT(about()));
 
     // ABOUT QT ACTION
-	aboutQtAction = new QAction(tr("About &Qt"), this);
-	aboutQtAction->setStatusTip(tr("Show the Qt library's About box"));
-	connect(aboutQtAction, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+    aboutQtAction = new QAction(tr("About &Qt"), this);
+    aboutQtAction->setStatusTip(tr("Show the Qt library's About box"));
+    connect(aboutQtAction, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
     // RUN ACTION
-	runAction = new QAction(tr("&Run"), this);
-	runAction->setShortcut(Qt::Key_F5);
-	runAction->setIcon(QIcon(":/images/run.png"));
-	runAction->setStatusTip(tr("Run current chunk of Lua code"));
-	connect(runAction, SIGNAL(triggered()), this, SLOT(run()));
+    runAction = new QAction(tr("&Run"), this);
+    runAction->setShortcut(Qt::Key_F5);
+    runAction->setIcon(QIcon(":/images/run.png"));
+    runAction->setStatusTip(tr("Run current chunk of Lua code"));
+    connect(runAction, SIGNAL(triggered()), this, SLOT(run()));
     connect(luaInterpret, SIGNAL(changedRunningState(bool)), runAction, SLOT(setDisabled(bool)));
 
 
     // DEBUG ACTION
-	debugAction = new QAction(tr("&Debug"), this);
+    debugAction = new QAction(tr("&Debug"), this);
     debugAction->setIcon(QIcon(":/images/compile.png"));
-	debugAction->setStatusTip(tr("Debug current chunk of Lua code"));
-	connect(debugAction, SIGNAL(triggered()), this, SLOT(debug()));
+    debugAction->setStatusTip(tr("Debug current chunk of Lua code"));
+    connect(debugAction, SIGNAL(triggered()), this, SLOT(debug()));
     connect(luaInterpret, SIGNAL(changedRunningState(bool)), debugAction, SLOT(setDisabled(bool)));
 
     // STOP ACTION
-	stopAction = new QAction(tr("&Stop"), this);
-	stopAction->setIcon(QIcon(":/images/process-stop.png"));
-	stopAction->setStatusTip(tr("Stop current running program"));
+    stopAction = new QAction(tr("&Stop"), this);
+    stopAction->setIcon(QIcon(":/images/process-stop.png"));
+    stopAction->setStatusTip(tr("Stop current running program"));
     stopAction->setDisabled(true);
     connect(stopAction, SIGNAL(triggered()), this, SLOT(stop()));
     connect(luaInterpret, SIGNAL(changedRunningState(bool)), stopAction, SLOT(setEnabled(bool)));
@@ -265,19 +264,19 @@ void LuaControl::createDockWindows()
         dock = new QDockWidget(tr("Watches"), this);
         dock->setAllowedAreas(Qt::AllDockWidgetAreas);
         dock->setWidget(luaWatchesView);
-        addDockWidget(Qt::BottomDockWidgetArea, dock);
+        addDockWidget(Qt::RightDockWidgetArea, dock);
 
 	// Locals dock widget
         dock = new QDockWidget(tr("Locals"), this);
         dock->setAllowedAreas(Qt::AllDockWidgetAreas);
         dock->setWidget(luaLocalsView);
-        addDockWidget(Qt::BottomDockWidgetArea, dock);
+        addDockWidget(Qt::RightDockWidgetArea, dock);
 
 	// Globals dock widget
         dock = new QDockWidget(tr("Globals"), this);
         dock->setAllowedAreas(Qt::AllDockWidgetAreas);
         dock->setWidget(luaGlobalsView);
-        addDockWidget(Qt::BottomDockWidgetArea, dock);
+        addDockWidget(Qt::RightDockWidgetArea, dock);
 
         // Controller dock widget for debug
         dock = new QDockWidget(tr("RemDebug"), this);
@@ -290,12 +289,22 @@ void LuaControl::createDockWindows()
 }
 
 void LuaControl::createWatchers()
-{
+{/*
     WatchModel *watchModel;
 
     watchModel = new WatchModel(luaWatchesView, this);
-    watchModel = new WatchModel(luaLocalsView, this);
-    watchModel = new WatchModel(luaGlobalsView, this);
+    connect(watchModel, SIGNAL(updateItem(QStandardItem*)),
+            luaDebugger, SLOT(updateWatch(QStandardItem*)));
+
+    watchModel = new WatchModel(luaLocalsView, this, true);
+    connect(watchModel, SIGNAL(updateItem(QStandardItem*)),
+            luaDebugger, SLOT(updateWatch(QStandardItem*)));
+
+    watchModel = new WatchModel(luaGlobalsView, this, true);
+    connect(watchModel, SIGNAL(updateItem(QStandardItem*)),
+            luaDebugger, SLOT(updateWatch(QStandardItem*)));
+*/
+    // TODO connect models with debugger
 }
 
 void LuaControl::closeEvent(QCloseEvent *event)

@@ -5,7 +5,6 @@
 #include <QProcess>
 #include <QTemporaryFile>
 
-
 #include "editor.h"
 #include "source.h"
 #include "console.h"

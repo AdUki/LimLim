@@ -9,6 +9,8 @@
 #include "breakpoint.h"
 #include "interpreter.h"
 
+class QStandardItem;
+
 static const QByteArray RunCommand = QByteArray("run\n");
 static const QByteArray StepOverCommand = QByteArray("over\n");
 static const QByteArray StepIntoCommand = QByteArray("step\n");
@@ -25,15 +27,11 @@ public:
 
     enum DebugStatus { Running, Waiting, On, Off };
 
-    void addWatchExp(const QString &exp);
-    void removeWatchExp(const QString &exp);
-
-    QString getWatchExp(const QString &exp) const;
-    bool hasWatchExp(const QString &exp) const;
+    DebugStatus getStatus() { return status; }
 
 signals:
     void waitingForCommand(bool status);
-    void watchUpdated(const QString& exp);
+    void updateWatches();
 
     void started();
     void finished();
@@ -46,9 +44,9 @@ public slots:
     void stepIn() { giveCommand(StepIntoCommand); }
     void run() { giveCommand(RunCommand); }
 
-    void setAutoRun(bool enabled) { autoRun = enabled; }
+    void updateWatch(QStandardItem *watch);
 
-    DebugStatus getStatus() { return status; }
+    void setAutoRun(bool enabled) { autoRun = enabled; }
 
 private:
     Console *console;
@@ -59,7 +57,7 @@ private:
     QByteArray output;
     QByteArray input;
 
-    QMap <QString, QString> watches;
+    QList<QStandardItem*> watches;
 
     bool autoRun;
 
