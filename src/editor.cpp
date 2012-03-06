@@ -116,8 +116,8 @@ void Editor::closeTabWithSource(int i)
 {
     Source* src = static_cast<Source*>(this->widget(i));
     if (src->canClose()) {
-        delete src;
         removeTab(i);
+        delete src;
     }
     if (count() == 0) src = NULL;
 }
