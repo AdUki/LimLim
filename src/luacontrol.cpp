@@ -37,7 +37,14 @@ LuaControl::LuaControl()
 
     setAttribute(Qt::WA_DeleteOnClose);
     
-    connect(luaDebugger, SIGNAL(started()), this, SLOT(run()));
+    connect(luaDebugger, SIGNAL(started()),
+            this,          SLOT(run()));
+
+    connect(luaWatchesView, SIGNAL(updateWatch(QTreeWidgetItem*)),
+            luaDebugger,      SLOT(updateWatch(QTreeWidgetItem*)));
+
+    connect(luaDebugger,  SIGNAL(updateWatches()),
+            luaWatchesView, SLOT(updateAll()));
 }
 
 // TODO add disabling of buttons when launching program and

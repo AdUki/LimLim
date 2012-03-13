@@ -9,7 +9,7 @@
 #include "breakpoint.h"
 #include "interpreter.h"
 
-class QStandardItem;
+class QTreeWidgetItem;
 
 static const QByteArray RunCommand = QByteArray("run\n");
 static const QByteArray StepOverCommand = QByteArray("over\n");
@@ -44,7 +44,7 @@ public slots:
     void stepIn() { giveCommand(StepIntoCommand); }
     void run() { giveCommand(RunCommand); }
 
-    void updateWatch(QStandardItem *watch);
+    void updateWatch(QTreeWidgetItem *watch);
 
     void setAutoRun(bool enabled) { autoRun = enabled; }
 
@@ -57,12 +57,11 @@ private:
     QByteArray output;
     QByteArray input;
 
-    QList<QStandardItem*> watches;
+    QList<QTreeWidgetItem*> watches;
 
     bool autoRun;
 
     /*inline*/ void giveCommand(const QByteArray& command);
-    inline void updateWatch(const QString &exp);
 
 private slots:
     void parseInput(const QByteArray& remdebugOutput);

@@ -1,51 +1,37 @@
 #include "watcher.h"
 
-#include <QStandardItemModel>
-#include <QStandardItem>
 #include <QAction>
 
-Watcher::Watcher(QWidget *parent) : QTreeView(parent)
+Watcher::Watcher(QWidget *parent) : QTreeWidget(parent)
 {
-    model = new QStandardItemModel(5, 3, this);
-    model->setHeaderData(0, Qt::Horizontal, QVariant(tr("Expression")), Qt::DisplayRole);
-    model->setHeaderData(1, Qt::Horizontal, QVariant(tr("Value")), Qt::DisplayRole);
-    model->setHeaderData(2, Qt::Horizontal, QVariant(tr("Type")), Qt::DisplayRole);
-    setModel(model);
+    setHeaderItem(new QTreeWidgetItem(QStringList()
+                                      << tr("Expression")
+                                      << tr("Value")
+                                      << tr("Type")));
 
     setSelectionMode(QTreeView::SingleSelection);
     setContextMenuPolicy(Qt::ActionsContextMenu);
 
-    connect(selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)),
-            this,             SLOT(updateActions(QModelIndex)));
-    connect(model, SIGNAL(itemChanged(QStandardItem*)),
-            this,  SLOT(updateItem(QStandardItem*)));
+    // TODO add actions for adding itmes
+    this->addItem();
+    // TODO add actions for deleting items
+
+    connect(this, SIGNAL(itemSelectionChanged()),
+            this,   SLOT(updateActions()));
+    connect(this, SIGNAL(itemChanged(QTreeWidgetItem*, int)),
+            this,   SLOT(updateItem(QTreeWidgetItem*, int)));
 }
 
-void Watcher::updateActions(const QModelIndex &index)
+void Watcher::updateActions()
 {
-    QStandardItem *item = model->itemFromIndex(index);
+
 }
 
-void Watcher::updateItem(QStandardItem *item)
+void Watcher::updateItem(QTreeWidgetItem *item, int column)
 {
-    static bool selfCall = false;
-    if (selfCall) return;
-    selfCall = true;
-
-    QStandardItem *exp = model->item(item->row(), 0);
-    QStandardItem *val = model->item(item->row(), 1);
-    QStandardItem *type = model->item(item->row(), 2);
-
-    switch(item->column()) {
+    switch(column) {
     case 0: // expression
-        setItemExpression(val, QString("eval ")
-                          .append(item->data(Qt::EditRole).toString());
-
-        setItemExpression(type, QString("eval type(")
-                          .append(item->data(Qt::EditRole).toString().append(")")));
-
-        emit updateWatch(val);
-        emit updateWatch(type);
+        emit updateWatch(item);
         break;
     case 1: // value
         // TODO here will user set values for wathces
@@ -54,26 +40,26 @@ void Watcher::updateItem(QStandardItem *item)
         // You can't change type
         break;
     }
-
-    selfCall = false;
 }
 
 void Watcher::updateAll()
 {
-    if (!isVisible()) return;
-
-    // TODO check if in colums are also all table fields
-    QList<QStandardItem*>::iterator i1 = model->takeColumn(1).begin();
-    QList<QStandardItem*>::iterator i2 = model->takeColumn(2).begin();
-    while (i1 != model->takeColumn(1).end()) {
-        emit updateWatch(*i1);
-        emit updateWatch(*i2);
-        ++i1; ++i2;
+    for (int i = 0; i < topLevelItemCount(); ++i) {
+        emit updateWatch(topLevelItem(i));
     }
 }
 
-bool Watcher::setItemExpression(QStandardItem *item, const QString &exp)
+void Watcher::addItem()
 {
-    // TODO implement this method
-    return false;
+    QTreeWidgetItem *newItem = new QTreeWidgetItem(this);
+    newItem->setFlags(newItem->flags() | Qt::ItemIsEditable);
+    addTopLevelItem(newItem);
+}
+
+void Watcher::removeSelectedItems()
+{
+    QList<QTreeWidgetItem*>::iterator i;
+    QList<QTreeWidgetItem*> list = selectedItems();
+
+    for (i = list.begin(); i != list.end(); ++i) delete *i;
 }
