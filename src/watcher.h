@@ -17,6 +17,10 @@ signals:
 public slots:
     void updateAll();
 
+    void addWatch();
+    void deleteWatch();
+    void clearAllWatches();
+
 private slots:
     void updateActions();
     void updateItem(QTreeWidgetItem *item, int column);

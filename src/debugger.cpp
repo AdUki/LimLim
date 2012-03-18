@@ -181,40 +181,13 @@ void Debugger::breakpointDeleted(int line, QString file)
   * When expression is already in the map, expression is not added but
   * updated.
   */
-/*
-void Debugger::addWatchExp(const QString& exp)
-{
-    QString validExp = exp.trimmed();
-    // TODO add more expression checks
 
-    if (watches.contains(validExp)) updateWatch(validExp);
-    else watches[validExp] = "";
-}
 
-void Debugger::removeWatchExp(const QString& exp)
-{
-    watches.remove(exp.trimmed());
-}
-
- QString Debugger::getWatchExp(const QString& exp) const
-{
-    return watches[exp.trimmed()];
-}
-
-bool Debugger::hasWatchExp(const QString &exp) const
-{
-    return watches.contains(exp.trimmed());
-}
-
-inline void Debugger::updateWatch(const QString &exp)
-{
-    giveCommand(QByteArray(EvaluateCommand)
-                .append(exp.toAscii())
-                .append('\n'));
-}
-*/
 void Debugger::updateWatch(QTreeWidgetItem *watch)
 {
+    if (status == Off) return;
+    if (status == On) return;
+
     watches.append(watch);
 
     // Value:
