@@ -12,7 +12,7 @@ class Debugger;
 class Interpreter;
 class Editor;
 class Console;
-class WatchModel;
+class Watcher;
 
 class LuaControl : public QMainWindow
 {
@@ -53,7 +53,7 @@ private:
         Editor *luaEditor;
         Debugger *luaDebugger;
 
-        QTreeView *luaWatchesView;
+        Watcher *luaWatchesView;
         QTreeView *luaGlobalsView;
         QTreeView *luaLocalsView;
 
@@ -69,7 +69,7 @@ private:
 	QToolBar *fileToolBar;
 	QToolBar *editToolBar;
 	QToolBar *runToolBar;
-        QToolBar *debugToolBar;
+    QToolBar *debugToolBar;
 
 	enum { MaxRecentFiles = 5 };
 	QAction *recentFileActions[MaxRecentFiles];
@@ -88,13 +88,13 @@ private:
 	QAction *cutAction;
 	QAction *deleteAction;
 
-        QAction *runAction;
+    QAction *runAction;
 	QAction *debugAction;
 	QAction *stopAction;
 
-        QAction *continueAction;
-        QAction *stepOverAction;
-        QAction *stepIntoAction;
+    QAction *continueAction;
+    QAction *stepOverAction;
+    QAction *stepIntoAction;
 };
 
 #endif // MAINWINDOW_H

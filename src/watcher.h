@@ -1,29 +1,27 @@
 #ifndef WATCHER_H
 #define WATCHER_H
 
-#include <QTreeView>
+#include <QTreeWidget>
 
-class QStandardItemModel;
-class QStandardItem;
+class QTreeWidgetItem;
 
-class Watcher : public QTreeView
+class Watcher : public QTreeWidget
 {
 Q_OBJECT
 public:
     explicit Watcher(QWidget *parent = 0);
 
 signals:
-    void updateWatch(QStandardItem *watch);
+    void updateWatch(QTreeWidgetItem *watch);
 
 public slots:
     void updateAll();
 
 private slots:
-    void updateActions(const QModelIndex &index);
-    void updateItem(QStandardItem *item);
-
-private:
-    QStandardItemModel* model;
+    void updateActions();
+    void updateItem(QTreeWidgetItem *item, int column);
+    void addItem();
+    void removeSelectedItems();
 };
 
 #endif // WATCHER_H

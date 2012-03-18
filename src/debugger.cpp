@@ -1,6 +1,6 @@
 #include "debugger.h"
 
-#include <QStandardItem>
+#include <QTreeWidgetItem>
 
 static const QByteArray StartCommand = QByteArray("> ");
 static const QByteArray PauseMessage = QByteArray("Paused:");
@@ -104,14 +104,9 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
         editor->debugLine(file, line);
 
         // Update all watched expressions
-        /*
-        QMap<QString, QString>::const_iterator i;
-        for (i = watches.constBegin(); i != watches.constEnd(); ++i) {
-            if (i.key().isEmpty()) continue;
-            updateWatch(i.key());
-        }
-        */
+        emit updateWatches();
 
+    // Parse value of watched expressions
     } else if (output.startsWith(EvaluateMessage)) {
         QRegExp rx(QString("^").append(EvaluateMessage)
                    .append(" ([^\n]*)\n(.*)\n")
@@ -121,12 +116,16 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
 
         QString exp = rx.cap(1);
         QString val = rx.cap(2);
-        /*
-        if (watches[exp].compare(val) != 0) {
-            watches[exp] = val;
-            emit watchUpdated(exp);
-        }
-        */
+
+        // take first watch from list
+        QTreeWidgetItem *item = watches.takeFirst();
+
+        // set watch value
+        item->setText(1, val.trimmed());
+
+        // set watch type
+        // TODO get type
+        //item->setText(2, val);
     }
 
     output.clear();
@@ -214,11 +213,14 @@ inline void Debugger::updateWatch(const QString &exp)
                 .append('\n'));
 }
 */
-void Debugger::updateWatch(QStandardItem *watch)
+void Debugger::updateWatch(QTreeWidgetItem *watch)
 {
     watches.append(watch);
 
+    // Value:
     giveCommand(QByteArray(EvaluateCommand)
-                .append(watch->data(Qt::EditRole).toString())
+                .append(watch->text(0))
                 .append('\n'));
+    // Type:
+    // TODO implement type
 }
