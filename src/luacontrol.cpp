@@ -13,14 +13,24 @@
 
 LuaControl::LuaControl()
 {
+    // process arguments
+    QStringList args = QCoreApplication::arguments();
+    QString exec(args.takeFirst()); // take executable name
+    QString file; // take file name
+    if (!args.isEmpty()) file = args.takeFirst();
+
     luaConsole      = new Console(this);
-    luaEditor       = new Editor(this);
+    if (file.isEmpty())
+        luaEditor   = new Editor(this);
+    else
+        luaEditor   = new Editor(this, file);
     luaInterpret    = new Interpreter(luaConsole, this);
+    luaInterpret->addArgs(args);
     debugConsole    = new Console(this);
     luaDebugger     = new Debugger(luaEditor, debugConsole, this);
     luaWatchesView  = new Watcher(this);
     luaGlobalsView  = new QTreeView(this);
-    luaLocalsView  = new QTreeView(this);
+    luaLocalsView   = new QTreeView(this);
 
     setCentralWidget(luaEditor);
     
@@ -194,6 +204,11 @@ void LuaControl::createActions()
     stepOverAction->setEnabled(false);
     connect(stepOverAction, SIGNAL(triggered()), luaDebugger, SLOT(stepOver()));
     connect(luaDebugger, SIGNAL(waitingForCommand(bool)), stepOverAction, SLOT(setEnabled(bool)));
+
+    // INTERPRETER ACTION
+    interpretAction = new QAction(tr("&Lua options"), this);
+    interpretAction->setEnabled(true);
+    connect(interpretAction, SIGNAL(triggered()), luaInterpret, SLOT(show()));
 }
 
 void LuaControl::createMenus()
@@ -219,6 +234,7 @@ void LuaControl::createMenus()
 	projectMenu->addAction(runAction);
 	projectMenu->addAction(debugAction);
 	projectMenu->addAction(stopAction);
+    projectMenu->addAction(interpretAction);
 
 	optionsMenu = menuBar()->addMenu(tr("&Options"));
 

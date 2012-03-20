@@ -22,7 +22,7 @@ class Editor : public QTabWidget
     Q_OBJECT
 
 public:
-    explicit Editor(QWidget *parent);
+    explicit Editor(QWidget *parent, const QString &file = 0);
 
     Source* currentSource();
     QList<Breakpoint*> getBreakpoints();

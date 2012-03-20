@@ -95,6 +95,8 @@ private:
     QAction *continueAction;
     QAction *stepOverAction;
     QAction *stepIntoAction;
+
+    QAction *interpretAction;
 };
 
 #endif // MAINWINDOW_H

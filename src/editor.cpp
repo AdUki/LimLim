@@ -2,8 +2,9 @@
 
 #include <QGridLayout>
 #include <QFileDialog>
+#include <QCoreApplication>
 
-Editor::Editor(QWidget *parent) :
+Editor::Editor(QWidget *parent, const QString &file) :
     QTabWidget(parent)
 {
     markerHandle = -1;
@@ -11,6 +12,9 @@ Editor::Editor(QWidget *parent) :
     setTabsClosable(true);
 
     connect(this, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTabWithSource(int)));
+
+    // process command line arguments
+    if (file != 0 && !file.isEmpty()) openSource(file);
 }
 
 Source* Editor::newSource()

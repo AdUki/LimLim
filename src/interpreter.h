@@ -1,20 +1,24 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 
-#include <QWidget>
-#include <QProcess>
+#include <QDialog>
 #include <QTemporaryFile>
+#include <QProcess>
 
-#include "editor.h"
-#include "source.h"
-#include "console.h"
+namespace Ui {
+    class InterpreterForm;
+}
+class Console;
+class Editor;
+class Source;
 
 // TODO implement argument managment to lua programs
-class Interpreter : public QWidget
+class Interpreter : public QDialog
 {
 Q_OBJECT
 public:
     explicit Interpreter(Console* console, QWidget *parent = 0);
+    virtual ~Interpreter();
 
     void run(Source* source);
 
@@ -25,8 +29,16 @@ public:
 
     void runFile(const QString &file);
 
+    void addArgs(const QStringList& args);
+    void addArg(const QString& arg);
+    void clearArgs();
+
+    void addOptions(const QStringList& options);
+    void addOption(const QString& option);
+    void clearOptions();
+
 public slots:
-    void kill() { process->kill(); }
+    void kill();
 
 signals:
     void changedRunningState(bool running);
@@ -34,6 +46,8 @@ signals:
     void started();
 
 private:
+    Ui::InterpreterForm *ui;
+
     QString fileName;
     QString luaPath;
 
@@ -44,23 +58,19 @@ private:
     QString interpreter;
 
     Console* console;
+    QStringList args;
 
     QTemporaryFile tempFile;
 
     void execute();
 
-    void ignoreEnvironmentVars() { options << "-E"; }
-    void setInteractiveMode() { options << "-i"; }
+    //void ignoreEnvironmentVars() { options << "-E"; }
+    //void setInteractiveMode() { options << "-i"; }
 
 private slots:
-    void writeInput(const QByteArray& input) { process->write(input); }
-
-    void readStandardOutput() {
-        console->writeOutput(process->readAllStandardOutput());
-    }
-    void readStandardError() {
-        console->writeError(process->readAllStandardError());
-    }
+    void writeInput(const QByteArray& input);
+    void readStandardOutput();
+    void readStandardError();
     void atFinish(int exitCode, QProcess::ExitStatus exitStatus);
     void atStart();
 };

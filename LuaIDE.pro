@@ -28,3 +28,6 @@ OTHER_FILES += controller.lua
 OBJECTS_DIR = build/
 MOC_DIR = build/
 RCC_DIR = build/
+
+FORMS += \
+    forms/interpreter.ui

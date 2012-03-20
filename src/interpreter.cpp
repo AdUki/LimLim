@@ -1,11 +1,17 @@
 #include "interpreter.h"
 #include "luacontrol.h"
+#include "source.h"
+#include "editor.h"
+#include "console.h"
+#include "ui_interpreter.h"
 
 #include <QFileInfo>
 
 Interpreter::Interpreter(Console* console, QWidget *parent)
-    : QWidget(parent)
+    : QDialog(parent), ui(new Ui::InterpreterForm)
 {
+    ui->setupUi(this);
+
     this->console = console;
     process = new QProcess(this);
     options.clear();
@@ -17,6 +23,11 @@ Interpreter::Interpreter(Console* console, QWidget *parent)
     connect(process, SIGNAL(readyReadStandardOutput()), this, SLOT(readStandardOutput()));
     connect(process, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(atFinish(int, QProcess::ExitStatus)));
     connect(process, SIGNAL(started()), this, SLOT(atStart()));
+}
+
+Interpreter::~Interpreter()
+{
+    delete ui;
 }
 
 void Interpreter::run(Source* source)
@@ -60,7 +71,7 @@ void Interpreter::execute()
         .append(fileName).append('\n'));
 
     options << "-e" << "io.stdout:setvbuf 'no'";
-    process->start(luaPath, options << "--" << fileName);
+    process->start(luaPath, options << "--" << fileName << args);
 }
 
 void Interpreter::atFinish(int exitCode, QProcess::ExitStatus exitStatus)
@@ -77,4 +88,58 @@ void Interpreter::atStart()
 {
     emit started();
     emit changedRunningState(true);
+}
+
+void Interpreter::addArgs(const QStringList& args)
+{
+    if (args.isEmpty()) return;
+    this->args.append(args);
+}
+
+void Interpreter::addArg(const QString &arg)
+{
+    if (arg.isEmpty()) return;
+    this->args.append(arg);
+}
+
+void Interpreter::clearArgs()
+{
+    args.clear();
+}
+
+void Interpreter::addOptions(const QStringList &options)
+{
+    if (options.isEmpty()) return;
+    this->options.append(options);
+}
+
+void Interpreter::addOption(const QString &option)
+{
+    if (option.isEmpty()) return;
+    this->options.append(option);
+}
+
+void Interpreter::clearOptions()
+{
+    options.clear();
+}
+
+void Interpreter::kill()
+{
+    process->kill();
+}
+
+void Interpreter::writeInput(const QByteArray& input)
+{
+    process->write(input);
+}
+
+void Interpreter::readStandardOutput()
+{
+    console->writeOutput(process->readAllStandardOutput());
+}
+
+void Interpreter::readStandardError()
+{
+    console->writeError(process->readAllStandardError());
 }
