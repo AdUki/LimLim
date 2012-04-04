@@ -57,12 +57,15 @@ LuaControl::LuaControl()
             luaWatchesView, SLOT(updateAll()));
 }
 
-// TODO add disabling of buttons when launching program and
-//      enabling buttons when program has finished
-
 void LuaControl::run()
 {
-    luaInterpret->run(luaEditor->currentSource());
+    // execute Lua program
+    if (!luaInterpret->run(luaEditor->currentSource())) {
+
+        // stop debugger if it runs
+        if (luaDebugger->getStatus() == !Debugger::Off)
+            luaDebugger->stop();
+    }
 }
 
 void LuaControl::debug()

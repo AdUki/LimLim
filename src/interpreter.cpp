@@ -6,6 +6,8 @@
 #include "ui_interpreter.h"
 
 #include <QFileInfo>
+#include <QFileDialog>
+#include <QMessageBox>
 
 Interpreter::Interpreter(Console* console, QWidget *parent)
     : QDialog(parent), ui(new Ui::InterpreterForm)
@@ -16,7 +18,10 @@ Interpreter::Interpreter(Console* console, QWidget *parent)
     process = new QProcess(this);
     options.clear();
 
-    luaPath = "lua";
+    ui->argsListView->setModel(&args);
+
+    // TODO load lua path via conf file
+    ui->luaPathEdit->setText("lua");
 
     connect(console, SIGNAL(emitInput(QByteArray)), this, SLOT(writeInput(QByteArray)));
     connect(process, SIGNAL(readyReadStandardError()), this, SLOT(readStandardError()));
@@ -30,9 +35,14 @@ Interpreter::~Interpreter()
     delete ui;
 }
 
-void Interpreter::run(Source* source)
+bool Interpreter::run(Source* source)
 {
-    if (source == NULL) return;
+    // get file name from configuration
+    if (!ui->updateCheckBox->isChecked()) {
+        return runFile(ui->execPathEdit->text());
+    }
+    // if source NULL return
+    if (source == NULL) return false;
 
     if (source->doesExist()) {
         fileName = source->getFileName();
@@ -42,7 +52,7 @@ void Interpreter::run(Source* source)
             tempFile.resize(0); // truncate file
             if (tempFile.write(source->text().toAscii()) == -1) {
                 // failed to create temp file
-                return; // TODO add error handling
+                return false;
             }
             tempFile.close();
             fileName = tempFile.fileName();
@@ -50,12 +60,21 @@ void Interpreter::run(Source* source)
             execute();
         }
     }
+    return true;
 }
-void Interpreter::runFile(const QString &file)
+
+bool Interpreter::runFile(const QString &file)
 {
     if (QFileInfo(file).exists()) {
         fileName = file;
         execute();
+        return true;
+    } else {
+        QMessageBox::critical(this,
+            tr("Error!"),
+            tr("Could not open file:").append('\n').append(file),
+            QMessageBox::Ok);
+        return false;
     }
 }
 
@@ -64,14 +83,13 @@ void Interpreter::runFile(const QString &file)
 void Interpreter::execute()
 {
     // TODO platform specific, lua mustn't be found
-    // TODO implement specifiing path to lua executable
 
     console->open();
     console->writeSystem(QString("Starting program ")
         .append(fileName).append('\n'));
 
     options << "-e" << "io.stdout:setvbuf 'no'";
-    process->start(luaPath, options << "--" << fileName << args);
+    process->start(luaPath, options << "--" << fileName << args.stringList());
 }
 
 void Interpreter::atFinish(int exitCode, QProcess::ExitStatus exitStatus)
@@ -93,18 +111,18 @@ void Interpreter::atStart()
 void Interpreter::addArgs(const QStringList& args)
 {
     if (args.isEmpty()) return;
-    this->args.append(args);
+    this->args.setStringList(this->args.stringList() << args);
 }
 
 void Interpreter::addArg(const QString &arg)
 {
     if (arg.isEmpty()) return;
-    this->args.append(arg);
+    this->args.setStringList(args.stringList() << arg);
 }
 
 void Interpreter::clearArgs()
 {
-    args.clear();
+    args.setStringList(QStringList());
 }
 
 void Interpreter::addOptions(const QStringList &options)
@@ -142,4 +160,46 @@ void Interpreter::readStandardOutput()
 void Interpreter::readStandardError()
 {
     console->writeError(process->readAllStandardError());
+}
+
+void Interpreter::on_luaPathButton_clicked()
+{
+    QFileDialog dialog(this);
+    dialog.setFileMode(QFileDialog::ExistingFile);
+    // TODO filter only executable files
+    //dialog.setFilter(QDir::Executable);
+    dialog.setModal(true);
+    dialog.setWindowTitle(tr("Select Executable"));
+
+
+    QString fileName;
+    if (dialog.exec()) {
+        fileName = dialog.selectedFiles().first();
+        ui->luaPathEdit->setText(fileName);
+    }
+}
+
+void Interpreter::on_execPathButton_clicked()
+{
+
+}
+
+void Interpreter::on_addArgButton_clicked()
+{
+    addArg("");
+}
+
+void Interpreter::on_delArgButton_clicked()
+{
+    if (args.rowCount() == 0) return;
+    foreach (QModelIndex index,
+             ui->argsListView->selectionModel()->selectedIndexes()) {
+        args.removeRow(index.row(), index.parent());
+    }
+}
+
+void Interpreter::on_luaPathEdit_textChanged(QString newPath)
+{
+    // TODO check if path valid
+    luaPath = newPath;
 }

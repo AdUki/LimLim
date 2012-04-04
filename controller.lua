@@ -38,6 +38,9 @@ end
 local basedir = ""
 
 while true do
+
+  if evalNumber == 0 then io.write("> ") end
+
   local line = io.read("*line")
   local _, _, command = string.find(line, "^([a-z]+)")
 
@@ -46,10 +49,10 @@ while true do
   --
   -- Reads evaluated expresions
   --
-  if numberEvals > 0 then
+  if evalNumber > 0 then
 	evals[#evals + 1] = command
-	numberEvals = numberEvals - 1
-	if (numberEvals == 0) then
+        evalNumber = numberEvals - 1
+        if (evalNumber == 0) then
 	  -- start evaluating 'evals' table
 	  -- TODO implement this
 	end
@@ -59,8 +62,6 @@ while true do
   -- Read new command
 
   else
-
-	  io.write("> ")
 	  --
 	  --  RUN, STEP, OVER commands
 	  --

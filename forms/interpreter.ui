@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>439</width>
-    <height>347</height>
+    <height>364</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -142,7 +142,7 @@
       </layout>
      </item>
      <item>
-      <widget class="QListWidget" name="argsListWidget"/>
+      <widget class="QListView" name="argsListView"/>
      </item>
     </layout>
    </item>
@@ -187,8 +187,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>227</x>
-     <y>327</y>
+     <x>236</x>
+     <y>354</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -219,8 +219,8 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>72</x>
-     <y>124</y>
+     <x>81</x>
+     <y>155</y>
     </hint>
     <hint type="destinationlabel">
      <x>79</x>
@@ -235,12 +235,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>419</x>
-     <y>122</y>
+     <x>428</x>
+     <y>155</y>
     </hint>
     <hint type="destinationlabel">
-     <x>416</x>
-     <y>100</y>
+     <x>427</x>
+     <y>124</y>
     </hint>
    </hints>
   </connection>

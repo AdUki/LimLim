@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QTemporaryFile>
 #include <QProcess>
+#include <QStringListModel>
 
 namespace Ui {
     class InterpreterForm;
@@ -20,14 +21,14 @@ public:
     explicit Interpreter(Console* console, QWidget *parent = 0);
     virtual ~Interpreter();
 
-    void run(Source* source);
+    bool run(Source* source);
 
     /** Function adds debug mode
       * when you want to debug code run this ALWAYS before run()
       */
     void addDebug() { options << "-e" << "require 'remdebug.engine'.start()"; }
 
-    void runFile(const QString &file);
+    bool runFile(const QString &file);
 
     void addArgs(const QStringList& args);
     void addArg(const QString& arg);
@@ -58,7 +59,7 @@ private:
     QString interpreter;
 
     Console* console;
-    QStringList args;
+    QStringListModel args;
 
     QTemporaryFile tempFile;
 
@@ -68,6 +69,11 @@ private:
     //void setInteractiveMode() { options << "-i"; }
 
 private slots:
+    void on_luaPathEdit_textChanged(QString );
+    void on_delArgButton_clicked();
+    void on_addArgButton_clicked();
+    void on_execPathButton_clicked();
+    void on_luaPathButton_clicked();
     void writeInput(const QByteArray& input);
     void readStandardOutput();
     void readStandardError();
