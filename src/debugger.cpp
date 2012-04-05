@@ -36,7 +36,8 @@ Debugger::Debugger(Editor *editor, Console *console, QObject *parent) :
 void Debugger::start()
 {
     // Start RemDebug controller
-    remdebug->runFile("controller.lua");
+    // TODO change to relative path via .pro file
+    remdebug->runFile("/home/aduki/workspace/qt/projects/LuaIDE/controller.lua");
 }
 
 void Debugger::stop()

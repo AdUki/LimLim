@@ -181,12 +181,17 @@ void Interpreter::on_luaPathButton_clicked()
 
 void Interpreter::on_execPathButton_clicked()
 {
-
+    QString fileName = QFileDialog::getOpenFileName(
+            this, tr("Open Lua source"), "", tr("Lua Files (*.lua)"));
+    if (!fileName.isEmpty()) ui->execPathEdit->setText(fileName);
 }
 
 void Interpreter::on_addArgButton_clicked()
 {
-    addArg("");
+    addArg(tr("New argument"));
+    QModelIndex newArg = args.index(args.rowCount()-1,0);
+    ui->argsListView->selectionModel()->select(newArg, QItemSelectionModel::Select);
+    ui->argsListView->edit(newArg);
 }
 
 void Interpreter::on_delArgButton_clicked()
