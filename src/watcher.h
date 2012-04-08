@@ -13,6 +13,8 @@ public:
 
 signals:
     void updateWatch(QTreeWidgetItem *watch);
+    void updateWatches(QList<QTreeWidgetItem*> *watches);
+    void updateTable(QTreeWidgetItem *table);
 
 public slots:
     void updateAll();
@@ -26,6 +28,7 @@ private slots:
     void updateItem(QTreeWidgetItem *item, int column);
     void addItem();
     void removeSelectedItems();
+    void expandTable(QTreeWidgetItem *item);
 };
 
 #endif // WATCHER_H

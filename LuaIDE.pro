@@ -21,13 +21,13 @@ HEADERS += src/interpreter.h \
     src/source.h \
     src/editor.h \
     src/breakpoint.h \
-    src/watcher.h
+    src/watcher.h \
+    src/global.h
 LIBS += -lqscintilla2
 RESOURCES += icons.qrc
-OTHER_FILES += controller.lua
+OTHER_FILES += remdebug/controller.lua \
+    remdebug/engine.lua
 OBJECTS_DIR = build/
 MOC_DIR = build/
 RCC_DIR = build/
-
-FORMS += \
-    forms/interpreter.ui
+FORMS += forms/interpreter.ui

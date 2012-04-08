@@ -5,21 +5,19 @@
 Watcher::Watcher(QWidget *parent) : QTreeWidget(parent)
 {
     setHeaderItem(new QTreeWidgetItem(QStringList()
-                                      << tr("Expression")
-                                      << tr("Value")
-                                      << tr("Type")));
+        << tr("Expression") << tr("Value") << tr("Type")));
 
     setSelectionMode(QTreeView::SingleSelection);
     setContextMenuPolicy(Qt::ActionsContextMenu);
 
-    // TODO add actions for adding itmes
     this->addItem();
-    // TODO add actions for deleting items
 
     connect(this, SIGNAL(itemSelectionChanged()),
             this,   SLOT(updateActions()));
     connect(this, SIGNAL(itemChanged(QTreeWidgetItem*, int)),
             this,   SLOT(updateItem(QTreeWidgetItem*, int)));
+    connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
+            this, SLOT(expandTable(QTreeWidgetItem*)));
 
     QAction *action;
 
@@ -55,6 +53,7 @@ void Watcher::deleteWatch()
 void Watcher::clearAllWatches()
 {
     clear();
+    addWatch();
 }
 
 
@@ -63,6 +62,7 @@ void Watcher::updateItem(QTreeWidgetItem *item, int column)
     switch(column) {
     case 0: // expression
         if (!item->text(0).isEmpty()) {
+            if (topLevelItem(topLevelItemCount()-1) == item) addItem();
             emit updateWatch(item);
         }
         break;
@@ -77,12 +77,11 @@ void Watcher::updateItem(QTreeWidgetItem *item, int column)
 
 void Watcher::updateAll()
 {
+    QList<QTreeWidgetItem*> watches;
     for (int i = 0; i < topLevelItemCount(); i++) {
-        QTreeWidgetItem *item = topLevelItem(i);
-        if (!item->text(0).isEmpty()) {
-            emit updateWatch(item);
-        }
+        watches.append(topLevelItem(i));
     }
+    emit updateWatches(&watches);
 }
 
 void Watcher::addItem()
@@ -98,4 +97,10 @@ void Watcher::removeSelectedItems()
     QList<QTreeWidgetItem*> list = selectedItems();
 
     for (i = list.begin(); i != list.end(); ++i) delete *i;
+}
+
+void Watcher::expandTable(QTreeWidgetItem *item)
+{
+    if (item->text(2).compare("table") != 0) return;
+    emit updateTable(item);
 }

@@ -31,7 +31,7 @@ public:
 
 signals:
     void waitingForCommand(bool status);
-    void updateWatches();
+    void luaStateChanged();
 
     void started();
     void finished();
@@ -45,6 +45,8 @@ public slots:
     void run() { giveCommand(RunCommand); }
 
     void updateWatch(QTreeWidgetItem *watch);
+    void updateWatches(QList<QTreeWidgetItem*> *watches);
+    void updateTable(QTreeWidgetItem *table);
 
     void setAutoRun(bool enabled) { autoRun = enabled; }
 
@@ -58,6 +60,7 @@ private:
     QByteArray input;
 
     QList<QTreeWidgetItem*> watches;
+    QList<QTreeWidgetItem*> tables;
 
     bool autoRun;
 

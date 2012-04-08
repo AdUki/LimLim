@@ -26,7 +26,7 @@ public:
     /** Function adds debug mode
       * when you want to debug code run this ALWAYS before run()
       */
-    void addDebug() { options << "-e" << "require 'remdebug.engine'.start()"; }
+    void addDebug();
 
     bool runFile(const QString &file);
 

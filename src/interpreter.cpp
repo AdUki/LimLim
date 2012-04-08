@@ -3,6 +3,7 @@
 #include "source.h"
 #include "editor.h"
 #include "console.h"
+#include "global.h"
 #include "ui_interpreter.h"
 
 #include <QFileInfo>
@@ -33,6 +34,14 @@ Interpreter::Interpreter(Console* console, QWidget *parent)
 Interpreter::~Interpreter()
 {
     delete ui;
+}
+
+void Interpreter::addDebug()
+{
+    QString remdebugPath = QString(APP_DIR_PATH).append("?.lua");
+    QString query = QString("package.path = '").append(remdebugPath).append(";' .. package.path");
+    options << "-e" << query;
+    options << "-e" << "require 'remdebug.engine'.start()";
 }
 
 bool Interpreter::run(Source* source)
@@ -98,6 +107,7 @@ void Interpreter::atFinish(int exitCode, QProcess::ExitStatus exitStatus)
         .append(QString::number(exitCode)).append('\n'));
     console->close();
     options.clear();
+    if (ui->resetCheckBox->isChecked()) clearArgs();
     emit changedRunningState(false);
     emit finished();
 }

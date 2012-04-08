@@ -47,21 +47,24 @@ LuaControl::LuaControl()
 
     setAttribute(Qt::WA_DeleteOnClose);
     
-    connect(luaDebugger, SIGNAL(started()),
-            this,          SLOT(run()));
+    connect(luaDebugger,  SIGNAL(started()),
+            this,           SLOT(run()));
+    connect(luaDebugger,  SIGNAL(luaStateChanged()),
+            luaWatchesView, SLOT(updateAll()));
 
     connect(luaWatchesView, SIGNAL(updateWatch(QTreeWidgetItem*)),
             luaDebugger,      SLOT(updateWatch(QTreeWidgetItem*)));
+    connect(luaWatchesView, SIGNAL(updateWatches(QList<QTreeWidgetItem*>*)),
+            luaDebugger,      SLOT(updateWatches(QList<QTreeWidgetItem*>*)));
+    connect(luaWatchesView, SIGNAL(updateTable(QTreeWidgetItem*)),
+            luaDebugger,      SLOT(updateTable(QTreeWidgetItem*)));
 
-    connect(luaDebugger,  SIGNAL(updateWatches()),
-            luaWatchesView, SLOT(updateAll()));
 }
 
 void LuaControl::run()
 {
     // execute Lua program
     if (!luaInterpret->run(luaEditor->currentSource())) {
-
         // stop debugger if it runs
         if (luaDebugger->getStatus() == !Debugger::Off)
             luaDebugger->stop();

@@ -1,6 +1,9 @@
 #include "debugger.h"
+#include "global.h"
 
 #include <QTreeWidgetItem>
+#include <QDebug>
+#include <QDir>
 
 static const QByteArray StartCommand = QByteArray("> ");
 static const QByteArray PauseMessage = QByteArray("Paused:");
@@ -36,8 +39,11 @@ Debugger::Debugger(Editor *editor, Console *console, QObject *parent) :
 void Debugger::start()
 {
     // Start RemDebug controller
-    // TODO change to relative path via .pro file
-    remdebug->runFile("/home/aduki/workspace/qt/projects/LuaIDE/controller.lua");
+    QString contPath = QString(APP_DIR_PATH)
+                       .append("remdebug")
+                       .append(QDir::separator())
+                       .append("controller.lua");
+    remdebug->runFile(contPath);
 }
 
 void Debugger::stop()
@@ -105,28 +111,32 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
         editor->debugLine(file, line);
 
         // Update all watched expressions
-        emit updateWatches();
+        emit luaStateChanged();
 
     // Parse value of watched expressions
     } else if (output.startsWith(EvaluateMessage)) {
-        QRegExp rx(QString("^").append(EvaluateMessage)
-                   .append(" ([^\n]*)\n(.*)\n")
-                   .append(StartCommand)
-                   .append('$'));
-        rx.indexIn(output);
+        output.chop(StartCommand.length());
 
-        QString exp = rx.cap(1);
-        QString val = rx.cap(2);
+        // TODO add string formatting and whitespace
+        QRegExp rx("\\s*([^\t.]+)\t([^\t.]+)");
 
-        // take first watch from list
-        QTreeWidgetItem *item = watches.takeFirst();
+        int pos = EvaluateMessage.length();
+        while ((pos = rx.indexIn(output, pos)) != -1) {
 
-        // set watch value
-        item->setText(1, val.trimmed());
+            // TODO format to original values
+            QString type = rx.cap(1);
+            QString val = rx.cap(2);
 
-        // set watch type
-        // TODO get type
-        //item->setText(2, val);
+            if (!watches.isEmpty()) {
+                // take first watch from list
+                QTreeWidgetItem *item = watches.takeFirst();
+                // set watch value
+                item->setText(1, val.trimmed());
+                // set watch type
+                item->setText(2, type.trimmed());
+            }
+            pos += rx.matchedLength();
+        }
     }
 
     output.clear();
@@ -182,19 +192,42 @@ void Debugger::breakpointDeleted(int line, QString file)
   * When expression is already in the map, expression is not added but
   * updated.
   */
-
-
 void Debugger::updateWatch(QTreeWidgetItem *watch)
 {
-    if (status == Off) return;
-    if (status == On) return;
+    if (status == Off || status == On) return;
 
     watches.append(watch);
 
-    // Value:
+    // evaluate watch
     giveCommand(QByteArray(EvaluateCommand)
-                .append(watch->text(0))
-                .append('\n'));
-    // Type:
-    // TODO implement type
+        .append("type(")
+        .append(watch->text(0)) // type
+        .append("), (")
+        .append(watch->text(0)) // value
+        .append(")\n")
+    );
+}
+
+void Debugger::updateWatches(QList<QTreeWidgetItem*> *watches)
+{
+    if (status == Off || status == On) return;
+
+    this->watches.append(*watches);
+
+    QStringList eval(EvaluateCommand);
+
+    foreach (QTreeWidgetItem *watch, *watches) {
+        eval.append(QString("type(").append(watch->text(0)).append(')'));
+        eval.append(", ");
+        eval.append(QString("(").append(watch->text(0)).append(')'));
+        eval.append(", ");
+    }
+    eval.removeLast();
+    eval.append("\n");
+    giveCommand(eval.join("").toAscii());
+}
+
+void Debugger::updateTable(QTreeWidgetItem *table)
+{
+
 }

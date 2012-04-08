@@ -1,17 +1,20 @@
 #include <QtGui/QApplication>
+#include <QDir>
+#include <QDebug>
 #include "luacontrol.h"
+#include "global.h"
 
-// TODO add argument processing
-//      [file] [...]
-//      file contains source code that should be loaded
-//      ... are arguments passed to input of lua code
+QString APP_DIR_PATH;
+
 int main(int argc, char *argv[])
 {
-	QApplication app(argc, argv);
+    QApplication app(argc, argv);
+    APP_DIR_PATH = QApplication::applicationDirPath();
+    APP_DIR_PATH.append(QDir::separator());
 
     LuaControl *mainWin = new LuaControl;
 
-	mainWin->show();
+    mainWin->show();
 
-	return app.exec();
+    return app.exec();
 }
