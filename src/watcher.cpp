@@ -1,6 +1,7 @@
 #include "watcher.h"
 
 #include <QAction>
+#include <QScrollBar>
 
 Watcher::Watcher(QWidget *parent) : QTreeWidget(parent)
 {
@@ -18,6 +19,8 @@ Watcher::Watcher(QWidget *parent) : QTreeWidget(parent)
             this,   SLOT(updateItem(QTreeWidgetItem*, int)));
     connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
             this, SLOT(expandTable(QTreeWidgetItem*)));
+    connect(this, SIGNAL(itemCollapsed(QTreeWidgetItem*)),
+            this, SLOT(collapseTable(QTreeWidgetItem*)));
 
     QAction *action;
 
@@ -105,5 +108,16 @@ void Watcher::expandTable(QTreeWidgetItem *item)
 {
     QString text = item->text(2);
     if (item->text(2).compare("table") != 0) return;
+    item->setExpanded(true);
     emit updateTable(item);
+}
+
+void Watcher::collapseTable(QTreeWidgetItem *table)
+{
+    table->takeChildren();
+}
+
+void Watcher::allUpdated()
+{
+    // TODO after update set vertical scroll bar as original
 }

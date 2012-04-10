@@ -118,51 +118,67 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
     } else if (output.startsWith(EvaluateMessage)) {
         output.chop(StartCommand.length());
 
-        // TODO add string formatting and whitespace
-        QRegExp rx("\\s*([^\t.]+)\t([^\t.]+)");
+        QRegExp rx("\\s*(\\w+)\t(\\d+)\t");
 
         int pos = EvaluateMessage.length();
         while ((pos = rx.indexIn(output, pos)) != -1) {
+            pos += rx.matchedLength();
 
-            // TODO format to original values
-            const QString &type = rx.cap(1);
-            const QString &val = rx.cap(2);
+            QRegExp valueRx(QString("(.{").append(rx.cap(2)).append("})"));
+            pos = valueRx.indexIn(output, pos);
+            pos += valueRx.matchedLength();
 
             if (!watches.isEmpty()) {
-                // take first watch from list
-                QTreeWidgetItem *item = watches.takeFirst();
-                // set watch value
-                item->setText(1, val.trimmed());
-                // set watch type
-                item->setText(2, type.trimmed());
+                QTreeWidgetItem *item = watches.takeFirst();    // take first watch from list
+                item->setText(1, valueRx.cap(1));   // set watch value
+                item->setText(2, rx.cap(1));        // set watch type
+
+                // update table fields
+                if (item->text(2).compare("table") == 0) {
+                    if (item->childCount() > 0) updateTable(item);
+                } else item->takeChildren();
             }
-            pos += rx.matchedLength();
         }
+
+    // Parse values of table
     } else if(output.startsWith(TableMessage)) {
         output.chop(StartCommand.length());
 
         // take first table from list
         QTreeWidgetItem *table = tables.takeFirst();
-        table->takeChildren();
 
-        QRegExp rx("(\\d+)\t");
+        // remeber expanded table names
+        QSet<QString> children;
+        foreach(QTreeWidgetItem* field, table->takeChildren()) {
+            if (field->childCount() > 0) children.insert(field->text(0));
+        }
 
+        QRegExp rx("(\\d+)\t(\\d+)\t");
         int pos = TableMessage.length();
         while ((pos = rx.indexIn(output, pos)) != -1) {
-            QString fieldSize = rx.cap(1);
-            QRegExp fieldRx(QString("(\\w+)\t(\\w+)\t(.{")
-                            .append(fieldSize)
-                            .append("})\n"));
             pos += rx.matchedLength();
 
+            // parse values of field
+            QRegExp fieldRx(QString("(.{")
+                            .append(rx.cap(1))
+                            .append("})\t(\\w+)\t(.{")
+                            .append(rx.cap(2))
+                            .append("})\n"));
             pos = fieldRx.indexIn(output, pos);
+            pos += fieldRx.matchedLength();
+
+            // create and add new field to table
             QTreeWidgetItem* field = new QTreeWidgetItem(table,
                 QStringList() << fieldRx.cap(1)   // field key
                               << fieldRx.cap(3)   // field value
                               << fieldRx.cap(2)); // field type
             table->addChild(field);
-            pos += fieldRx.matchedLength();
+
+            // update nested table fields
+            if (children.contains(field->text(0)) && field->text(2).compare("table") == 0)
+                updateTable(field);
         }
+        table->setExpanded(true);
     }
 
     output.clear();
@@ -227,9 +243,11 @@ void Debugger::updateWatch(QTreeWidgetItem *watch)
     // evaluate watch
     giveCommand(QByteArray(EvaluateCommand)
         .append("type(")
-        .append(watch->text(0)) // type
-        .append("), (")
-        .append(watch->text(0)) // value
+        .append(watch->text(0))
+        .append("), string.len(tostring(")
+        .append(watch->text(0))
+        .append(")), (")
+        .append(watch->text(0))
         .append(")\n")
     );
 }
@@ -243,9 +261,13 @@ void Debugger::updateWatches(QList<QTreeWidgetItem*> *watches)
     QStringList eval(EvaluateCommand);
 
     foreach (QTreeWidgetItem *watch, *watches) {
-        eval.append(QString("type(").append(watch->text(0)).append(')'));
-        eval.append(", ");
-        eval.append(QString("(").append(watch->text(0)).append(')'));
+        eval.append("type(");
+        eval.append(watch->text(0));
+        eval.append("), string.len(tostring(");
+        eval.append(watch->text(0));
+        eval.append(")), (");
+        eval.append(watch->text(0));
+        eval.append(")");
         eval.append(", ");
     }
     eval.removeLast();
@@ -256,7 +278,15 @@ void Debugger::updateWatches(QList<QTreeWidgetItem*> *watches)
 void Debugger::updateTable(QTreeWidgetItem *table)
 {
     if (status == Off || status == On) return;
-
     tables.append(table);
-    giveCommand(QByteArray(TableCommand).append(table->text(0)).append("\n"));
+
+    QString tableName = table->text(0);
+    while (table->parent() != NULL)
+    {
+        table = table->parent();
+        tableName.prepend(table->text(0).append('['));
+        tableName.append(']');
+    }
+
+    giveCommand(QByteArray(TableCommand).append(tableName).append("\n"));
 }

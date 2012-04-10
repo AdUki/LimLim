@@ -225,23 +225,30 @@ local function debugger_loop(server)
     --	TABLE command
     --
     elseif command == "TABLE" then
-      local _, _, chunk = string.find(line, "^[A-Z]+%s+(%a+)$")
+      local _, _, chunk = string.find(line, "^[A-Z]+%s+(.+)$")
       if chunk then
         local function evalTable(tab)
 			local sertable = {}
 			for i,v in pairs(tab) do
 			    local val = tostring(v)
-				sertable[#sertable+1] = tostring(string.len(val)) .. '\t' 
-					.. i .. '\t'
+			    local key = tostring(i)
+			    if type(i) == 'string' then key = '"' .. key .. '"' end
+				sertable[#sertable+1] = tostring(string.len(key)) .. '\t'
+				    .. tostring(string.len(val)) .. '\t'
+					.. key .. '\t'
 					.. type(v) .. '\t'
 					.. val .. '\n'
 			end
 			return table.concat(sertable);
+        end
+        -- TODO set new environment for loadstring
+        local func = loadstring('return ' .. chunk)
+        local res, status, tab
+        if func then
+          setfenv(func, eval_env)
+          status, tab = xpcall(func, debug.traceback)
         end 
-        local res
-        -- TODO add support for index type fields (1,2,3...n)
-        local tab = _G[chunk]
-        if tab and type(tab) == 'table' then
+        if status and type(tab) == 'table' then
           res = evalTable(tab)
           server:send("200 OK " .. string.len(res) .. "\n")
           server:send(res)

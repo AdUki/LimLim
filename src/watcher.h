@@ -18,6 +18,7 @@ signals:
 
 public slots:
     void updateAll();
+    void allUpdated();
 
     void addWatch();
     void deleteWatch();
@@ -29,6 +30,10 @@ private slots:
     void addItem();
     void removeSelectedItems();
     void expandTable(QTreeWidgetItem *item);
+    void collapseTable(QTreeWidgetItem *table);
+
+private:
+    int scrollBarPosition;
 };
 
 #endif // WATCHER_H
