@@ -16,7 +16,7 @@ Source::Source(const QString& sourceFile, QWidget *parent) :
         if (source->open(QIODevice::ReadOnly) && read(source)) {
             source->close();
             setModified(false);
-            file = sourceFile;
+            file = QFileInfo(*source).absoluteFilePath();
         } else { // TODO rewrite to QErrorMessage
             QMessageBox::critical(this, tr("Error!"),
                 tr("Cannot read from file!\n"
