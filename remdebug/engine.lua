@@ -201,7 +201,6 @@ local function debugger_loop(server)
       if chunk then
         local func = loadstring(chunk)
         local res, value
--- 7.4.2012 added support for multiple returns
         if func then
           setfenv(func, eval_env)
           local function pack (...) return arg end

@@ -28,6 +28,7 @@ Watcher::Watcher(QWidget *parent) : QTreeWidget(parent)
     connect(action, SIGNAL(triggered()), SLOT(addWatch()));
     addAction(action);
 
+    // TODO shortcut doesn't work
     action = new QAction(tr("Delete watch"), this);
     action->setShortcut(QKeySequence::Delete);
     connect(action, SIGNAL(triggered()), this, SLOT(deleteWatch()));
@@ -91,6 +92,7 @@ void Watcher::updateAll()
 
 void Watcher::addItem()
 {
+    // TODO set type uneditable
     QTreeWidgetItem *newItem = new QTreeWidgetItem(this);
     newItem->setFlags(newItem->flags() | Qt::ItemIsEditable);
     addTopLevelItem(newItem);

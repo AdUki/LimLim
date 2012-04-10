@@ -141,7 +141,7 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
         }
 
     // Parse values of table
-    } else if(output.startsWith(TableMessage)) {
+    } else if(output.startsWith(TableMessage) && !tables.isEmpty()) {
         output.chop(StartCommand.length());
 
         // take first table from list
