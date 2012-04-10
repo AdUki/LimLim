@@ -79,9 +79,11 @@ void Watcher::updateAll()
 {
     QList<QTreeWidgetItem*> watches;
     for (int i = 0; i < topLevelItemCount(); i++) {
+        if (topLevelItem(i)->text(0).isEmpty()) continue;
         watches.append(topLevelItem(i));
     }
-    emit updateWatches(&watches);
+    if (!watches.isEmpty())
+        emit updateWatches(&watches);
 }
 
 void Watcher::addItem()
@@ -101,6 +103,7 @@ void Watcher::removeSelectedItems()
 
 void Watcher::expandTable(QTreeWidgetItem *item)
 {
+    QString text = item->text(2);
     if (item->text(2).compare("table") != 0) return;
     emit updateTable(item);
 }

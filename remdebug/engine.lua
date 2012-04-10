@@ -170,6 +170,9 @@ local function debugger_loop(server)
   while true do
     local line, status = server:receive()
     command = string.sub(line, string.find(line, "^[A-Z]+"))
+    --
+    --	SETB command
+    --
     if command == "SETB" then
       local _, _, filename, line = string.find(line, "^.... (.+) (%d+)$")
       if filename and line then
@@ -179,6 +182,9 @@ local function debugger_loop(server)
       else
         server:send("400 Bad Request\n")
       end
+    --
+    --	DELB command
+    --
     elseif command == "DELB" then
       local _, _, filename, line = string.find(line, "^.... (.+) (%d+)$")
       if filename and line then
@@ -187,6 +193,9 @@ local function debugger_loop(server)
       else
         server:send("400 Bad Request\n")
       end
+    --
+    --	EXEC command
+    --
     elseif command == "EXEC" then
       local _, _, chunk = string.find(line, "^[A-Z]+%s+(.+)$")
       if chunk then
@@ -212,6 +221,42 @@ local function debugger_loop(server)
       else
         server:send("400 Bad Request\n")
       end
+    --
+    --	TABLE command
+    --
+    elseif command == "TABLE" then
+      local _, _, chunk = string.find(line, "^[A-Z]+%s+(%a+)$")
+      if chunk then
+        local function evalTable(tab)
+			local sertable = {}
+			for i,v in pairs(tab) do
+			    local val = tostring(v)
+				sertable[#sertable+1] = tostring(string.len(val)) .. '\t' 
+					.. i .. '\t'
+					.. type(v) .. '\t'
+					.. val .. '\n'
+			end
+			return table.concat(sertable);
+        end 
+        local res
+        -- TODO add support for index type fields (1,2,3...n)
+        local tab = _G[chunk]
+        if tab and type(tab) == 'table' then
+          res = evalTable(tab)
+          server:send("200 OK " .. string.len(res) .. "\n")
+          server:send(res)
+        else
+        -- send error message
+          res = ' "' .. chunk .. "\" is not a table"
+          server:send("401 Error in Expression " .. string.len(res) .. "\n")
+          server:send(res)
+        end
+      else
+        server:send("400 Bad Request\n")
+      end      
+    --
+    --	SETW command
+    --
     elseif command == "SETW" then
       local _, _, exp = string.find(line, "^[A-Z]+%s+(.+)$")
       if exp then
@@ -223,6 +268,9 @@ local function debugger_loop(server)
       else
         server:send("400 Bad Request\n")
       end
+    --
+    --	DELW command
+    --
     elseif command == "DELW" then
       local _, _, index = string.find(line, "^[A-Z]+%s+(%d+)$")
       index = tonumber(index)
@@ -232,6 +280,9 @@ local function debugger_loop(server)
       else
         server:send("400 Bad Request\n")
       end
+    --
+    --	RUN command
+    --
     elseif command == "RUN" then
       server:send("200 OK\n")
       local ev, vars, file, line, idx_watch = coroutine.yield()
@@ -257,6 +308,9 @@ local function debugger_loop(server)
         server:send("401 Error in Execution " .. string.len(file) .. "\n")
         server:send(file)
       end
+    --
+    --	OVER command
+    --
     elseif command == "OVER" then
       server:send("200 OK\n")
       step_over = true

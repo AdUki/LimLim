@@ -17,6 +17,7 @@ static const QByteArray StepIntoCommand = QByteArray("step\n");
 
 static const QByteArray ExecuteCommand = QByteArray("exec ");
 static const QByteArray EvaluateCommand = QByteArray("eval ");
+static const QByteArray TableCommand = QByteArray("table ");
 
 
 class Debugger : public QObject

@@ -8,6 +8,7 @@
 static const QByteArray StartCommand = QByteArray("> ");
 static const QByteArray PauseMessage = QByteArray("Paused:");
 static const QByteArray EvaluateMessage = QByteArray("Evaluate:");
+static const QByteArray TableMessage = QByteArray("Table:");
 
 
 /*
@@ -124,8 +125,8 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
         while ((pos = rx.indexIn(output, pos)) != -1) {
 
             // TODO format to original values
-            QString type = rx.cap(1);
-            QString val = rx.cap(2);
+            const QString &type = rx.cap(1);
+            const QString &val = rx.cap(2);
 
             if (!watches.isEmpty()) {
                 // take first watch from list
@@ -136,6 +137,31 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
                 item->setText(2, type.trimmed());
             }
             pos += rx.matchedLength();
+        }
+    } else if(output.startsWith(TableMessage)) {
+        output.chop(StartCommand.length());
+
+        // take first table from list
+        QTreeWidgetItem *table = tables.takeFirst();
+        table->takeChildren();
+
+        QRegExp rx("(\\d+)\t");
+
+        int pos = TableMessage.length();
+        while ((pos = rx.indexIn(output, pos)) != -1) {
+            QString fieldSize = rx.cap(1);
+            QRegExp fieldRx(QString("(\\w+)\t(\\w+)\t(.{")
+                            .append(fieldSize)
+                            .append("})\n"));
+            pos += rx.matchedLength();
+
+            pos = fieldRx.indexIn(output, pos);
+            QTreeWidgetItem* field = new QTreeWidgetItem(table,
+                QStringList() << fieldRx.cap(1)   // field key
+                              << fieldRx.cap(3)   // field value
+                              << fieldRx.cap(2)); // field type
+            table->addChild(field);
+            pos += fieldRx.matchedLength();
         }
     }
 
@@ -229,5 +255,8 @@ void Debugger::updateWatches(QList<QTreeWidgetItem*> *watches)
 
 void Debugger::updateTable(QTreeWidgetItem *table)
 {
+    if (status == Off || status == On) return;
 
+    tables.append(table);
+    giveCommand(QByteArray(TableCommand).append(table->text(0)).append("\n"));
 }

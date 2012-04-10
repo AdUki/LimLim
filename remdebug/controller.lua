@@ -198,7 +198,7 @@ while true do
           elseif status == "401" then
                 len = tonumber(len)
                 local res = client:receive(len)
-                print("Error: Invalid expression:")
+                print("Error: Invalid expression:" .. res)
           else
                 print("Error: Unknown error")
           end
@@ -213,17 +213,17 @@ while true do
   elseif command == "table" then
         local _, _, exp = string.find(line, "^[a-z]+%s+(.+)$")
         if exp then
-          client:send("EXEC return (" .. exp .. "),type(" .. exp .. ")\n")
+          client:send("TABLE " .. exp .. "\n")
           local line = client:receive()
           local _, _, status, len = string.find(line, "^(%d+)[a-zA-Z ]+ (%d+)$")
           if status == "200" then
                 len = tonumber(len)
                 local res = client:receive(len)
-                print("Evaluate: " .. res)
+                io.write("Table:\n" .. res)
           elseif status == "401" then
                 len = tonumber(len)
                 local res = client:receive(len)
-                print("Error: Invalid expression:")
+                print("Error: Invalid expression:" .. res)
           else
                 print("Error: Unknown error")
           end
