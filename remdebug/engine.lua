@@ -227,6 +227,7 @@ local function debugger_loop(server)
       local _, _, chunk = string.find(line, "^[A-Z]+%s+(.+)$")
       if chunk then
         local function evalTable(tab)
+			local numFields = 0
 			local sertable = {}
 			for i,v in pairs(tab) do
 			    local val = tostring(v)
@@ -237,8 +238,9 @@ local function debugger_loop(server)
 					.. key .. '\t'
 					.. type(v) .. '\t'
 					.. val .. '\n'
+				numFields = numFields + 1
 			end
-			return table.concat(sertable);
+			return table.concat(sertable), numFields;
         end
         -- TODO set new environment for loadstring
         local func = loadstring('return ' .. chunk)
@@ -248,7 +250,8 @@ local function debugger_loop(server)
           status, tab = xpcall(func, debug.traceback)
         end 
         if status and type(tab) == 'table' then
-          res = evalTable(tab)
+          res, tab = evalTable(tab)
+          res = tostring(tab) .. '\n' .. res
           server:send("200 OK " .. string.len(res) .. "\n")
           server:send(res)
         else

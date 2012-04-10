@@ -153,8 +153,11 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
             if (field->childCount() > 0) children.insert(field->text(0));
         }
 
-        QRegExp rx("(\\d+)\t(\\d+)\t");
         int pos = TableMessage.length();
+        QRegExp numRx(" (\\d+)\n");
+        pos = numRx.indexIn(output, pos) + numRx.matchedLength();
+
+        QRegExp rx("(\\d+)\t(\\d+)\t");
         while ((pos = rx.indexIn(output, pos)) != -1) {
             pos += rx.matchedLength();
 
