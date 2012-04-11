@@ -154,19 +154,20 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
         }
 
         int pos = TableMessage.length();
-        QRegExp numRx(" (\\d+)\n");
+        QRegExp numRx("\\s*(\\d+)\\s");
         pos = numRx.indexIn(output, pos) + numRx.matchedLength();
 
         QRegExp rx("(\\d+)\t(\\d+)\t");
         while ((pos = rx.indexIn(output, pos)) != -1) {
             pos += rx.matchedLength();
 
+            // TODO doesn't work with package.config
             // parse values of field
             QRegExp fieldRx(QString("(.{")
                             .append(rx.cap(1))
                             .append("})\t(\\w+)\t(.{")
                             .append(rx.cap(2))
-                            .append("})\n"));
+                            .append("})\\s"));
             pos = fieldRx.indexIn(output, pos);
             pos += fieldRx.matchedLength();
 
