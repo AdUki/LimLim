@@ -157,7 +157,7 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
         QRegExp numRx("\\s*(\\d+)\\s");
         pos = numRx.indexIn(output, pos) + numRx.matchedLength();
 
-        QRegExp rx("(\\d+)\t(\\d+)\t");
+        QRegExp rx("\\s*(\\d+)\t(\\d+)\t");
         while ((pos = rx.indexIn(output, pos)) != -1) {
             pos += rx.matchedLength();
 
@@ -167,9 +167,16 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
                             .append(rx.cap(1))
                             .append("})\t(\\w+)\t(.{")
                             .append(rx.cap(2))
-                            .append("})\\s"));
+                            .append("})."));
             pos = fieldRx.indexIn(output, pos);
             pos += fieldRx.matchedLength();
+
+            console->writeSystem("-----------------------------\n");
+            console->writeSystem(QString(rx.cap(1))
+                                 .append(" ")
+                                 .append(rx.cap(2))
+                                 .append("\n"));
+            console->writeSystem(output.right(output.length()-pos).append('\n'));
 
             // create and add new field to table
             QTreeWidgetItem* field = new QTreeWidgetItem(table,
