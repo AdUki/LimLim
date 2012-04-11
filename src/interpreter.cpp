@@ -39,6 +39,9 @@ Interpreter::~Interpreter()
 void Interpreter::addDebug()
 {
     QString remdebugPath = QString(APP_DIR_PATH).append("?.lua");
+#ifdef Q_WS_WIN
+    remdebugPath.replace('\\', "\\\\");
+#endif
     QString query = QString("package.path = '").append(remdebugPath).append(";' .. package.path");
     options << "-e" << query;
     options << "-e" << "require 'remdebug.engine'.start()";

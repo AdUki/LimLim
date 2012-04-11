@@ -41,9 +41,9 @@ void Debugger::start()
 {
     // Start RemDebug controller
     QString contPath = QString(APP_DIR_PATH)
-                       .append("remdebug")
-                       .append(QDir::separator())
-                       .append("controller.lua");
+            .append("remdebug")
+            .append(QDir::separator())
+            .append("controller.lua");
     remdebug->runFile(contPath);
 }
 
