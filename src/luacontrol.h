@@ -16,86 +16,92 @@ class Watcher;
 
 class LuaControl : public QMainWindow
 {
-	Q_OBJECT
+Q_OBJECT
 
 public:
-	LuaControl();
+    LuaControl();
 
 protected:
-	void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event);
 
 private slots:
-	void about();
-	void openRecentFile();
-	void updateStatusBar();
-	void run();
-	void debug();
-	void stop();
+    void about();
+    void openRecentFile();
+    void updateStatusBar();
+    void run();
+    void debug();
+    void stop();
+    void controllerReady();
 
 private:
-	void createActions();
-	void createMenus();
-	void createToolBars();
-	void createStatusBar();
-	void createDockWindows();
-        void createWatchers();
+    void createActions();
+    void createMenus();
+    void createToolBars();
+    void createStatusBar();
+    void createDockWindows();
+    void createWatchers();
 
-	void readSettings();
-	void writeSettings();
+    void readSettings();
+    void writeSettings();
 
-	void updateRecentFileActions();
+    void updateRecentFileActions();
 
-	QStringList recentFiles;
+    QStringList recentFiles;
+    bool debugging;
 
-        Console *luaConsole;
-        Console *debugConsole;
-        Interpreter *luaInterpret;
-        Editor *luaEditor;
-        Debugger *luaDebugger;
+    Console *luaConsole;
+    Console *debugConsole;
+    Interpreter *luaInterpret;
+    Editor *luaEditor;
+    Debugger *luaDebugger;
 
-        Watcher *luaWatchesView;
-        QTreeView *luaLocalsView;
+    Watcher *luaWatchesView;
+    QTreeView *luaLocalsView;
 
-	QLabel *statusLabel;
+    QLabel *statusLabel;
 
-	QMenu *fileMenu;
-	QMenu *editMenu;
-	QMenu *projectMenu;
-	QMenu *viewMenu;
-	QMenu *optionsMenu;
-	QMenu *helpMenu;
+    QMenu *fileMenu;
+    QMenu *editMenu;
+    QMenu *projectMenu;
+    QMenu *viewMenu;
+    QMenu *optionsMenu;
+    QMenu *helpMenu;
 
-	QToolBar *fileToolBar;
-	QToolBar *editToolBar;
-	QToolBar *runToolBar;
+    QToolBar *fileToolBar;
+    QToolBar *editToolBar;
+    QToolBar *runToolBar;
     QToolBar *debugToolBar;
+    QToolBar *controllerToolBar;
 
-	enum { MaxRecentFiles = 5 };
-	QAction *recentFileActions[MaxRecentFiles];
-	QAction *separatorAction;
+    enum { MaxRecentFiles = 5 };
+    QAction *recentFileActions[MaxRecentFiles];
+    QAction *separatorAction;
 
-	QAction *newAction;
-	QAction *openAction;
-	QAction *saveAction;
-	QAction *saveAsAction;
-	QAction *aboutQtAction;
-	QAction *aboutAction;
-	QAction *exitAction;
+    QAction *newAction;
+    QAction *openAction;
+    QAction *saveAction;
+    QAction *saveAsAction;
+    QAction *aboutQtAction;
+    QAction *aboutAction;
+    QAction *exitAction;
 
-	QAction *copyAction;
-	QAction *pasteAction;
-	QAction *cutAction;
-	QAction *deleteAction;
+    QAction *copyAction;
+    QAction *pasteAction;
+    QAction *cutAction;
+    QAction *deleteAction;
 
     QAction *runAction;
-	QAction *debugAction;
-	QAction *stopAction;
+    QAction *debugAction;
+    QAction *stopAction;
 
     QAction *continueAction;
     QAction *stepOverAction;
     QAction *stepIntoAction;
 
     QAction *interpretAction;
+
+    QAction *startControlAction;
+    QAction *stopControlAction;
 };
 
 #endif // MAINWINDOW_H

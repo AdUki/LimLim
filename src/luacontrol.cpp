@@ -29,11 +29,11 @@ LuaControl::LuaControl()
     luaInterpret = new Interpreter(luaConsole, this);
     luaInterpret->addArgs(args);
 
-    // set up debuger
+    // set up debugger
     debugConsole = new Console(this);
     luaDebugger = new Debugger(luaEditor, debugConsole, this);
     connect(luaDebugger,  SIGNAL(started()),
-            this,           SLOT(run()));
+            this,           SLOT(controllerReady()));
     connect(luaDebugger, SIGNAL(waitingForCommand(bool)),
             debugConsole, SLOT(setPrintOutput(bool)));
 
@@ -53,24 +53,29 @@ LuaControl::LuaControl()
 void LuaControl::run()
 {
     // execute Lua program
-    if (!luaInterpret->run(luaEditor->currentSource())) {
-        // stop debugger if it runs
-        if (luaDebugger->getStatus() == !Debugger::Off)
-            luaDebugger->stop();
-    }
+    luaInterpret->run(luaEditor->currentSource());
 }
 
 void LuaControl::debug()
 {
     debugConsole->setVerbose();
     luaInterpret->addDebug();
-    luaDebugger->start();
+    if (luaDebugger->getStatus() == Debugger::Off) {
+        debugging = true;
+        luaDebugger->start();
+    } else run();
 }
 
 void LuaControl::stop()
 {
     luaDebugger->stop();
     luaInterpret->kill();
+}
+
+void LuaControl::controllerReady()
+{
+    if (debugging) run();
+    debugging = false;
 }
 
 
@@ -164,7 +169,7 @@ void LuaControl::createActions()
 
     // DEBUG ACTION
     debugAction = new QAction(tr("&Debug"), this);
-    debugAction->setIcon(QIcon(":/images/compile.png"));
+    debugAction->setIcon(QIcon(":/images/debug.png"));
     debugAction->setStatusTip(tr("Debug current chunk of Lua code"));
     connect(debugAction, SIGNAL(triggered()), this, SLOT(debug()));
     connect(luaInterpret, SIGNAL(changedRunningState(bool)), debugAction, SLOT(setDisabled(bool)));
@@ -179,7 +184,7 @@ void LuaControl::createActions()
 
     // CONTINUE ACTION
     continueAction = new QAction(tr("&Continue"), this);
-    continueAction->setIcon(QIcon(":/images/debug/run.png"));
+    continueAction->setIcon(QIcon(":/images/debug_run.png"));
     continueAction->setStatusTip(tr("Continue running program"));
     continueAction->setEnabled(false);
     connect(continueAction, SIGNAL(triggered()), luaDebugger, SLOT(run()));
@@ -187,7 +192,7 @@ void LuaControl::createActions()
 
     // STEP INTO ACTION
     stepIntoAction = new QAction(tr("&Step into"), this);
-    stepIntoAction->setIcon(QIcon(":/images/debug/step-into.png"));
+    stepIntoAction->setIcon(QIcon(":/images/debug_into.png"));
     stepIntoAction->setStatusTip(tr("Step into function"));
     stepIntoAction->setEnabled(false);
     connect(stepIntoAction, SIGNAL(triggered()), luaDebugger, SLOT(stepIn()));
@@ -195,7 +200,7 @@ void LuaControl::createActions()
 
     // STEP OVER ACTION
     stepOverAction = new QAction(tr("Step &over"), this);
-    stepOverAction->setIcon(QIcon(":/images/debug/step-over.png"));
+    stepOverAction->setIcon(QIcon(":/images/debug_next.png"));
     stepOverAction->setStatusTip(tr("Step over function"));
     stepOverAction->setEnabled(false);
     connect(stepOverAction, SIGNAL(triggered()), luaDebugger, SLOT(stepOver()));
@@ -205,58 +210,78 @@ void LuaControl::createActions()
     interpretAction = new QAction(tr("&Lua options"), this);
     interpretAction->setEnabled(true);
     connect(interpretAction, SIGNAL(triggered()), luaInterpret, SLOT(show()));
+
+    // START CONTROLLER ACTION
+    startControlAction = new QAction(tr("Start controller"), this);
+    startControlAction->setIcon(QIcon(":/images/bug_green.png"));
+    startControlAction->setEnabled(true);
+    connect(startControlAction, SIGNAL(triggered()), luaDebugger, SLOT(start()));
+    connect(luaDebugger, SIGNAL(updateActions(bool)), startControlAction, SLOT(setDisabled(bool)));
+
+    // STOP CONTROLLER ACTION
+    stopControlAction = new QAction(tr("Stop controller"), this);
+    stopControlAction->setIcon(QIcon(":/images/bug_red.png"));
+    stopControlAction->setEnabled(true);
+    stopControlAction->setDisabled(true);
+    connect(stopControlAction, SIGNAL(triggered()), luaDebugger, SLOT(stop()));
+    connect(luaDebugger, SIGNAL(updateActions(bool)), stopControlAction, SLOT(setEnabled(bool)));
+
 }
 
 void LuaControl::createMenus()
 {
-	fileMenu = menuBar()->addMenu(tr("&File"));
-	fileMenu->addAction(newAction);
-	fileMenu->addAction(openAction);
-	fileMenu->addAction(saveAction);
-	fileMenu->addAction(saveAsAction);
-	separatorAction = fileMenu->addSeparator();
-	for (int i = 0; i < MaxRecentFiles; ++i)
-		fileMenu->addAction(recentFileActions[i]);
-	fileMenu->addSeparator();
-	fileMenu->addAction(exitAction);
+    fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu->addAction(newAction);
+    fileMenu->addAction(openAction);
+    fileMenu->addAction(saveAction);
+    fileMenu->addAction(saveAsAction);
+    separatorAction = fileMenu->addSeparator();
+    for (int i = 0; i < MaxRecentFiles; ++i)
+        fileMenu->addAction(recentFileActions[i]);
+    fileMenu->addSeparator();
+    fileMenu->addAction(exitAction);
 
-	editMenu = menuBar()->addMenu(tr("&Edit"));
-	editMenu->addAction(cutAction);
-	editMenu->addAction(copyAction);
-	editMenu->addAction(pasteAction);
-	editMenu->addAction(deleteAction);
+    editMenu = menuBar()->addMenu(tr("&Edit"));
+    editMenu->addAction(cutAction);
+    editMenu->addAction(copyAction);
+    editMenu->addAction(pasteAction);
+    editMenu->addAction(deleteAction);
 
-	projectMenu = menuBar()->addMenu(tr("&Project"));
-	projectMenu->addAction(runAction);
-	projectMenu->addAction(debugAction);
-	projectMenu->addAction(stopAction);
+    projectMenu = menuBar()->addMenu(tr("&Project"));
+    projectMenu->addAction(runAction);
+    projectMenu->addAction(debugAction);
+    projectMenu->addAction(stopAction);
     projectMenu->addAction(interpretAction);
 
-	optionsMenu = menuBar()->addMenu(tr("&Options"));
+    optionsMenu = menuBar()->addMenu(tr("&Options"));
 
-	menuBar()->addSeparator();
+    menuBar()->addSeparator();
 
-	helpMenu = menuBar()->addMenu(tr("&Help"));
-	helpMenu->addAction(aboutAction);
-	helpMenu->addAction(aboutQtAction);
+    helpMenu = menuBar()->addMenu(tr("&Help"));
+    helpMenu->addAction(aboutAction);
+    helpMenu->addAction(aboutQtAction);
 }
 
 void LuaControl::createToolBars()
 {
-	fileToolBar = addToolBar(tr("&File"));
-	fileToolBar->addAction(newAction);
-	fileToolBar->addAction(openAction);
-	fileToolBar->addAction(saveAction);
+    fileToolBar = addToolBar(tr("&File"));
+    fileToolBar->addAction(newAction);
+    fileToolBar->addAction(openAction);
+    fileToolBar->addAction(saveAction);
 
-        runToolBar = addToolBar(tr("&Run"));
-	runToolBar->addAction(runAction);
-	runToolBar->addAction(debugAction);
-	runToolBar->addAction(stopAction);
+    runToolBar = addToolBar(tr("&Run"));
+    runToolBar->addAction(runAction);
+    runToolBar->addAction(debugAction);
+    runToolBar->addAction(stopAction);
 
-        debugToolBar = addToolBar(tr("&Debug"));
-        debugToolBar->addAction(continueAction);
-        debugToolBar->addAction(stepIntoAction);
-        debugToolBar->addAction(stepOverAction);
+    debugToolBar = addToolBar(tr("&Debug"));
+    debugToolBar->addAction(continueAction);
+    debugToolBar->addAction(stepIntoAction);
+    debugToolBar->addAction(stepOverAction);
+
+    controllerToolBar = addToolBar("&Controller");
+    controllerToolBar->addAction(startControlAction);
+    controllerToolBar->addAction(stopControlAction);
 }
 
 void LuaControl::createStatusBar()
@@ -313,7 +338,7 @@ void LuaControl::createWatchers()
     QAction *action;
 
     action = new QAction(tr("New watch"), luaWatchesView);
-    connect(action, SIGNAL(triggered()), SLOT(addWatch()));
+    connect(action, SIGNAL(triggered()), luaWatchesView, SLOT(addWatch()));
     luaWatchesView->addAction(action);
 
     // TODO shortcut doesn't work

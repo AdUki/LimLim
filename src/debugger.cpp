@@ -16,8 +16,6 @@ static const QByteArray LocalMessage = QByteArray("Local:");
 
 	This debugger can be used remotely, whitout lua interpreter,
 	to debbug embedded lua applications.
-
-        TODO in final version of program remove console for better performance
 */
 Debugger::Debugger(Editor *editor, Console *console, QObject *parent) :
     QObject(parent)
@@ -40,6 +38,7 @@ Debugger::Debugger(Editor *editor, Console *console, QObject *parent) :
 
 void Debugger::start()
 {
+    if (status != Off) return;
     // Start RemDebug controller
     QString contPath = QString(APP_DIR_PATH)
             .append("remdebug")
@@ -270,6 +269,7 @@ void Debugger::stateChange(bool running)
     if (running) { // controller started
         status = On;
         emit started();
+        emit updateActions(true);
     } else { // controller ended
         status = Off;
         output.clear();
@@ -279,6 +279,8 @@ void Debugger::stateChange(bool running)
         editor->unlock();
         emit waitingForCommand(false);
         emit finished();
+        emit updateActions(false);
+        console->setVerbose();
     }
 }
 

@@ -5,6 +5,10 @@
 -- Modified 2011-2012 for LuaIDE project by Simon Mikuda
 -- Bachelor project on STU Fiit
 -- Project manager: Ing. Michal Kottman
+-- Copyright Simon Mikuda STU Fiit 2012
+--
+
+print "LuaIDE controller"
 
 local socket = require "socket"
 
@@ -12,7 +16,10 @@ local server = socket.bind("*", 8172)
 if server == nil then
   print "Error: Remdebug already running"
   os.exit()
+else
+  print "Start program you want to debug:"
 end
+
 local client = server:accept()
 
 local breakpoints = {}

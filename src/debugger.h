@@ -38,6 +38,7 @@ signals:
 
     void started();
     void finished();
+    void updateActions(bool isOn);
 
 public slots:
     void start();

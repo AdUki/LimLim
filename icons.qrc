@@ -11,15 +11,13 @@
         <file>images/copy.png</file>
         <file>images/run.png</file>
         <file>images/compile.png</file>
-        <file>images/debug/step-over.png</file>
-        <file>images/debug/step-out.png</file>
-        <file>images/debug/step-into-instruction.png</file>
-        <file>images/debug/step-into.png</file>
-        <file>images/debug/step-instruction.png</file>
-        <file>images/debug/run-cursor.png</file>
-        <file>images/debug/run.png</file>
-        <file>images/debug/execute-to-cursor.png</file>
-        <file>images/debug/execute-from-cursor.png</file>
         <file>images/process-stop.png</file>
+        <file>images/bug_green.png</file>
+        <file>images/bug_red.png</file>
+        <file>images/debug.png</file>
+        <file>images/debug_into.png</file>
+        <file>images/debug_next.png</file>
+        <file>images/debug_run.png</file>
+        <file>images/debug_stop.png</file>
     </qresource>
 </RCC>

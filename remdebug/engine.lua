@@ -1,10 +1,12 @@
 --
 -- RemDebug for LuaIDE
 -- Copyright Kepler Project 2005 (http://www.keplerproject.org/remdebug)
+--
+-- Modified 2011-2012 for LuaIDE project by Simon Mikuda
+-- Bachelor project on STU Fiit
+-- Project manager: Ing. Michal Kottman
 -- Copyright Simon Mikuda STU Fiit 2012
 --
-
-print "Debugging enabled"
 
 local microlight = require "ml"
 local socket = require "socket"
