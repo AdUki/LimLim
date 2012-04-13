@@ -68,7 +68,7 @@ private:
     bool autoRun;
     bool updateLocals;
 
-    /*inline*/ void giveCommand(const QByteArray& command);
+    inline void giveCommand(const QByteArray& command);
 
 private slots:
     void parseInput(const QByteArray& remdebugOutput);

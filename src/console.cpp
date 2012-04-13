@@ -8,6 +8,17 @@ Console::Console(QWidget *parent) : QTextEdit(parent)
     setReadOnly(true);
     setTextBackgroundColor(QColor::fromRgb(255,255,255));
     setLineWrapMode(QTextEdit::NoWrap);
+    printOutput = false;
+}
+
+void Console::setSilent()
+{
+    printOutput = false;
+}
+
+void Console::setVerbose()
+{
+    printOutput = true;
 }
 
 void Console::open()
@@ -40,12 +51,12 @@ void Console::writeInput(const QByteArray& data)
     QList<QByteArray> commands = data.split('\n');
     QList<QByteArray>::iterator iter = commands.begin();
     while (true) {
-        insertPlainText(*iter);
+        if (printOutput) insertPlainText(*iter);
         command.append(*iter);
         iter++;
         if (iter == commands.end()) break;
         else {
-            insertPlainText("\n");
+            if (printOutput) insertPlainText("\n");
             confirmCommand();
         }
     }
@@ -54,19 +65,23 @@ void Console::writeInput(const QByteArray& data)
 
 void Console::writeOutput(const QByteArray& data)
 {
-    outputBuffer.write(data);
-    setTextColor(QColor::fromRgb(0,200,0));
-    insertPlainText(data);
-    ensureCursorVisible();
+    if (printOutput) {
+        outputBuffer.write(data);
+        setTextColor(QColor::fromRgb(0,200,0));
+        insertPlainText(data);
+        ensureCursorVisible();
+    }
     emit emitOutput(data);
 }
 
 void Console::writeError(const QByteArray& data)
 {
-    errorBuffer.write(data);
-    setTextColor(QColor::fromRgb(200,0,0));
-    insertPlainText(data);
-    ensureCursorVisible();
+    if (printOutput) {
+        errorBuffer.write(data);
+        setTextColor(QColor::fromRgb(200,0,0));
+        insertPlainText(data);
+        ensureCursorVisible();
+    }
     emit emitError(data);
 }
 

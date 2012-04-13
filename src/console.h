@@ -26,6 +26,10 @@ public slots:
     void open();
     void close();
 
+    void setSilent();
+    void setVerbose();
+    void setPrintOutput(bool print) { printOutput = print; }
+
     void writeInput (const QByteArray& data);
     void writeOutput(const QByteArray& data);
     void writeError (const QByteArray& data);
@@ -40,6 +44,8 @@ private:
 
     QBuffer outputBuffer;
     QBuffer errorBuffer;
+
+    bool printOutput;
 };
 
 #endif // CONSOLE_H

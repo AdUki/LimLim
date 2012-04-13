@@ -19,20 +19,25 @@ LuaControl::LuaControl()
     QString file; // take file name
     if (!args.isEmpty()) file = args.takeFirst();
 
-    luaConsole      = new Console(this);
-    if (file.isEmpty())
-        luaEditor   = new Editor(this);
-    else
-        luaEditor   = new Editor(this, file);
-    luaInterpret    = new Interpreter(luaConsole, this);
-    luaInterpret->addArgs(args);
-    debugConsole    = new Console(this);
-    luaDebugger     = new Debugger(luaEditor, debugConsole, this);
-    luaWatchesView  = new Watcher(this);
-    luaLocalsView   = new Watcher(this);
-
+    // set up editor
+    luaConsole = new Console(this);
+    if (file.isEmpty()) luaEditor = new Editor(this);
+    else luaEditor = new Editor(this, file);
     setCentralWidget(luaEditor);
-    
+
+    // set up interpreter
+    luaInterpret = new Interpreter(luaConsole, this);
+    luaInterpret->addArgs(args);
+
+    // set up debuger
+    debugConsole = new Console(this);
+    luaDebugger = new Debugger(luaEditor, debugConsole, this);
+    connect(luaDebugger,  SIGNAL(started()),
+            this,           SLOT(run()));
+    connect(luaDebugger, SIGNAL(waitingForCommand(bool)),
+            debugConsole, SLOT(setPrintOutput(bool)));
+
+    // set up other things
     createActions();
     createMenus();
     createToolBars();
@@ -41,31 +46,8 @@ LuaControl::LuaControl()
     createDockWindows();
 
     readSettings();
-
     setWindowIcon(QIcon(":/images/lua.png"));
-
     setAttribute(Qt::WA_DeleteOnClose);
-    
-    connect(luaDebugger,  SIGNAL(started()),
-            this,           SLOT(run()));
-
-    connect(luaDebugger,  SIGNAL(luaStateChanged()),
-            luaWatchesView, SLOT(updateAll()));
-    connect(luaWatchesView, SIGNAL(updateWatch(QTreeWidgetItem*)),
-            luaDebugger,      SLOT(updateWatch(QTreeWidgetItem*)));
-    connect(luaWatchesView, SIGNAL(updateWatches(QList<QTreeWidgetItem*>*)),
-            luaDebugger,      SLOT(updateWatches(QList<QTreeWidgetItem*>*)));
-    connect(luaWatchesView, SIGNAL(updateTable(QTreeWidgetItem*)),
-            luaDebugger,      SLOT(updateTable(QTreeWidgetItem*)));
-
-    connect(luaDebugger,  SIGNAL(localsChanged(QList<QTreeWidgetItem*>*)),
-            luaLocalsView, SLOT(replaceAllWatches(QList<QTreeWidgetItem*>*)));
-    connect(luaLocalsView, SIGNAL(updateWatch(QTreeWidgetItem*)),
-            luaDebugger,      SLOT(updateWatch(QTreeWidgetItem*)));
-    connect(luaLocalsView, SIGNAL(updateWatches(QList<QTreeWidgetItem*>*)),
-            luaDebugger,      SLOT(updateWatches(QList<QTreeWidgetItem*>*)));
-    connect(luaLocalsView, SIGNAL(updateTable(QTreeWidgetItem*)),
-            luaDebugger,      SLOT(updateTable(QTreeWidgetItem*)));
 }
 
 void LuaControl::run()
@@ -80,6 +62,7 @@ void LuaControl::run()
 
 void LuaControl::debug()
 {
+    debugConsole->setVerbose();
     luaInterpret->addDebug();
     luaDebugger->start();
 }
@@ -320,6 +303,11 @@ void LuaControl::createDockWindows()
 
 void LuaControl::createWatchers()
 {
+    //
+    // Editable watcher
+    //
+    luaWatchesView  = new Watcher(this);
+
     luaWatchesView->addItem();
 
     QAction *action;
@@ -337,6 +325,29 @@ void LuaControl::createWatchers()
     action = new QAction(tr("Clear all watches"), luaWatchesView);
     connect(action, SIGNAL(triggered()), luaWatchesView, SLOT(clearAllWatches()));
     luaWatchesView->addAction(action);
+    
+    connect(luaDebugger,  SIGNAL(luaStateChanged()),
+            luaWatchesView, SLOT(updateAll()));
+    connect(luaWatchesView, SIGNAL(updateWatch(QTreeWidgetItem*)),
+            luaDebugger,      SLOT(updateWatch(QTreeWidgetItem*)));
+    connect(luaWatchesView, SIGNAL(updateWatches(QList<QTreeWidgetItem*>*)),
+            luaDebugger,      SLOT(updateWatches(QList<QTreeWidgetItem*>*)));
+    connect(luaWatchesView, SIGNAL(updateTable(QTreeWidgetItem*)),
+            luaDebugger,      SLOT(updateTable(QTreeWidgetItem*)));
+
+    //
+    // Local variables watcher
+    //
+    luaLocalsView   = new Watcher(this);
+
+    connect(luaDebugger,  SIGNAL(localsChanged(QList<QTreeWidgetItem*>*)),
+            luaLocalsView, SLOT(replaceAllWatches(QList<QTreeWidgetItem*>*)));
+    connect(luaLocalsView, SIGNAL(updateWatch(QTreeWidgetItem*)),
+            luaDebugger,      SLOT(updateWatch(QTreeWidgetItem*)));
+    connect(luaLocalsView, SIGNAL(updateWatches(QList<QTreeWidgetItem*>*)),
+            luaDebugger,      SLOT(updateWatches(QList<QTreeWidgetItem*>*)));
+    connect(luaLocalsView, SIGNAL(updateTable(QTreeWidgetItem*)),
+            luaDebugger,      SLOT(updateTable(QTreeWidgetItem*)));
 }
 
 void LuaControl::closeEvent(QCloseEvent *event)

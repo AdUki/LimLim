@@ -55,23 +55,28 @@ void Debugger::stop()
 
 void Debugger::stepOver()
 {
+    console->setSilent();
     giveCommand(StepOverCommand);
     if (updateLocals) giveCommand(LocalCommand);
 }
 
 void Debugger::stepIn()
 {
+    console->setSilent();
     giveCommand(StepIntoCommand);
     if (updateLocals) giveCommand(LocalCommand);
 }
 
 void Debugger::run()
 {
+    console->setSilent();
     giveCommand(RunCommand);
     if (updateLocals) giveCommand(LocalCommand);
 }
 
-/*inline*/ void Debugger::giveCommand(const QByteArray& command)
+
+
+inline void Debugger::giveCommand(const QByteArray& command)
 {
     switch (status) {
     case Waiting:
@@ -279,11 +284,13 @@ void Debugger::stateChange(bool running)
 
 void Debugger::breakpointSet(int line, QString file)
 {
+    console->setSilent();
     giveCommand(QString("setb %1 %2\n").arg(file).arg(line).toAscii());
 }
 
 void Debugger::breakpointDeleted(int line, QString file)
 {
+    console->setSilent();
     giveCommand(QString("delb %1 %2\n").arg(file).arg(line).toAscii());
 }
 
@@ -295,6 +302,7 @@ void Debugger::breakpointDeleted(int line, QString file)
 void Debugger::updateWatch(QTreeWidgetItem *watch)
 {
     if (status == Off || status == On) return;
+    console->setSilent();
 
     watches.append(watch);
 
@@ -313,6 +321,7 @@ void Debugger::updateWatch(QTreeWidgetItem *watch)
 void Debugger::updateWatches(QList<QTreeWidgetItem*> *watches)
 {
     if (status == Off || status == On) return;
+    console->setSilent();
 
     this->watches.append(*watches);
 
@@ -336,6 +345,8 @@ void Debugger::updateWatches(QList<QTreeWidgetItem*> *watches)
 void Debugger::updateTable(QTreeWidgetItem *table)
 {
     if (status == Off || status == On) return;
+    console->setSilent();
+
     tables.append(table);
 
     QString rootTable = table->text(0);
