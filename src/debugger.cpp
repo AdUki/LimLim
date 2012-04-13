@@ -171,13 +171,6 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
             pos = fieldRx.indexIn(output, pos);
             pos += fieldRx.matchedLength();
 
-            console->writeSystem("-----------------------------\n");
-            console->writeSystem(QString(rx.cap(1))
-                                 .append(" ")
-                                 .append(rx.cap(2))
-                                 .append("\n"));
-            console->writeSystem(output.right(output.length()-pos).append('\n'));
-
             // create and add new field to table
             QTreeWidgetItem* field = new QTreeWidgetItem(table,
                 QStringList() << fieldRx.cap(1)   // field key
@@ -291,13 +284,20 @@ void Debugger::updateTable(QTreeWidgetItem *table)
     if (status == Off || status == On) return;
     tables.append(table);
 
-    QString tableName = table->text(0);
+    QString rootTable = table->text(0);
+    QString tableIndexes = "";
     while (table->parent() != NULL)
     {
         table = table->parent();
-        tableName.prepend(table->text(0).append('['));
-        tableName.append(']');
+        rootTable.prepend('[');
+        rootTable.append(']');
+
+        tableIndexes.prepend(rootTable);
+        rootTable = table->text(0);
     }
 
-    giveCommand(QByteArray(TableCommand).append(tableName).append("\n"));
+    giveCommand(QByteArray(TableCommand)
+                .append(rootTable)
+                .append(tableIndexes)
+                .append("\n"));
 }
