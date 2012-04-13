@@ -14,11 +14,10 @@ class QTreeWidgetItem;
 static const QByteArray RunCommand = QByteArray("run\n");
 static const QByteArray StepOverCommand = QByteArray("over\n");
 static const QByteArray StepIntoCommand = QByteArray("step\n");
-
+static const QByteArray LocalCommand = QByteArray("local\n");
 static const QByteArray ExecuteCommand = QByteArray("exec ");
 static const QByteArray EvaluateCommand = QByteArray("eval ");
 static const QByteArray TableCommand = QByteArray("table ");
-
 
 class Debugger : public QObject
 {
@@ -29,10 +28,13 @@ public:
     enum DebugStatus { Running, Waiting, On, Off };
 
     DebugStatus getStatus() { return status; }
+    void setLocalsUpdating(bool eval);
 
 signals:
     void waitingForCommand(bool status);
     void luaStateChanged();
+    // TODO maybe change to "QList* getLocals()" but then watcher needs reference to debugger
+    void localsChanged(QList<QTreeWidgetItem*> *locals);
 
     void started();
     void finished();
@@ -41,9 +43,9 @@ public slots:
     void start();
     void stop();
 
-    void stepOver() { giveCommand(StepOverCommand); }
-    void stepIn() { giveCommand(StepIntoCommand); }
-    void run() { giveCommand(RunCommand); }
+    void stepOver();
+    void stepIn();
+    void run();
 
     void updateWatch(QTreeWidgetItem *watch);
     void updateWatches(QList<QTreeWidgetItem*> *watches);
@@ -64,6 +66,7 @@ private:
     QList<QTreeWidgetItem*> tables;
 
     bool autoRun;
+    bool updateLocals;
 
     /*inline*/ void giveCommand(const QByteArray& command);
 

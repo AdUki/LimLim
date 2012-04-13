@@ -11,37 +11,19 @@ Watcher::Watcher(QWidget *parent) : QTreeWidget(parent)
     setSelectionMode(QTreeView::SingleSelection);
     setContextMenuPolicy(Qt::ActionsContextMenu);
 
-    this->addItem();
-
     connect(this, SIGNAL(itemSelectionChanged()),
             this,   SLOT(updateActions()));
     connect(this, SIGNAL(itemChanged(QTreeWidgetItem*, int)),
             this,   SLOT(updateItem(QTreeWidgetItem*, int)));
     connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
-            this, SLOT(expandTable(QTreeWidgetItem*)));
+            this,   SLOT(expandTable(QTreeWidgetItem*)));
     connect(this, SIGNAL(itemCollapsed(QTreeWidgetItem*)),
-            this, SLOT(collapseTable(QTreeWidgetItem*)));
-
-    QAction *action;
-
-    action = new QAction(tr("New watch"), this);
-    connect(action, SIGNAL(triggered()), SLOT(addWatch()));
-    addAction(action);
-
-    // TODO shortcut doesn't work
-    action = new QAction(tr("Delete watch"), this);
-    action->setShortcut(QKeySequence::Delete);
-    connect(action, SIGNAL(triggered()), this, SLOT(deleteWatch()));
-    addAction(action);
-
-    action = new QAction(tr("Clear all watches"), this);
-    connect(action, SIGNAL(triggered()), this, SLOT(clearAllWatches()));
-    addAction(action);
+            this,   SLOT(collapseTable(QTreeWidgetItem*)));
 }
 
 void Watcher::updateActions()
 {
-
+    // TODO implement adding and removing fields from tables
 }
 
 void Watcher::addWatch()
@@ -60,6 +42,11 @@ void Watcher::clearAllWatches()
     addWatch();
 }
 
+void Watcher::replaceAllWatches(QList<QTreeWidgetItem *> *watches)
+{
+    clear();
+    addTopLevelItems(*watches);
+}
 
 void Watcher::updateItem(QTreeWidgetItem *item, int column)
 {
@@ -71,10 +58,10 @@ void Watcher::updateItem(QTreeWidgetItem *item, int column)
         }
         break;
     case 1: // value
-        // TODO here will user set values for wathces
+        emit setWatch(item);
         break;
     case 2: // type
-        // You can't change type
+        emit updateWatch(item);
         break;
     }
 }

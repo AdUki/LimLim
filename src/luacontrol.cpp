@@ -29,8 +29,7 @@ LuaControl::LuaControl()
     debugConsole    = new Console(this);
     luaDebugger     = new Debugger(luaEditor, debugConsole, this);
     luaWatchesView  = new Watcher(this);
-    luaGlobalsView  = new QTreeView(this);
-    luaLocalsView   = new QTreeView(this);
+    luaLocalsView   = new Watcher(this);
 
     setCentralWidget(luaEditor);
     
@@ -49,9 +48,9 @@ LuaControl::LuaControl()
     
     connect(luaDebugger,  SIGNAL(started()),
             this,           SLOT(run()));
+
     connect(luaDebugger,  SIGNAL(luaStateChanged()),
             luaWatchesView, SLOT(updateAll()));
-
     connect(luaWatchesView, SIGNAL(updateWatch(QTreeWidgetItem*)),
             luaDebugger,      SLOT(updateWatch(QTreeWidgetItem*)));
     connect(luaWatchesView, SIGNAL(updateWatches(QList<QTreeWidgetItem*>*)),
@@ -59,6 +58,14 @@ LuaControl::LuaControl()
     connect(luaWatchesView, SIGNAL(updateTable(QTreeWidgetItem*)),
             luaDebugger,      SLOT(updateTable(QTreeWidgetItem*)));
 
+    connect(luaDebugger,  SIGNAL(localsChanged(QList<QTreeWidgetItem*>*)),
+            luaLocalsView, SLOT(replaceAllWatches(QList<QTreeWidgetItem*>*)));
+    connect(luaLocalsView, SIGNAL(updateWatch(QTreeWidgetItem*)),
+            luaDebugger,      SLOT(updateWatch(QTreeWidgetItem*)));
+    connect(luaLocalsView, SIGNAL(updateWatches(QList<QTreeWidgetItem*>*)),
+            luaDebugger,      SLOT(updateWatches(QList<QTreeWidgetItem*>*)));
+    connect(luaLocalsView, SIGNAL(updateTable(QTreeWidgetItem*)),
+            luaDebugger,      SLOT(updateTable(QTreeWidgetItem*)));
 }
 
 void LuaControl::run()
@@ -301,12 +308,6 @@ void LuaControl::createDockWindows()
         dock->setWidget(luaLocalsView);
         addDockWidget(Qt::RightDockWidgetArea, dock);
 
-	// Globals dock widget
-        dock = new QDockWidget(tr("Globals"), this);
-        dock->setAllowedAreas(Qt::AllDockWidgetAreas);
-        dock->setWidget(luaGlobalsView);
-        addDockWidget(Qt::RightDockWidgetArea, dock);
-
         // Controller dock widget for debug
         dock = new QDockWidget(tr("RemDebug"), this);
         dock->setAllowedAreas(Qt::AllDockWidgetAreas);
@@ -318,22 +319,24 @@ void LuaControl::createDockWindows()
 }
 
 void LuaControl::createWatchers()
-{/*
-    WatchModel *watchModel;
+{
+    luaWatchesView->addItem();
 
-    watchModel = new WatchModel(luaWatchesView, this);
-    connect(watchModel, SIGNAL(updateItem(QStandardItem*)),
-            luaDebugger, SLOT(updateWatch(QStandardItem*)));
+    QAction *action;
 
-    watchModel = new WatchModel(luaLocalsView, this, true);
-    connect(watchModel, SIGNAL(updateItem(QStandardItem*)),
-            luaDebugger, SLOT(updateWatch(QStandardItem*)));
+    action = new QAction(tr("New watch"), luaWatchesView);
+    connect(action, SIGNAL(triggered()), SLOT(addWatch()));
+    luaWatchesView->addAction(action);
 
-    watchModel = new WatchModel(luaGlobalsView, this, true);
-    connect(watchModel, SIGNAL(updateItem(QStandardItem*)),
-            luaDebugger, SLOT(updateWatch(QStandardItem*)));
-*/
-    // TODO connect models with debugger
+    // TODO shortcut doesn't work
+    action = new QAction(tr("Delete watch"), luaWatchesView);
+    action->setShortcut(QKeySequence::Delete);
+    connect(action, SIGNAL(triggered()), luaWatchesView, SLOT(deleteWatch()));
+    luaWatchesView->addAction(action);
+
+    action = new QAction(tr("Clear all watches"), luaWatchesView);
+    connect(action, SIGNAL(triggered()), luaWatchesView, SLOT(clearAllWatches()));
+    luaWatchesView->addAction(action);
 }
 
 void LuaControl::closeEvent(QCloseEvent *event)

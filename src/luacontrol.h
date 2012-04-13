@@ -54,7 +54,6 @@ private:
         Debugger *luaDebugger;
 
         Watcher *luaWatchesView;
-        QTreeView *luaGlobalsView;
         QTreeView *luaLocalsView;
 
 	QLabel *statusLabel;

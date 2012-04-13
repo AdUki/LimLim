@@ -9,7 +9,7 @@ static const QByteArray StartCommand = QByteArray("> ");
 static const QByteArray PauseMessage = QByteArray("Paused:");
 static const QByteArray EvaluateMessage = QByteArray("Evaluate:");
 static const QByteArray TableMessage = QByteArray("Table:");
-
+static const QByteArray LocalMessage = QByteArray("Local:");
 
 /*
 	Lua debugger class
@@ -26,6 +26,7 @@ Debugger::Debugger(Editor *editor, Console *console, QObject *parent) :
     this->editor = editor;
 
     autoRun = false;
+    updateLocals = true;
     status = Off;
 
     connect(console, SIGNAL(emitOutput(QByteArray)), this, SLOT(parseInput(QByteArray)));
@@ -50,6 +51,24 @@ void Debugger::start()
 void Debugger::stop()
 {
     if (status != Off) remdebug->kill();
+}
+
+void Debugger::stepOver()
+{
+    giveCommand(StepOverCommand);
+    if (updateLocals) giveCommand(LocalCommand);
+}
+
+void Debugger::stepIn()
+{
+    giveCommand(StepIntoCommand);
+    if (updateLocals) giveCommand(LocalCommand);
+}
+
+void Debugger::run()
+{
+    giveCommand(RunCommand);
+    if (updateLocals) giveCommand(LocalCommand);
 }
 
 /*inline*/ void Debugger::giveCommand(const QByteArray& command)
@@ -140,6 +159,41 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
             }
         }
 
+        // Parse value of local variables
+        } else if (output.startsWith(LocalMessage)) {
+            output.chop(StartCommand.length());
+
+            QList<QTreeWidgetItem*> locals;
+
+            int pos = LocalMessage.length();
+            QRegExp numRx("(\\d+)\\s");
+            pos = numRx.indexIn(output, pos) + numRx.matchedLength();
+
+            QRegExp rx("\\s*(\\d+)\t(\\d+)\t");
+            while ((pos = rx.indexIn(output, pos)) != -1) {
+                pos += rx.matchedLength();
+
+                // parse values of field
+                QRegExp fieldRx(QString("(.{")
+                                .append(rx.cap(1))
+                                .append("})\t(\\w+)\t(.{")
+                                .append(rx.cap(2))
+                                .append("})."));
+                pos = fieldRx.indexIn(output, pos);
+                pos += fieldRx.matchedLength();
+
+                QString name = fieldRx.cap(1);
+                name = name.mid(1, name.length()-2);
+
+                // create and add new field to table
+                QTreeWidgetItem* newLocal = new QTreeWidgetItem((QTreeWidget*)0,
+                    QStringList() << name
+                                  << fieldRx.cap(3)   // value
+                                  << fieldRx.cap(2)); // type
+                locals.append(newLocal);
+            }
+            emit localsChanged(&locals);
+
     // Parse values of table
     } else if(output.startsWith(TableMessage) && !tables.isEmpty()) {
         output.chop(StartCommand.length());
@@ -154,7 +208,7 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
         }
 
         int pos = TableMessage.length();
-        QRegExp numRx("\\s*(\\d+)\\s");
+        QRegExp numRx("(\\d+)\\s");
         pos = numRx.indexIn(output, pos) + numRx.matchedLength();
 
         QRegExp rx("\\s*(\\d+)\t(\\d+)\t");

@@ -8,7 +8,7 @@
 
 local socket = require "socket"
 
-local server = socket.bind("*", 8171)
+local server = socket.bind("*", 8172)
 if server == nil then
   print "Error: Remdebug already running"
   os.exit()

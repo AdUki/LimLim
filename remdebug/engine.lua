@@ -18,6 +18,8 @@ _DESCRIPTION = "Remote Debugger for the Lua programming language"
 _VERSION = "1.0"
 
 local coro_debugger
+local local_vars = {}
+local locals_stack_level = 1
 local events = { BREAK = 1, WATCH = 2 }
 local breakpoints = {}
 local watches = {}
@@ -27,7 +29,7 @@ local step_level = 0
 local stack_level = 0
 
 local controller_host = "localhost"
-local controller_port = 8171
+local controller_port = 8172
 
 local function set_breakpoint(file, line)
   if not breakpoints[file] then
@@ -73,12 +75,14 @@ local function restore_vars(vars)
 end
 
 local function capture_vars()
+  local_vars = {}
   local vars = {}
   local func = debug.getinfo(3, "f").func
   local i = 1
   while true do
     local name, value = debug.getupvalue(func, i)
     if not name then break end
+    local_vars[name] = value
     vars[name] = value
     i = i + 1
   end
@@ -88,6 +92,7 @@ local function capture_vars()
     if not name then break end
     -- ignore temporary variables
     if name:sub(1,1) ~= '(' then
+      local_vars[name] = value
       vars[name] = value
     end
     i = i + 1
@@ -118,6 +123,23 @@ local function merge_paths(path1, path2)
   end
   if path1:sub(1,1) == '/' then return "/" .. table.concat(paths1, "/")
   else return table.concat(paths1, "/") end
+end
+
+local function evalTable(tab)
+	local numFields = 0
+	local sertable = {}
+	for i,v in pairs(tab) do
+	    local val = tostring(v)
+	    local key = tostring(i)
+	    if type(i) == 'string' then key = '"' .. key .. '"' end
+		sertable[#sertable+1] = tostring(string.len(key)) .. '\t'
+		    .. tostring(string.len(val)) .. '\t'
+			.. key .. '\t'
+			.. type(v) .. '\t'
+			.. val .. '\n'
+		numFields = numFields + 1
+	end
+	return table.concat(sertable), numFields;
 end
 
 local function debug_hook(event, line)
@@ -226,22 +248,6 @@ local function debugger_loop(server)
     elseif command == "TABLE" then
       local _, _, chunk = string.find(line, "^[A-Z]+%s+(.+)$")
       if chunk then
-        local function evalTable(tab)
-			local numFields = 0
-			local sertable = {}
-			for i,v in pairs(tab) do
-			    local val = tostring(v)
-			    local key = tostring(i)
-			    if type(i) == 'string' then key = '"' .. key .. '"' end
-				sertable[#sertable+1] = tostring(string.len(key)) .. '\t'
-				    .. tostring(string.len(val)) .. '\t'
-					.. key .. '\t'
-					.. type(v) .. '\t'
-					.. val .. '\n'
-				numFields = numFields + 1
-			end
-			return table.concat(sertable), numFields;
-        end
         -- TODO set new environment for loadstring
         local func = loadstring('return ' .. chunk)
         local res, status, tab
@@ -267,17 +273,8 @@ local function debugger_loop(server)
     --	LOCAL command
     --
     elseif command == "LOCAL" then
-    	local tb = debug.traceback()
-    	print ("Dlzka: " .. string.len(tb))
-    	print (tb)
-    	local res, locals = {};
-    	for i = 1, math.huge do
-        	local n, v = debug.getlocal(6, i)
-        	print (">>>",n,v)
-        	if not n then break end
-        	locals[#locals + 1] = '\n' .. n .. v
-		end
-		res = table.concat(locals)
+    	local locals, num = evalTable(local_vars)
+    	local res = tostring(num) .. '\n' .. locals
 		server:send("200 OK " .. string.len(res) .. "\n")
         server:send(res)
     --
