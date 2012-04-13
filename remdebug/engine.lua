@@ -146,14 +146,14 @@ local function debug_hook(event, line)
 	-- print ("Dir: " .. dir)
 
     local vars = capture_vars()
-    table.foreach(watches, function (index, value)
+    for index, value in ipairs(watches) do
       setfenv(value, vars)
       local status, res = pcall(value)
       if status and res then
         coroutine.resume(coro_debugger, events.WATCH, vars, file, line, index)
-	restore_vars(vars)
+		restore_vars(vars)
       end
-    end)
+    end
     if step_into or (step_over and stack_level <= step_level) or has_breakpoint(file, line) then
       step_into = false
       step_over = false
@@ -262,7 +262,31 @@ local function debugger_loop(server)
         end
       else
         server:send("400 Bad Request\n")
-      end      
+      end
+    --
+    --	LOCAL command
+    --
+    elseif command == "LOCAL" then
+    	local tb = debug.traceback()
+    	print ("Dlzka: " .. string.len(tb))
+    	print (tb)
+    	local res, locals = {};
+    	for i = 1, math.huge do
+        	local n, v = debug.getlocal(6, i)
+        	print (">>>",n,v)
+        	if not n then break end
+        	locals[#locals + 1] = '\n' .. n .. v
+		end
+		res = table.concat(locals)
+		server:send("200 OK " .. string.len(res) .. "\n")
+        server:send(res)
+    --
+    --	BACKTRACE command
+    -- 
+    elseif command == "TRACEBACK" then
+		local res = debug.traceback()
+		server:send("200 OK " .. string.len(res) .. "\n")
+		server:send(res)
     --
     --	SETW command
     --
@@ -270,10 +294,12 @@ local function debugger_loop(server)
       local _, _, exp = string.find(line, "^[A-Z]+%s+(.+)$")
       if exp then
         local func = loadstring("return(" .. exp .. ")")
-        local newidx = table.getn(watches) + 1
-        watches[newidx] = func
-        table.setn(watches, newidx)
-        server:send("200 OK " .. newidx .. "\n")
+        watches[#watches + 1] = func
+        if func then
+        	server:send("200 OK " .. #watches .. "\n")
+        else
+        	server:send("401 Error in Expression\n")
+        end
       else
         server:send("400 Bad Request\n")
       end

@@ -116,7 +116,7 @@ while true do
           local _, _, watch_idx = string.find(answer, "^200 OK (%d+)$")
           if watch_idx then
                 watches[watch_idx] = exp
-                print("Inserted watch exp no. " .. watch_idx)
+                print("Watch: " .. watch_idx)
           else
                 print("Error: Watch expression not inserted")
           end
@@ -232,6 +232,43 @@ while true do
         else
           print("Error: Invalid command")
         end
+  --
+  -- TRACEBACK command
+  --
+  elseif command == "traceback" then
+      client:send("TRACEBACK\n")
+      local line = client:receive()
+      local _, _, status, len = string.find(line, "^(%d+)[a-zA-Z ]+%s*(%d+)$")
+      if status == "200" then
+            len = tonumber(len)
+            local res = client:receive(len)
+            print(res)
+      elseif status == "401" then
+            len = tonumber(len)
+            local res = client:receive(len)
+            print("Error: Invalid expression:" .. res)
+      else
+            print("Error: Unknown error")
+      end
+
+  --
+  -- LOCAL command
+  --
+  elseif command == "local" then
+      client:send("LOCAL\n")
+      local line = client:receive()
+      local _, _, status, len = string.find(line, "^(%d+)[a-zA-Z ]+%s*(%d+)$")
+      if status == "200" then
+            len = tonumber(len)
+            local res = client:receive(len)
+            io.write("Local: " .. res)
+      elseif status == "401" then
+            len = tonumber(len)
+            local res = client:receive(len)
+            print("Error: Invalid expression:" .. res)
+      else
+            print("Error: Unknown error")
+      end
 
   --
   -- EXEC command
