@@ -36,8 +36,10 @@ Interpreter::~Interpreter()
     delete ui;
 }
 
-void Interpreter::addDebug()
+void Interpreter::debug(Source* source)
 {
+    if (source == NULL) return;
+
     QString remdebugPath = QString(APP_DIR_PATH).append("?.lua");
 #ifdef Q_WS_WIN
     remdebugPath.replace('\\', "\\\\");
@@ -45,6 +47,8 @@ void Interpreter::addDebug()
     QString query = QString("package.path = '").append(remdebugPath).append(";' .. package.path");
     options << "-e" << query;
     options << "-e" << "require 'remdebug.engine'.start()";
+
+    run(source);
 }
 
 bool Interpreter::run(Source* source)

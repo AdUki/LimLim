@@ -36,6 +36,12 @@ Debugger::Debugger(Editor *editor, Console *console, QObject *parent) :
     this->console = console;
 }
 
+Debugger::~Debugger()
+{
+    // End debugger if it is runnning
+    if (status != Off) stop();
+}
+
 void Debugger::start()
 {
     if (status != Off) return;

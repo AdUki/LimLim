@@ -26,7 +26,7 @@ public:
     /** Function adds debug mode
       * when you want to debug code run this ALWAYS before run()
       */
-    void addDebug();
+    void debug(Source* source);
 
     bool runFile(const QString &file);
 

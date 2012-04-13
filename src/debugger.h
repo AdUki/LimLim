@@ -24,6 +24,7 @@ class Debugger : public QObject
 Q_OBJECT
 public:
     explicit Debugger(Editor *editor, Console *console, QObject *parent = 0);
+    ~Debugger();
 
     enum DebugStatus { Running, Waiting, On, Off };
 

@@ -58,12 +58,12 @@ void LuaControl::run()
 
 void LuaControl::debug()
 {
+    if (luaEditor->currentSource() == NULL) return;
     debugConsole->setVerbose();
-    luaInterpret->addDebug();
     if (luaDebugger->getStatus() == Debugger::Off) {
         debugging = true;
         luaDebugger->start();
-    } else run();
+    } else luaInterpret->debug(luaEditor->currentSource());
 }
 
 void LuaControl::stop()
@@ -74,7 +74,7 @@ void LuaControl::stop()
 
 void LuaControl::controllerReady()
 {
-    if (debugging) run();
+    if (debugging) luaInterpret->debug(luaEditor->currentSource());
     debugging = false;
 }
 
