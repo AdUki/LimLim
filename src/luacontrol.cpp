@@ -11,6 +11,7 @@
 #include "debugger.h"
 #include "watcher.h"
 #include "hideeventwatcher.h"
+#include "stack.h"
 
 LuaControl::LuaControl()
 {
@@ -317,6 +318,12 @@ void LuaControl::createDockWindows()
         dock->setWidget(luaLocalsView);
         addDockWidget(Qt::RightDockWidgetArea, dock);
 
+        // Stack dock widget
+        dock = new QDockWidget(tr("Stack traceback"), this);
+        dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+        dock->setWidget(luaStack);
+        addDockWidget(Qt::BottomDockWidgetArea, dock);
+
         // Controller dock widget for debug
         dock = new QDockWidget(tr("RemDebug"), this);
         dock->setAllowedAreas(Qt::AllDockWidgetAreas);
@@ -366,7 +373,7 @@ void LuaControl::createWatchers()
     //
     luaLocalsView = new Watcher(this);
 
-    HideEventWatcher *ew = new HideEventWatcher();
+    HideEventWatcher *ew = new HideEventWatcher(luaLocalsView);
     connect(ew, SIGNAL(isShown(bool)), luaDebugger, SLOT(setUpdateLocals(bool)));
     luaLocalsView->installEventFilter(ew);
 
@@ -378,6 +385,18 @@ void LuaControl::createWatchers()
             luaDebugger,      SLOT(updateWatches(QList<QTreeWidgetItem*>*)));
     connect(luaLocalsView, SIGNAL(updateTable(QTreeWidgetItem*)),
             luaDebugger,      SLOT(updateTable(QTreeWidgetItem*)));
+    
+    //
+    // Stack watcher
+    //
+    luaStack = new Stack(this);
+    connect(luaDebugger, SIGNAL(stackChanged(QStringList*)),
+            luaStack,      SLOT(setStack(QStringList*)));
+    connect(luaStack, SIGNAL(highlightSource(QString,uint)),
+            luaEditor, SLOT(gotoLine(QString,uint)));
+    ew = new HideEventWatcher(luaStack);
+    connect(ew, SIGNAL(isShown(bool)), luaDebugger, SLOT(setUpdateStack(bool)));
+    luaStack->installEventFilter(ew);
 }
 
 void LuaControl::closeEvent(QCloseEvent *event)

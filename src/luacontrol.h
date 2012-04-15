@@ -13,6 +13,7 @@ class Interpreter;
 class Editor;
 class Console;
 class Watcher;
+class Stack;
 
 class LuaControl : public QMainWindow
 {
@@ -54,6 +55,7 @@ private:
     Interpreter *luaInterpret;
     Editor *luaEditor;
     Debugger *luaDebugger;
+    Stack *luaStack;
 
     Watcher *luaWatchesView;
     QTreeView *luaLocalsView;

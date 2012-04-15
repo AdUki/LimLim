@@ -46,7 +46,7 @@ void Interpreter::debug(Source* source)
 #endif
     QString query = QString("package.path = '").append(remdebugPath).append(";' .. package.path");
     options << "-e" << query;
-    options << "-e" << "require 'remdebug.engine'.start()";
+    options << "-e" << "require 'limdebug.engine'.start()";
 
     run(source);
 }

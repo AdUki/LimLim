@@ -28,7 +28,7 @@ public slots:
 
     void setSilent();
     void setVerbose();
-    void setPrintOutput(bool print) { printOutput = print; }
+    void setPrintOutput(bool print);
 
     void writeInput (const QByteArray& data);
     void writeOutput(const QByteArray& data);

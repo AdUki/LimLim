@@ -18,6 +18,7 @@ static const QByteArray LocalCommand = QByteArray("local\n");
 static const QByteArray ExecuteCommand = QByteArray("exec ");
 static const QByteArray EvaluateCommand = QByteArray("eval ");
 static const QByteArray TableCommand = QByteArray("table ");
+static const QByteArray StackCommand = QByteArray("traceback\n");
 
 class Debugger : public QObject
 {
@@ -56,6 +57,7 @@ public slots:
 
     void setAutoRun(bool enabled) { autoRun = enabled; }
     void setUpdateLocals(bool enabled) { updateLocals = enabled; }
+    void setUpdateStack(bool enabled) { updateStack = enabled; }
 
 private:
     Console *console;
@@ -71,6 +73,7 @@ private:
 
     bool autoRun;
     bool updateLocals;
+    bool updateStack;
 
     inline void giveCommand(const QByteArray& command);
 

@@ -2,7 +2,7 @@
 -- RemDebug for LuaIDE
 -- Copyright Kepler Project 2005 (http://www.keplerproject.org/remdebug)
 --
--- Modified 2011-2012 for LuaIDE project by Simon Mikuda
+-- Modified 2011-2012 for LuaIDE project by Simon Mikuda to LimDebug
 -- Bachelor project on STU Fiit
 -- Project manager: Ing. Michal Kottman
 -- Copyright Simon Mikuda STU Fiit 2012
@@ -13,7 +13,7 @@ local socket = require "socket"
 local lfs = require "lfs"
 local debug = require "debug"
 
-module("remdebug.engine", package.seeall)
+module("limdebug.engine", package.seeall)
 
 _COPYRIGHT = "2006 - Kepler Project"
 _DESCRIPTION = "Remote Debugger for the Lua programming language"
@@ -78,7 +78,7 @@ end
 
 local function capture_vars()
   local_vars = {}
-  traceback = debug.traceback("", 3)
+  traceback = debug.traceback("", 4)
   local vars = {}
   local func = debug.getinfo(3, "f").func
   local i = 1

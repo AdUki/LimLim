@@ -22,10 +22,6 @@ public:
     virtual ~Interpreter();
 
     bool run(Source* source);
-
-    /** Function adds debug mode
-      * when you want to debug code run this ALWAYS before run()
-      */
     void debug(Source* source);
 
     bool runFile(const QString &file);

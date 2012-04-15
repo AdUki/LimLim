@@ -142,28 +142,42 @@ Source* Editor::currentSource()
     else return NULL;
 }
 
-void Editor::debugLine(QString file, unsigned line)
+Source* Editor::openTabWithSource(const QString &file)
 {
-    debugClear();
+    Source *source = NULL;
 
-    debugSource = NULL;
-    file = file.trimmed(); // Damn you whitespace! Give me back my 3 hours!!!
-
-    int i;
-    for (i = 0; i < count(); i++) {
+    // Try to find file in tabs
+    for (int i = 0; i < count(); i++) {
         Source* src = static_cast<Source*>(widget(i));
         if (QFileInfo(src->getFileName()) == QFileInfo(file)) {
             setCurrentIndex(i);
-            debugSource = src; // Found file in tabs
+            source = src; // Found file in tabs
             break;
         }
     }
-    if (debugSource == NULL) { // Try to open referenced file
-        debugSource = openSource(file);
-        if (debugSource == NULL) return; // Failed to open file
-        debugSource->lock();
+    // Try to open referenced file
+    if (source == NULL) {
+        source = openSource(file);
     }
+    return source;
+}
 
+void Editor::gotoLine(const QString &file, unsigned line)
+{
+    Source *gotoSource = openTabWithSource(file);
+    if (gotoSource == NULL) return;
+
+    gotoSource->setCursorPosition(line-1, 0);
+}
+
+void Editor::debugLine(const QString &file, unsigned line)
+{
+    debugClear();
+
+    debugSource = openTabWithSource(file);
+    if (debugSource == NULL) return; // Failed to open file
+
+    debugSource->lock();
     markerHandle = debugSource->markerAdd(line-1, QsciScintilla::RightArrow);
     debugSource->setCursorPosition(line-1, 0);
 }

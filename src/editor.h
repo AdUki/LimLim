@@ -44,8 +44,10 @@ public slots:
     void saveAllSources();
     bool closeAllSources(); // call this before exit
 
-    void debugLine(QString file, unsigned line);
+    void debugLine(const QString &file, unsigned line);
     void debugClear();
+
+    void gotoLine(const QString &file, unsigned line);
 
 private:
     Source* addSource(Source* source);
@@ -56,6 +58,7 @@ private:
 private slots:
     void closeTabWithSource(int i);
     void updateSourceNames();
+    Source* openTabWithSource(const QString& file);
 };
 
 #endif // EDITOR_H

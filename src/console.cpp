@@ -13,12 +13,22 @@ Console::Console(QWidget *parent) : QTextEdit(parent)
 
 void Console::setSilent()
 {
+#ifndef QT_DEBUG
     printOutput = false;
+#endif
 }
 
 void Console::setVerbose()
 {
     printOutput = true;
+}
+
+void Console::setPrintOutput(bool print)
+{
+    printOutput = print;
+#ifdef QT_DEBUG
+    printOutput = true;
+#endif
 }
 
 void Console::open()

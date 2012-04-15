@@ -26,6 +26,7 @@ Debugger::Debugger(Editor *editor, Console *console, QObject *parent) :
 
     autoRun = false;
     updateLocals = true;
+    updateStack = true;
     status = Off;
 
     connect(console, SIGNAL(emitOutput(QByteArray)), this, SLOT(parseInput(QByteArray)));
@@ -48,7 +49,7 @@ void Debugger::start()
     if (status != Off) return;
     // Start RemDebug controller
     QString contPath = QString(APP_DIR_PATH)
-            .append("remdebug")
+            .append("limdebug")
             .append(QDir::separator())
             .append("controller.lua");
     remdebug->runFile(contPath);
@@ -64,6 +65,7 @@ void Debugger::stepOver()
     console->setSilent();
     giveCommand(StepOverCommand);
     if (updateLocals) giveCommand(LocalCommand);
+    if (updateStack) giveCommand(StackCommand);
 }
 
 void Debugger::stepIn()
@@ -71,6 +73,7 @@ void Debugger::stepIn()
     console->setSilent();
     giveCommand(StepIntoCommand);
     if (updateLocals) giveCommand(LocalCommand);
+    if (updateStack) giveCommand(StackCommand);
 }
 
 void Debugger::run()
@@ -78,6 +81,7 @@ void Debugger::run()
     console->setSilent();
     giveCommand(RunCommand);
     if (updateLocals) giveCommand(LocalCommand);
+    if (updateStack) giveCommand(StackCommand);
 }
 
 
@@ -137,8 +141,9 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
         int line = rx.cap(2).toInt();   // get line number
         int watch = rx.cap(4).toInt();  // get watch id
         Q_UNUSED(watch);
-        QString file = rx.cap(5);
+        QString file = rx.cap(5).trimmed(); // Damn you whitespace! Give me back my 3 hours!!!
 
+        // TODO change to signal
         editor->debugLine(file, line);
 
         // Update all watched expressions

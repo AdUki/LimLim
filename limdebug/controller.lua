@@ -2,13 +2,13 @@
 -- RemDebug 1.0
 -- Copyright Kepler Project 2005-2007 (http://www.keplerproject.org/remdebug)
 --
--- Modified 2011-2012 for LuaIDE project by Simon Mikuda
+-- Modified 2011-2012 for LuaIDE project by Simon Mikuda to LimDebug
 -- Bachelor project on STU Fiit
 -- Project manager: Ing. Michal Kottman
 -- Copyright Simon Mikuda STU Fiit 2012
 --
 
-print "LuaIDE controller"
+print "LimDebug controller"
 
 local socket = require "socket"
 
