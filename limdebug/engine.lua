@@ -246,7 +246,6 @@ local function debugger_loop(server)
     elseif command == "EVAL" then
       local _, _, chunk = string.find(line, "^[A-Z]+%s+(.+)$")
       if chunk then
-      print(chunk)
         local func = loadstring(chunk)
         local res, value
         if func then

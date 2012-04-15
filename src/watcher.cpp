@@ -58,10 +58,9 @@ void Watcher::updateItem(QTreeWidgetItem *item, int column)
         }
         break;
     case 1: // value
-        emit setWatch(item);
+        //emit setWatch(item);
         break;
     case 2: // type
-        emit updateWatch(item);
         break;
     }
 }

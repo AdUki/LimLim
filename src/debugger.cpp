@@ -234,9 +234,10 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
         QTreeWidgetItem *table = tables.takeFirst();
 
         // remeber expanded table names
-        QSet<QString> children;
+        // TODO fix this for n nested tables
+        expandedTables.clear();
         foreach(QTreeWidgetItem* field, table->takeChildren()) {
-            if (field->childCount() > 0) children.insert(field->text(0));
+            if (field->childCount() > 0) expandedTables.insert(field->text(0));
         }
 
         int pos = TableMessage.length();
@@ -264,7 +265,7 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
             table->addChild(field);
 
             // update nested table fields
-            if (children.contains(field->text(0)) && field->text(2).compare("table") == 0)
+            if (expandedTables.contains(field->text(0)) && field->text(2).compare("table") == 0)
                 updateTable(field);
         }
         table->setExpanded(true);
@@ -332,7 +333,7 @@ void Debugger::updateWatch(QTreeWidgetItem *watch)
 {
     if (status == Off || status == On) return;
     console->setSilent();
-
+    
     watches.append(watch);
 
     // evaluate watch
@@ -371,6 +372,23 @@ void Debugger::updateWatches(QList<QTreeWidgetItem*> *watches)
     giveCommand(eval.join("").toAscii());
 }
 
+// TODO refactor QTreeWidgetItem to its own class and put this method there
+QString Debugger::getWatchName(const QTreeWidgetItem *watch)
+{
+    QString rootTable = watch->text(0);
+    QString tableIndexes = "";
+    while (watch->parent() != NULL)
+    {
+        watch = watch->parent();
+        rootTable.prepend('[');
+        rootTable.append(']');
+
+        tableIndexes.prepend(rootTable);
+        rootTable = watch->text(0);
+    }
+    return rootTable.append(tableIndexes);
+}
+
 void Debugger::updateTable(QTreeWidgetItem *table)
 {
     if (status == Off || status == On) return;
@@ -378,20 +396,22 @@ void Debugger::updateTable(QTreeWidgetItem *table)
 
     tables.append(table);
 
-    QString rootTable = table->text(0);
-    QString tableIndexes = "";
-    while (table->parent() != NULL)
-    {
-        table = table->parent();
-        rootTable.prepend('[');
-        rootTable.append(']');
-
-        tableIndexes.prepend(rootTable);
-        rootTable = table->text(0);
-    }
-
     giveCommand(QByteArray(TableCommand)
-                .append(rootTable)
-                .append(tableIndexes)
+                .append(getWatchName(table))
                 .append("\n"));
+}
+
+void Debugger::setWatch(QTreeWidgetItem *watch)
+{
+    //if (numUpdated > 0) { numUpdated--; return; }
+    if (status == Off || status == On) return;
+    console->setSilent();
+
+    giveCommand(QByteArray(ExecuteCommand)
+                .append(getWatchName(watch)
+                .append(" = ")
+                .append(watch->text(1)))
+                .append("\n"));
+
+    updateWatch(watch);
 }

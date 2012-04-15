@@ -55,6 +55,8 @@ public slots:
     void updateWatches(QList<QTreeWidgetItem*> *watches);
     void updateTable(QTreeWidgetItem *table);
 
+    void setWatch(QTreeWidgetItem *watch);
+
     void setAutoRun(bool enabled) { autoRun = enabled; }
     void setUpdateLocals(bool enabled) { updateLocals = enabled; }
     void setUpdateStack(bool enabled) { updateStack = enabled; }
@@ -70,12 +72,14 @@ private:
 
     QList<QTreeWidgetItem*> watches;
     QList<QTreeWidgetItem*> tables;
+    QSet<QString> expandedTables;
 
     bool autoRun;
     bool updateLocals;
     bool updateStack;
 
     inline void giveCommand(const QByteArray& command);
+    QString getWatchName(const QTreeWidgetItem *watch);
 
 private slots:
     void parseInput(const QByteArray& remdebugOutput);

@@ -367,6 +367,8 @@ void LuaControl::createWatchers()
             luaDebugger,      SLOT(updateWatches(QList<QTreeWidgetItem*>*)));
     connect(luaWatchesView, SIGNAL(updateTable(QTreeWidgetItem*)),
             luaDebugger,      SLOT(updateTable(QTreeWidgetItem*)));
+    connect(luaWatchesView, SIGNAL(setWatch(QTreeWidgetItem*)),
+            luaDebugger,      SLOT(setWatch(QTreeWidgetItem*)));
 
     //
     // Local variables watcher
