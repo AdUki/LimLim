@@ -10,6 +10,7 @@
 #include "editor.h"
 #include "debugger.h"
 #include "watcher.h"
+#include "hideeventwatcher.h"
 
 LuaControl::LuaControl()
 {
@@ -363,7 +364,11 @@ void LuaControl::createWatchers()
     //
     // Local variables watcher
     //
-    luaLocalsView   = new Watcher(this);
+    luaLocalsView = new Watcher(this);
+
+    HideEventWatcher *ew = new HideEventWatcher();
+    connect(ew, SIGNAL(isShown(bool)), luaDebugger, SLOT(setUpdateLocals(bool)));
+    luaLocalsView->installEventFilter(ew);
 
     connect(luaDebugger,  SIGNAL(localsChanged(QList<QTreeWidgetItem*>*)),
             luaLocalsView, SLOT(replaceAllWatches(QList<QTreeWidgetItem*>*)));

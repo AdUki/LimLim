@@ -10,6 +10,7 @@ static const QByteArray PauseMessage = QByteArray("Paused:");
 static const QByteArray EvaluateMessage = QByteArray("Evaluate:");
 static const QByteArray TableMessage = QByteArray("Table:");
 static const QByteArray LocalMessage = QByteArray("Local:");
+static const QByteArray StackMessage = QByteArray("\nstack traceback:");
 
 /*
 	Lua debugger class
@@ -169,40 +170,56 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
             }
         }
 
-        // Parse value of local variables
-        } else if (output.startsWith(LocalMessage)) {
-            output.chop(StartCommand.length());
+    // Parse value of local variables
+    } else if (output.startsWith(LocalMessage)) {
+        output.chop(StartCommand.length());
 
-            QList<QTreeWidgetItem*> locals;
+        QList<QTreeWidgetItem*> locals;
 
-            int pos = LocalMessage.length();
-            QRegExp numRx("(\\d+)\\s");
-            pos = numRx.indexIn(output, pos) + numRx.matchedLength();
+        int pos = LocalMessage.length();
+        QRegExp numRx("(\\d+)[\r\n]+");
+        pos = numRx.indexIn(output, pos) + numRx.matchedLength();
 
-            QRegExp rx("\\s*(\\d+)\t(\\d+)\t");
-            while ((pos = rx.indexIn(output, pos)) != -1) {
-                pos += rx.matchedLength();
+        QRegExp rx("(\\d+)\t(\\d+)\t");
+        while ((pos = rx.indexIn(output, pos)) != -1) {
+            pos += rx.matchedLength();
 
-                // parse values of field
-                QRegExp fieldRx(QString("(.{")
-                                .append(rx.cap(1))
-                                .append("})\t(\\w+)\t(.{")
-                                .append(rx.cap(2))
-                                .append("})."));
-                pos = fieldRx.indexIn(output, pos);
-                pos += fieldRx.matchedLength();
+            // parse values of field
+            QRegExp fieldRx(QString("(.{")
+                            .append(rx.cap(1))
+                            .append("})\t(\\w+)\t(.{")
+                            .append(rx.cap(2))
+                            .append("})[\r\n]+"));
+            pos = fieldRx.indexIn(output, pos);
+            pos += fieldRx.matchedLength();
 
-                QString name = fieldRx.cap(1);
-                name = name.mid(1, name.length()-2);
+            QString name = fieldRx.cap(1);
+            name = name.mid(1, name.length()-2);
 
-                // create and add new field to table
-                QTreeWidgetItem* newLocal = new QTreeWidgetItem((QTreeWidget*)0,
-                    QStringList() << name
-                                  << fieldRx.cap(3)   // value
-                                  << fieldRx.cap(2)); // type
-                locals.append(newLocal);
-            }
-            emit localsChanged(&locals);
+            // create and add new field to table
+            QTreeWidgetItem* newLocal = new QTreeWidgetItem((QTreeWidget*)0,
+                QStringList() << name
+                              << fieldRx.cap(3)   // value
+                              << fieldRx.cap(2)); // type
+            locals.append(newLocal);
+        }
+        emit localsChanged(&locals);
+
+    // Parse stack trace
+    } else if (output.startsWith(StackMessage)) {
+        output.chop(StartCommand.length());
+
+        QStringList stack;
+
+        int pos = StackMessage.length();
+        QRegExp rx("[\r\n]+\t([^\r\n]+)");
+        while ((pos = rx.indexIn(output, pos)) != -1) {
+            pos += rx.matchedLength();
+            QString line = rx.cap(1);
+            if (!line.isEmpty()) stack.append(line);
+        }
+        if (!stack.isEmpty()) stack.pop_back();
+        emit stackChanged(&stack);
 
     // Parse values of table
     } else if(output.startsWith(TableMessage) && !tables.isEmpty()) {
@@ -218,20 +235,19 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
         }
 
         int pos = TableMessage.length();
-        QRegExp numRx("(\\d+)\\s");
+        QRegExp numRx("(\\d+)[\r\n]+");
         pos = numRx.indexIn(output, pos) + numRx.matchedLength();
 
-        QRegExp rx("\\s*(\\d+)\t(\\d+)\t");
+        QRegExp rx("(\\d+)\t(\\d+)\t");
         while ((pos = rx.indexIn(output, pos)) != -1) {
             pos += rx.matchedLength();
 
-            // TODO doesn't work with package.config
             // parse values of field
             QRegExp fieldRx(QString("(.{")
                             .append(rx.cap(1))
                             .append("})\t(\\w+)\t(.{")
                             .append(rx.cap(2))
-                            .append("})."));
+                            .append("})[\r\n]+"));
             pos = fieldRx.indexIn(output, pos);
             pos += fieldRx.matchedLength();
 

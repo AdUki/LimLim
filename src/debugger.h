@@ -36,6 +36,7 @@ signals:
     void luaStateChanged();
     // TODO maybe change to "QList* getLocals()" but then watcher needs reference to debugger
     void localsChanged(QList<QTreeWidgetItem*> *locals);
+    void stackChanged(QStringList *stack);
 
     void started();
     void finished();
@@ -54,6 +55,7 @@ public slots:
     void updateTable(QTreeWidgetItem *table);
 
     void setAutoRun(bool enabled) { autoRun = enabled; }
+    void setUpdateLocals(bool enabled) { updateLocals = enabled; }
 
 private:
     Console *console;

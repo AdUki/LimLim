@@ -21,7 +21,7 @@ _VERSION = "1.0"
 
 local coro_debugger
 local local_vars = {}
-local locals_stack_level = 1
+local traceback
 local events = { BREAK = 1, WATCH = 2 }
 local breakpoints = {}
 local watches = {}
@@ -78,6 +78,7 @@ end
 
 local function capture_vars()
   local_vars = {}
+  traceback = debug.traceback("", 3)
   local vars = {}
   local func = debug.getinfo(3, "f").func
   local i = 1
@@ -280,12 +281,11 @@ local function debugger_loop(server)
 		server:send("200 OK " .. string.len(res) .. "\n")
         server:send(res)
     --
-    --	BACKTRACE command
+    --	TRACEBACK command
     -- 
     elseif command == "TRACEBACK" then
-		local res = debug.traceback()
-		server:send("200 OK " .. string.len(res) .. "\n")
-		server:send(res)
+		server:send("200 OK " .. string.len(traceback) .. "\n")
+		server:send(traceback)
     --
     --	SETW command
     --
