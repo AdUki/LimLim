@@ -13,7 +13,8 @@ SOURCES += src/main.cpp \
     src/source.cpp \
     src/editor.cpp \
     src/breakpoint.cpp \
-    src/watcher.cpp
+    src/watcher.cpp \
+    src/hideeventwatcher.cpp
 HEADERS += src/interpreter.h \
     src/luacontrol.h \
     src/debugger.h \
@@ -22,7 +23,8 @@ HEADERS += src/interpreter.h \
     src/editor.h \
     src/breakpoint.h \
     src/watcher.h \
-    src/global.h
+    src/global.h \
+    src/hideeventwatcher.h
 LIBS += -lqscintilla2
 RESOURCES += icons.qrc
 OTHER_FILES += remdebug/controller.lua \
