@@ -223,7 +223,30 @@ local function debugger_loop(server)
     --
     elseif command == "EXEC" then
       local _, _, chunk = string.find(line, "^[A-Z]+%s+(.+)$")
+      if chunk then 
+        local func = loadstring(chunk)
+        local status, res
+        if func then
+          setfenv(func, eval_env)
+          status, res = xpcall(func, debug.traceback)
+        end
+        if status then
+          server:send("200 OK 0\n")
+        else
+          res = tostring(res)
+          server:send("401 Error in Expression " .. string.len(res) .. "\n")
+          server:send(res)
+        end
+      else
+        server:send("400 Bad Request\n")
+      end
+    --
+    --	EVAL command
+    --
+    elseif command == "EVAL" then
+      local _, _, chunk = string.find(line, "^[A-Z]+%s+(.+)$")
       if chunk then
+      print(chunk)
         local func = loadstring(chunk)
         local res, value
         if func then

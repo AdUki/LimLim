@@ -196,7 +196,7 @@ while true do
   elseif command == "eval" then
         local _, _, exp = string.find(line, "^%a+%s+(.+)$")
         if exp then
-          client:send("EXEC return " .. exp .. ", 1\n")
+          client:send("EVAL return " .. exp .. ", 1\n")
           local line = client:receive()
           local _, _, status, len = string.find(line, "^(%d+)[a-zA-Z ]+%s*(%d+)$")
           if status == "200" then
@@ -281,19 +281,16 @@ while true do
   -- EXEC command
   --
   elseif command == "exec" then
-        local _, _, exp = string.find(line, "^.... (.+)$")
+        local _, _, exp = string.find(line, "^[a-z]+%s+(.+)$")
         if exp then
           client:send("EXEC " .. exp .. "\n")
           local line = client:receive()
           local _, _, status, len = string.find(line, "^(%d+)[%s%w]+ (%d+)$")
           if status == "200" then
-                len = tonumber(len)
-                local res = client:receive(len)
---        print(res)  -- for output use eval
           elseif status == "401" then
                 len = tonumber(len)
                 local res = client:receive(len)
-                print("Error: Invalid expression")
+                print("Error: Invalid expression" .. res)
           else
                 print("Error: Unknown error")
           end
@@ -352,6 +349,8 @@ while true do
         print("listw                 -- lists watch expressions")
         print("eval <exp>            -- evaluates expression on the current context and returns its value")
         print("exec <stmt>           -- executes statement on the current context")
+        print("table <name>	         -- ")
+        print("traceback             -- ")
         print("basedir [<path>]      -- sets the base path of the remote application, or shows the current one")
         print("exit                  -- exits debugger")
   else
