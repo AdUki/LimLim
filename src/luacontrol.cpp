@@ -50,6 +50,7 @@ LuaControl::LuaControl()
     readSettings();
     setWindowIcon(QIcon(":/images/lua.png"));
     setAttribute(Qt::WA_DeleteOnClose);
+    this->setDockNestingEnabled(true);
 }
 
 void LuaControl::run()
@@ -288,9 +289,9 @@ void LuaControl::createToolBars()
 
 void LuaControl::createStatusBar()
 {
-	statusLabel = new QLabel("Welcome to Lua IDE");
-	statusBar()->addWidget(statusLabel);
-	updateStatusBar();
+    statusLabel = new QLabel("Welcome to Lua IDE");
+    statusBar()->addWidget(statusLabel);
+    updateStatusBar();
 }
 void LuaControl::updateStatusBar()
 {
@@ -298,35 +299,44 @@ void LuaControl::updateStatusBar()
 
 void LuaControl::createDockWindows()
 {
-        QDockWidget *dock;
+    QDockWidget *dock;
 
-	// Lua interpreter dock widget
+    // Lua interpreter dock widget
     dock = new QDockWidget(tr("Output"), this);
-	dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+    dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+    dock->setContentsMargins(0,0,0,0);
     dock->setWidget(luaConsole);
+    dock->setObjectName("interpreter");
     addDockWidget(Qt::BottomDockWidgetArea, dock);
 
     // Watches dock widget
     dock = new QDockWidget(tr("Watches"), this);
     dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+    dock->setContentsMargins(0,0,0,0);
     dock->setWidget(luaWatchesView);
+    dock->setObjectName("watches");
     addDockWidget(Qt::RightDockWidgetArea, dock);
 
-	// Locals dock widget
+    // Locals dock widget
     dock = new QDockWidget(tr("Locals"), this);
     dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+    dock->setContentsMargins(0,0,0,0);
     dock->setWidget(luaLocalsView);
+    dock->setObjectName("locals");
     addDockWidget(Qt::RightDockWidgetArea, dock);
 
     // Stack dock widget
     dock = new QDockWidget(tr("Stack traceback"), this);
     dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+    dock->setContentsMargins(0,0,0,0);
     dock->setWidget(luaStack);
+    dock->setObjectName("stack");
     addDockWidget(Qt::BottomDockWidgetArea, dock);
 
     // Controller dock widget for debug
     dock = new QDockWidget(tr("LimDebug"), this);
     dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+    dock->setContentsMargins(0,0,0,0);
     dock->setWidget(debugConsole);
     addDockWidget(Qt::BottomDockWidgetArea, dock);
 
@@ -443,8 +453,8 @@ void LuaControl::openRecentFile()
 void LuaControl::about()
 {
 	QMessageBox::about(this, tr("About Lua IDE"),
-			tr("<h2>Lua IDE 0.1</h2>"
-			   "<p>Copyright &copy; 2011 STU FIIT"
+                        tr("<h2>LimLim</h2>"
+                           "<p>Copyright &copy; 2011 Simon Mikuda STU FIIT"
 			   "<p>Lua IDE is a small application "
 			   "for debugging and programming "
 			   "in Lua language."));
@@ -452,15 +462,17 @@ void LuaControl::about()
 
 void LuaControl::writeSettings()
 {
-        QSettings settings("STU FIIT", "Lua IDE");
-	settings.setValue("geometry", saveGeometry());
-	settings.setValue("recentFiles", recentFiles);
+        QSettings settings("Simon Mikuda", "LimLim");
+        settings.setValue("mainwindow/geometry", saveGeometry());
+        settings.setValue("mainwindow/state", saveState());
+        settings.setValue("recentFiles", recentFiles);
 }
 
 void LuaControl::readSettings()
 {
-        QSettings settings("STU FIIT", "Lua IDE");
-	restoreGeometry(settings.value("geometry").toByteArray());
+        QSettings settings("Simon Mikuda", "LimLim");
+        restoreGeometry(settings.value("mainwindow/geometry").toByteArray());
+        restoreState(settings.value("mainwindow/state").toByteArray());
 	recentFiles = settings.value("recentFiles").toStringList();
 	updateRecentFileActions();
 }

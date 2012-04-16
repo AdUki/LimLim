@@ -8,6 +8,8 @@ Watcher::Watcher(QWidget *parent) : QTreeWidget(parent)
     setHeaderItem(new QTreeWidgetItem(QStringList()
         << tr("Expression") << tr("Value") << tr("Type")));
 
+
+
     setSelectionMode(QTreeView::SingleSelection);
     setContextMenuPolicy(Qt::ActionsContextMenu);
 

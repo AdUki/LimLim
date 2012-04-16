@@ -19,7 +19,7 @@ signals:
     void setWatch(QTreeWidgetItem *watch);
 
 public slots:
-    virtual void updateAll();
+    void updateAll();
     void allUpdated();
 
     void addWatch();
