@@ -301,37 +301,37 @@ void LuaControl::createDockWindows()
         QDockWidget *dock;
 
 	// Lua interpreter dock widget
-        dock = new QDockWidget(tr("Output"), this);
+    dock = new QDockWidget(tr("Output"), this);
 	dock->setAllowedAreas(Qt::AllDockWidgetAreas);
-        dock->setWidget(luaConsole);
-        addDockWidget(Qt::BottomDockWidgetArea, dock);
+    dock->setWidget(luaConsole);
+    addDockWidget(Qt::BottomDockWidgetArea, dock);
 
-        // Watches dock widget
-        dock = new QDockWidget(tr("Watches"), this);
-        dock->setAllowedAreas(Qt::AllDockWidgetAreas);
-        dock->setWidget(luaWatchesView);
-        addDockWidget(Qt::RightDockWidgetArea, dock);
+    // Watches dock widget
+    dock = new QDockWidget(tr("Watches"), this);
+    dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+    dock->setWidget(luaWatchesView);
+    addDockWidget(Qt::RightDockWidgetArea, dock);
 
 	// Locals dock widget
-        dock = new QDockWidget(tr("Locals"), this);
-        dock->setAllowedAreas(Qt::AllDockWidgetAreas);
-        dock->setWidget(luaLocalsView);
-        addDockWidget(Qt::RightDockWidgetArea, dock);
+    dock = new QDockWidget(tr("Locals"), this);
+    dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+    dock->setWidget(luaLocalsView);
+    addDockWidget(Qt::RightDockWidgetArea, dock);
 
-        // Stack dock widget
-        dock = new QDockWidget(tr("Stack traceback"), this);
-        dock->setAllowedAreas(Qt::AllDockWidgetAreas);
-        dock->setWidget(luaStack);
-        addDockWidget(Qt::BottomDockWidgetArea, dock);
+    // Stack dock widget
+    dock = new QDockWidget(tr("Stack traceback"), this);
+    dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+    dock->setWidget(luaStack);
+    addDockWidget(Qt::BottomDockWidgetArea, dock);
 
-        // Controller dock widget for debug
-        dock = new QDockWidget(tr("RemDebug"), this);
-        dock->setAllowedAreas(Qt::AllDockWidgetAreas);
-        dock->setWidget(debugConsole);
-        addDockWidget(Qt::BottomDockWidgetArea, dock);
+    // Controller dock widget for debug
+    dock = new QDockWidget(tr("RemDebug"), this);
+    dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+    dock->setWidget(debugConsole);
+    addDockWidget(Qt::BottomDockWidgetArea, dock);
 
-        // Breakpoints dock widget
-        // TODO implement breakpoint managment
+    // Breakpoints dock widget
+    // TODO implement breakpoint managment
 }
 
 void LuaControl::createWatchers()
