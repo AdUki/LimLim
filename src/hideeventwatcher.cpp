@@ -13,11 +13,11 @@ bool HideEventWatcher::eventFilter(QObject *obj, QEvent *event)
         emit isHidden(true);
         emit isShown(false);
         emit hidden();
-        return true;
     } else if (event->type() == QEvent::Show) {
         emit isHidden(false);
         emit isShown(true);
         emit shown();
-        return true;
     }
+    event->accept();
+    return true;
 }
