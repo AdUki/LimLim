@@ -15,9 +15,15 @@ local debug = require "debug"
 
 module("limdebug.engine", package.seeall)
 
-_COPYRIGHT = "2006 - Kepler Project"
-_DESCRIPTION = "Remote Debugger for the Lua programming language"
+_COPYRIGHT = "2006 - Kepler Project, 2011 - Simon Mikuda"
+_DESCRIPTION = "Remote Debugger for the Lua programming language\nModified to LimDebug"
 _VERSION = "1.0"
+
+-- initialize init state of _G table
+local base = {}
+for k,v in pairs(_G) do
+    base[k] = true
+end
 
 local coro_debugger
 local local_vars = {}
@@ -32,6 +38,17 @@ local stack_level = 0
 
 local controller_host = "localhost"
 local controller_port = 8172
+
+-- return global variables in table
+function globals()
+  local global_vars = {}
+  for i, v in pairs(_G) do
+    if not base[i] then
+      global_vars[i] = v
+    end
+  end
+  return global_vars
+end
 
 local function set_breakpoint(file, line)
   if not breakpoints[file] then
@@ -299,6 +316,14 @@ local function debugger_loop(server)
     --
     elseif command == "LOCAL" then
     	local locals, num = evalTable(local_vars)
+    	local res = tostring(num) .. '\n' .. locals
+		server:send("200 OK " .. string.len(res) .. "\n")
+        server:send(res)
+    --
+    --	GLOBAL command
+    --
+    elseif command == "GLOBAL" then
+    	local locals, num = evalTable(globals())
     	local res = tostring(num) .. '\n' .. locals
 		server:send("200 OK " .. string.len(res) .. "\n")
         server:send(res)

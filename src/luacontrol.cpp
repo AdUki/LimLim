@@ -325,6 +325,14 @@ void LuaControl::createDockWindows()
     dock->setObjectName("locals");
     addDockWidget(Qt::RightDockWidgetArea, dock);
 
+    // Locals dock widget
+    dock = new QDockWidget(tr("Globals"), this);
+    dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+    dock->setContentsMargins(0,0,0,0);
+    dock->setWidget(luaGlobalsView);
+    dock->setObjectName("globals");
+    addDockWidget(Qt::RightDockWidgetArea, dock);
+
     // Stack dock widget
     dock = new QDockWidget(tr("Stack traceback"), this);
     dock->setAllowedAreas(Qt::AllDockWidgetAreas);
@@ -397,7 +405,25 @@ void LuaControl::createWatchers()
             luaDebugger,      SLOT(updateWatches(QList<QTreeWidgetItem*>*)));
     connect(luaLocalsView, SIGNAL(updateTable(QTreeWidgetItem*)),
             luaDebugger,      SLOT(updateTable(QTreeWidgetItem*)));
-    
+
+    //
+    // Global variables watcher
+    //
+    luaGlobalsView = new Watcher(this);
+
+    ew = new HideEventWatcher(luaGlobalsView);
+    connect(ew, SIGNAL(isShown(bool)), luaDebugger, SLOT(setUpdateGlobals(bool)));
+    luaGlobalsView->installEventFilter(ew);
+
+    connect(luaDebugger,  SIGNAL(globalsChanged(QList<QTreeWidgetItem*>*)),
+            luaGlobalsView, SLOT(replaceAllWatches(QList<QTreeWidgetItem*>*)));
+    connect(luaGlobalsView, SIGNAL(updateWatch(QTreeWidgetItem*)),
+            luaDebugger,      SLOT(updateWatch(QTreeWidgetItem*)));
+    connect(luaGlobalsView, SIGNAL(updateWatches(QList<QTreeWidgetItem*>*)),
+            luaDebugger,      SLOT(updateWatches(QList<QTreeWidgetItem*>*)));
+    connect(luaGlobalsView, SIGNAL(updateTable(QTreeWidgetItem*)),
+            luaDebugger,      SLOT(updateTable(QTreeWidgetItem*)));
+
     //
     // Stack watcher
     //

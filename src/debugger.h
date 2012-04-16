@@ -26,8 +26,8 @@ public:
 signals:
     void waitingForCommand(bool status);
     void luaStateChanged();
-    // TODO maybe change to "QList* getLocals()" but then watcher needs reference to debugger
     void localsChanged(QList<QTreeWidgetItem*> *locals);
+    void globalsChanged(QList<QTreeWidgetItem*> *globals);
     void stackChanged(QStringList *stack);
 
     void started();
@@ -50,6 +50,7 @@ public slots:
 
     void setAutoRun(bool enabled) { autoRun = enabled; }
     void setUpdateLocals(bool enabled) { updateLocals = enabled; }
+    void setUpdateGlobals(bool enabled) { updateGlobals = enabled; }
     void setUpdateStack(bool enabled) { updateStack = enabled; }
 
 private:
@@ -67,6 +68,7 @@ private:
 
     bool autoRun;
     bool updateLocals;
+    bool updateGlobals;
     bool updateStack;
 
     inline void giveCommand(const QByteArray& command);

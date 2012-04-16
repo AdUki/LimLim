@@ -276,7 +276,26 @@ while true do
       else
             print("Error: Unknown error")
       end
-
+      
+  --
+  -- GLOBAL command
+  --
+  elseif command == "global" then
+      client:send("GLOBAL\n")
+      local line = client:receive()
+      local _, _, status, len = string.find(line, "^(%d+)[a-zA-Z ]+%s*(%d+)$")
+      if status == "200" then
+            len = tonumber(len)
+            local res = client:receive(len)
+            io.write("Global: " .. res)
+      elseif status == "401" then
+            len = tonumber(len)
+            local res = client:receive(len)
+            print("Error: Invalid expression:" .. res)
+      else
+            print("Error: Unknown error")
+      end
+      
   --
   -- EXEC command
   --

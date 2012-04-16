@@ -110,7 +110,7 @@ void Interpreter::execute()
 
 void Interpreter::atFinish(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    console->writeSystem(QString("Program exited whit code ")
+    console->writeSystem(QString("Program exited with code ")
         .append(QString::number(exitCode)).append('\n'));
     console->close();
     options.clear();

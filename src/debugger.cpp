@@ -14,11 +14,13 @@ static const QByteArray ExecuteCommand = QByteArray("exec ");
 static const QByteArray EvaluateCommand = QByteArray("eval ");
 static const QByteArray TableCommand = QByteArray("table ");
 static const QByteArray StackCommand = QByteArray("traceback\n");
+static const QByteArray GlobalCommand = QByteArray("global\n");
 
 static const QByteArray PauseMessage = QByteArray("Paused:");
 static const QByteArray EvaluateMessage = QByteArray("Evaluate:");
 static const QByteArray TableMessage = QByteArray("Table:");
 static const QByteArray LocalMessage = QByteArray("Local:");
+static const QByteArray GlobalMessage = QByteArray("Global:");
 static const QByteArray StackMessage = QByteArray("\nstack traceback:");
 
 /*
@@ -35,6 +37,7 @@ Debugger::Debugger(Editor *editor, Console *console, QObject *parent) :
 
     autoRun = false;
     updateLocals = true;
+    updateGlobals = true;
     updateStack = true;
     status = Off;
 
@@ -75,6 +78,7 @@ void Debugger::stepOver()
     giveCommand(StepOverCommand);
     if (updateLocals) giveCommand(LocalCommand);
     if (updateStack) giveCommand(StackCommand);
+    if (updateGlobals) giveCommand(GlobalCommand);
 }
 
 void Debugger::stepIn()
@@ -83,6 +87,7 @@ void Debugger::stepIn()
     giveCommand(StepIntoCommand);
     if (updateLocals) giveCommand(LocalCommand);
     if (updateStack) giveCommand(StackCommand);
+    if (updateGlobals) giveCommand(GlobalCommand);
 }
 
 void Debugger::run()
@@ -91,6 +96,7 @@ void Debugger::run()
     giveCommand(RunCommand);
     if (updateLocals) giveCommand(LocalCommand);
     if (updateStack) giveCommand(StackCommand);
+    if (updateGlobals) giveCommand(GlobalCommand);
 }
 
 
@@ -218,6 +224,41 @@ void Debugger::parseInput(const QByteArray& remdebugOutput)
             locals.append(newLocal);
         }
         emit localsChanged(&locals);
+
+        // Parse value of global variables
+        } else if (output.startsWith(GlobalMessage)) {
+            output.chop(StartCommand.length());
+
+            QList<QTreeWidgetItem*> globals;
+
+            int pos = LocalMessage.length();
+            QRegExp numRx("(\\d+)[\r\n]+");
+            pos = numRx.indexIn(output, pos) + numRx.matchedLength();
+
+            QRegExp rx("(\\d+)\t(\\d+)\t");
+            while ((pos = rx.indexIn(output, pos)) != -1) {
+                pos += rx.matchedLength();
+
+                // parse values of field
+                QRegExp fieldRx(QString("(.{")
+                                .append(rx.cap(1))
+                                .append("})\t(\\w+)\t(.{")
+                                .append(rx.cap(2))
+                                .append("})[\r\n]+"));
+                pos = fieldRx.indexIn(output, pos);
+                pos += fieldRx.matchedLength();
+
+                QString name = fieldRx.cap(1);
+                name = name.mid(1, name.length()-2);
+
+                // create and add new field to table
+                QTreeWidgetItem* newLocal = new QTreeWidgetItem((QTreeWidget*)0,
+                    QStringList() << name
+                                  << fieldRx.cap(3)   // value
+                                  << fieldRx.cap(2)); // type
+                globals.append(newLocal);
+            }
+            emit globalsChanged(&globals);
 
     // Parse stack trace
     } else if (output.startsWith(StackMessage)) {

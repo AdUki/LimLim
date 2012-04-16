@@ -58,7 +58,8 @@ private:
     Stack *luaStack;
 
     Watcher *luaWatchesView;
-    QTreeView *luaLocalsView;
+    Watcher *luaLocalsView;
+    Watcher *luaGlobalsView;
 
     QLabel *statusLabel;
 
