@@ -3,7 +3,7 @@
 # -------------------------------------------------
 QT += core \
     gui
-TARGET = LuaIDE
+TARGET = LimLim
 TEMPLATE = app
 SOURCES += src/main.cpp \
     src/interpreter.cpp \

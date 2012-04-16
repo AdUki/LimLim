@@ -11,15 +11,6 @@
 
 class QTreeWidgetItem;
 
-static const QByteArray RunCommand = QByteArray("run\n");
-static const QByteArray StepOverCommand = QByteArray("over\n");
-static const QByteArray StepIntoCommand = QByteArray("step\n");
-static const QByteArray LocalCommand = QByteArray("local\n");
-static const QByteArray ExecuteCommand = QByteArray("exec ");
-static const QByteArray EvaluateCommand = QByteArray("eval ");
-static const QByteArray TableCommand = QByteArray("table ");
-static const QByteArray StackCommand = QByteArray("traceback\n");
-
 class Debugger : public QObject
 {
 Q_OBJECT

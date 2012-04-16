@@ -325,7 +325,7 @@ void LuaControl::createDockWindows()
     addDockWidget(Qt::BottomDockWidgetArea, dock);
 
     // Controller dock widget for debug
-    dock = new QDockWidget(tr("RemDebug"), this);
+    dock = new QDockWidget(tr("LimDebug"), this);
     dock->setAllowedAreas(Qt::AllDockWidgetAreas);
     dock->setWidget(debugConsole);
     addDockWidget(Qt::BottomDockWidgetArea, dock);
