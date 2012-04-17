@@ -268,21 +268,25 @@ void LuaControl::createMenus()
 void LuaControl::createToolBars()
 {
     fileToolBar = addToolBar(tr("&File"));
+    fileToolBar->setObjectName("filetoolbar");
     fileToolBar->addAction(newAction);
     fileToolBar->addAction(openAction);
     fileToolBar->addAction(saveAction);
 
     runToolBar = addToolBar(tr("&Run"));
+    runToolBar->setObjectName("runtoolbar");
     runToolBar->addAction(runAction);
     runToolBar->addAction(debugAction);
     runToolBar->addAction(stopAction);
 
     debugToolBar = addToolBar(tr("&Debug"));
+    debugToolBar->setObjectName("debugtoolbar");
     debugToolBar->addAction(continueAction);
     debugToolBar->addAction(stepIntoAction);
     debugToolBar->addAction(stepOverAction);
 
     controllerToolBar = addToolBar("&Controller");
+    controllerToolBar->setObjectName("controllertoolbar");
     controllerToolBar->addAction(startControlAction);
     controllerToolBar->addAction(stopControlAction);
 }
@@ -346,6 +350,7 @@ void LuaControl::createDockWindows()
     dock->setAllowedAreas(Qt::AllDockWidgetAreas);
     dock->setContentsMargins(0,0,0,0);
     dock->setWidget(debugConsole);
+    dock->setObjectName("limdebug");
     addDockWidget(Qt::BottomDockWidgetArea, dock);
 
     // Breakpoints dock widget
@@ -392,11 +397,11 @@ void LuaControl::createWatchers()
     // Local variables watcher
     //
     luaLocalsView = new Watcher(this);
-
+/*
     HideEventWatcher *ew = new HideEventWatcher(luaLocalsView);
     connect(ew, SIGNAL(isShown(bool)), luaDebugger, SLOT(setUpdateLocals(bool)));
     luaLocalsView->installEventFilter(ew);
-
+*/
     connect(luaDebugger,  SIGNAL(localsChanged(QList<QTreeWidgetItem*>*)),
             luaLocalsView, SLOT(replaceAllWatches(QList<QTreeWidgetItem*>*)));
     connect(luaLocalsView, SIGNAL(updateWatch(QTreeWidgetItem*)),
@@ -410,11 +415,11 @@ void LuaControl::createWatchers()
     // Global variables watcher
     //
     luaGlobalsView = new Watcher(this);
-
+/*
     ew = new HideEventWatcher(luaGlobalsView);
     connect(ew, SIGNAL(isShown(bool)), luaDebugger, SLOT(setUpdateGlobals(bool)));
     luaGlobalsView->installEventFilter(ew);
-
+*/
     connect(luaDebugger,  SIGNAL(globalsChanged(QList<QTreeWidgetItem*>*)),
             luaGlobalsView, SLOT(replaceAllWatches(QList<QTreeWidgetItem*>*)));
     connect(luaGlobalsView, SIGNAL(updateWatch(QTreeWidgetItem*)),
@@ -432,9 +437,11 @@ void LuaControl::createWatchers()
             luaStack,      SLOT(setStack(QStringList*)));
     connect(luaStack, SIGNAL(highlightSource(QString,uint)),
             luaEditor, SLOT(gotoLine(QString,uint)));
+/*
     ew = new HideEventWatcher(luaStack);
     connect(ew, SIGNAL(isShown(bool)), luaDebugger, SLOT(setUpdateStack(bool)));
     luaStack->installEventFilter(ew);
+*/
 }
 
 void LuaControl::closeEvent(QCloseEvent *event)

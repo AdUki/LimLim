@@ -45,7 +45,7 @@ local basedir = ""
 while true do
 
   io.write("> ")
-  io.flush()
+  --io.flush()
 
   -- Read new command
 
