@@ -21,9 +21,9 @@ LimLim is small simple but useful debugger for Lua programming language.
 
 ## Future work
  * Add QScintilla features.
-    ** find/replace
-    ** bind toolbar buttons to qscintilla
-    ** changing of appearance (monospace font)
+    * find/replace
+    * bind toolbar buttons to qscintilla
+    * changing of appearance (monospace font)
  * project managment (file tree at side of LimLim)
  * changing of program base path to file (and add this feature to Lua Options)
  * remove " from field values of tables (not so easy as i thought)
