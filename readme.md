@@ -29,4 +29,7 @@ LimLim is small simple but useful debugger for Lua programming language.
  * remove " from field values of tables (not so easy as i thought)
  * add feature that user can change values of introspected values
  * add gui widget for breakpoints and watchpoints
- * On windows debugging is SLOW. I suppose windows doesn't have so quick process input/output managment so that slows program down (or it is worse qtprocess implementation???). I would need complete change of LimDebug (i think saving Lua states to XML file and sending directly to Qt application would be ideal)
+ * On windows debugging is SLOW. I suppose windows doesn't have so quick process input/output managment so that slows program down (or it is worse qtprocess implementation???). Program needs complete change of LimDebug 
+    * i think saving Lua states to XML file and sending directly to Qt application would be ideal
+    * lua debugger have to remeber, which values needs to send main program
+    * main program would send complex orders to Lua debugger with executable lua codes or XML
