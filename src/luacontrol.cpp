@@ -10,7 +10,6 @@
 #include "editor.h"
 #include "debugger.h"
 #include "watcher.h"
-#include "hideeventwatcher.h"
 #include "stack.h"
 
 LuaControl::LuaControl()

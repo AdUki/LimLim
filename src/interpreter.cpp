@@ -3,7 +3,6 @@
 #include "source.h"
 #include "editor.h"
 #include "console.h"
-#include "global.h"
 #include "ui_interpreter.h"
 
 #include <QFileInfo>
@@ -39,13 +38,14 @@ Interpreter::~Interpreter()
 void Interpreter::debug(Source* source)
 {
     if (source == NULL) return;
-
+/*
     QString remdebugPath = QString(APP_DIR_PATH).append("?.lua");
 #ifdef Q_WS_WIN
     remdebugPath.replace('\\', "\\\\");
 #endif
     QString query = QString("package.path = '").append(remdebugPath).append(";' .. package.path");
     options << "-e" << query;
+*/
     options << "-e" << "require 'limdebug.engine'.start()";
 
     run(source);

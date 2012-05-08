@@ -14,7 +14,6 @@ SOURCES += src/main.cpp \
     src/editor.cpp \
     src/breakpoint.cpp \
     src/watcher.cpp \
-    src/hideeventwatcher.cpp \
     src/stack.cpp
 HEADERS += src/interpreter.h \
     src/luacontrol.h \
@@ -24,8 +23,6 @@ HEADERS += src/interpreter.h \
     src/editor.h \
     src/breakpoint.h \
     src/watcher.h \
-    src/global.h \
-    src/hideeventwatcher.h \
     src/stack.h
 LIBS += -lqscintilla2
 RESOURCES += icons.qrc
