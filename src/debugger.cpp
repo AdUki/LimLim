@@ -120,6 +120,9 @@ inline void Debugger::giveCommand(const QByteArray& command)
 void Debugger::parseInput(const QByteArray& remdebugOutput)
 {
     output.append(remdebugOutput);
+#ifdef Q_WS_WIN
+    output.replace("\r", "");
+#endif
 
     // Return if RemDebug didn't write whole status
     if (!output.endsWith(StartCommand)) return;
