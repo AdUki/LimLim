@@ -26,6 +26,11 @@ public:
     DebugStatus getStatus() { return status; }
     void setLocalsUpdating(bool eval);
 
+    const QString& getControllerPath();
+    const QString& getLimdebugPath();
+    void setControllerPath(const QString& path);
+    void setLimdebugPath(const QString& path);
+
 signals:
     void waitingForCommand(bool status);
     void luaStateChanged();

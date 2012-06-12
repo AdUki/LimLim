@@ -502,17 +502,26 @@ void LuaControl::about()
 
 void LuaControl::writeSettings()
 {
-        QSettings settings("Simon Mikuda", "LimLim");
-        settings.setValue("mainwindow/geometry", saveGeometry());
-        settings.setValue("mainwindow/state", saveState());
-        settings.setValue("recentFiles", recentFiles);
+    QSettings settings("Simon Mikuda", "LimLim");
+    settings.setValue("mainwindow/geometry", saveGeometry());
+    settings.setValue("mainwindow/state", saveState());
+    settings.setValue("recentFiles", recentFiles);
+    settings.setValue("debugger/controller",
+                      QVariant(luaDebugger->getControllerPath()));
+    settings.setValue("debugger/limdebug",
+                      QVariant(luaDebugger->getLimdebugPath()));
 }
 
 void LuaControl::readSettings()
 {
-        QSettings settings("Simon Mikuda", "LimLim");
-        restoreGeometry(settings.value("mainwindow/geometry").toByteArray());
-        restoreState(settings.value("mainwindow/state").toByteArray());
+    QSettings settings("Simon Mikuda", "LimLim");
+    restoreGeometry(settings.value("mainwindow/geometry").toByteArray());
+    restoreState(settings.value("mainwindow/state").toByteArray());
 	recentFiles = settings.value("recentFiles").toStringList();
 	updateRecentFileActions();
+    QVariant fileName;
+    fileName = settings.value("debugger/controller", QVariant("limdebug/controller.lua"));
+    if (fileName.isValid()) luaDebugger->setControllerPath(fileName.toString());
+    fileName = settings.value("debugger/limdebug", QVariant(""));
+    if (fileName.isValid()) luaDebugger->setLimdebugPath(fileName.toString());
 }

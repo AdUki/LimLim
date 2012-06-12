@@ -486,30 +486,45 @@ void Debugger::on_controllerPathButton_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(
             this, tr("LimDebug controller location"), "", tr("Lua Files (*.lua)"));
-    if (!fileName.isEmpty()) {
-        ui->controllerPathEdit->setText(fileName);
-        this->controllerLocation = fileName;
-    }
+    if (!fileName.isEmpty()) setControllerPath(fileName);
 }
 
 void Debugger::on_limdebugPathButton_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(
             this, tr("LimDebug module location"), "", tr("Lua Files (*.lua)"));
-    if (!fileName.isEmpty()) {
-        ui->limdebugPathEdit->setText(fileName);
-        this->limdebugLocation = fileName;
-        emit limdebugPathChanged(fileName);
-    }
+    if (!fileName.isEmpty()) setLimdebugPath(fileName);
 }
 
 void Debugger::on_controllerPathEdit_textChanged(const QString &arg1)
 {
-    controllerLocation = arg1;
+    setControllerPath(arg1);
 }
 
 void Debugger::on_limdebugPathEdit_textChanged(const QString &arg1)
 {
-    limdebugLocation = arg1;
-    emit limdebugPathChanged(arg1);
+    setLimdebugPath(arg1);
+}
+
+const QString &Debugger::getControllerPath()
+{
+    return this->controllerLocation;
+}
+
+const QString &Debugger::getLimdebugPath()
+{
+    return this->limdebugLocation;
+}
+
+void Debugger::setControllerPath(const QString &path)
+{
+    this->controllerLocation = path;
+    ui->controllerPathEdit->setText(path);
+}
+
+void Debugger::setLimdebugPath(const QString &path)
+{
+    this->limdebugLocation = path;
+    ui->limdebugPathEdit->setText(path);
+    emit limdebugPathChanged(limdebugLocation);
 }
