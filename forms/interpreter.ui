@@ -167,6 +167,13 @@
     </spacer>
    </item>
    <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -178,6 +185,18 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>luaPathEdit</tabstop>
+  <tabstop>luaPathButton</tabstop>
+  <tabstop>execPathEdit</tabstop>
+  <tabstop>execPathButton</tabstop>
+  <tabstop>argsListView</tabstop>
+  <tabstop>addArgButton</tabstop>
+  <tabstop>delArgButton</tabstop>
+  <tabstop>resetCheckBox</tabstop>
+  <tabstop>updateCheckBox</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
@@ -219,8 +238,8 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>81</x>
-     <y>155</y>
+     <x>90</x>
+     <y>133</y>
     </hint>
     <hint type="destinationlabel">
      <x>79</x>
@@ -235,12 +254,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>428</x>
-     <y>155</y>
+     <x>429</x>
+     <y>133</y>
     </hint>
     <hint type="destinationlabel">
      <x>427</x>
-     <y>124</y>
+     <y>106</y>
     </hint>
    </hints>
   </connection>
