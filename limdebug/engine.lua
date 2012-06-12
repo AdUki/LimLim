@@ -8,7 +8,6 @@
 -- Copyright Simon Mikuda STU Fiit 2012
 --
 
-local microlight = require "ml"
 local socket = require "socket"
 local lfs = require "lfs"
 local debug = require "debug"
@@ -18,6 +17,24 @@ module("limdebug.engine", package.seeall)
 _COPYRIGHT = "2006 - Kepler Project, 2011 - Simon Mikuda"
 _DESCRIPTION = "Remote Debugger for the Lua programming language\nModified to LimDebug"
 _VERSION = "1.0"
+
+-- Function taken from Microlight, Steve Donovan, 2012; License MIT
+--- map a function over a array.
+-- The output must always be the same length as the input, so
+-- any `nil` values are mapped to `false`.
+-- @param f a function of one or more arguments
+-- @param t the array
+-- @param ... any extra arguments to the function
+-- @return a array with elements `f(t[i],...)`
+function imap(f,t,...)
+    f = ml.function_arg(f)
+    local res = {}
+    for i = 1,#t do
+        res[i] = f(t[i],...) or false
+    end
+    return res
+end
+
 
 -- initialize init state of _G table
 local base = {}
@@ -240,7 +257,7 @@ local function debugger_loop(server)
     --
     elseif command == "EXEC" then
       local _, _, chunk = string.find(line, "^[A-Z]+%s+(.+)$")
-      if chunk then 
+      if chunk then
         local func = loadstring(chunk)
         local status, res
         if func then
@@ -273,7 +290,7 @@ local function debugger_loop(server)
         -- first value is status
         if res[1] then
           -- there is 1 at the end of the table to indicate nil values at the end of table
-          value = table.concat(microlight.imap(tostring, res), '\t', 2, #res - 1)
+          value = table.concat(imap(tostring, res), '\t', 2, #res - 1)
           server:send("200 OK " .. string.len(value) .. "\n")
           server:send(value)
         else
@@ -296,7 +313,7 @@ local function debugger_loop(server)
         if func then
           setfenv(func, eval_env)
           status, tab = xpcall(func, debug.traceback)
-        end 
+        end
         if status and type(tab) == 'table' then
           res, tab = evalTable(tab)
           res = tostring(tab) .. '\n' .. res
@@ -329,7 +346,7 @@ local function debugger_loop(server)
         server:send(res)
     --
     --	TRACEBACK command
-    -- 
+    --
     elseif command == "TRACEBACK" then
 		server:send("200 OK " .. string.len(traceback) .. "\n")
 		server:send(traceback)

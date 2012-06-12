@@ -1,8 +1,10 @@
 #include "debugger.h"
+#include "ui_debugger.h"
 
 #include <QTreeWidgetItem>
 #include <QDebug>
 #include <QDir>
+#include <QFileDialog>
 
 static const QByteArray StartCommand = QByteArray("> ");
 static const QByteArray RunCommand = QByteArray("run\n");
@@ -28,9 +30,11 @@ static const QByteArray StackMessage = QByteArray("\nstack traceback:");
 	This debugger can be used remotely, whitout lua interpreter,
 	to debbug embedded lua applications.
 */
-Debugger::Debugger(Editor *editor, Console *console, QObject *parent) :
-    QObject(parent)
+Debugger::Debugger(Editor *editor, Console *console, QWidget *parent)
+    : QDialog(parent), ui(new Ui::DebuggerForm)
 {
+    ui->setupUi(this);
+
     remdebug = new Interpreter(console);
     this->editor = editor;
 
@@ -47,22 +51,33 @@ Debugger::Debugger(Editor *editor, Console *console, QObject *parent) :
 
     // set up console
     this->console = console;
+
+    // set up controller path
+    // TODO load path from file or registry
+    controllerLocation = QString("limdebug").append(QDir::separator()).append("controller.lua");
+    ui->controllerPathEdit->setText(controllerLocation);
+
+    // set up limdebug path
+    // TODO load path from file or registry
+    emit limdebugPathChanged(limdebugLocation);
 }
 
 Debugger::~Debugger()
 {
     // End debugger if it is runnning
     if (status != Off) stop();
+
+    delete ui;
 }
 
 void Debugger::start()
 {
     if (status != Off) return;
     // Start RemDebug controller
-    QString contPath = QString("limdebug")
-            .append(QDir::separator())
-            .append("controller.lua");
-    remdebug->runFile(contPath);
+    if (!remdebug->runFile(controllerLocation)){
+        // specify path to controller
+        // TODO finish this
+    }
 }
 
 void Debugger::stop()
@@ -465,4 +480,36 @@ void Debugger::setWatch(QTreeWidgetItem *watch)
                 .append("\n"));
 
     updateWatch(watch);
+}
+
+void Debugger::on_controllerPathButton_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(
+            this, tr("LimDebug controller location"), "", tr("Lua Files (*.lua)"));
+    if (!fileName.isEmpty()) {
+        ui->controllerPathEdit->setText(fileName);
+        this->controllerLocation = fileName;
+    }
+}
+
+void Debugger::on_limdebugPathButton_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(
+            this, tr("LimDebug module location"), "", tr("Lua Files (*.lua)"));
+    if (!fileName.isEmpty()) {
+        ui->limdebugPathEdit->setText(fileName);
+        this->limdebugLocation = fileName;
+        emit limdebugPathChanged(fileName);
+    }
+}
+
+void Debugger::on_controllerPathEdit_textChanged(const QString &arg1)
+{
+    controllerLocation = arg1;
+}
+
+void Debugger::on_limdebugPathEdit_textChanged(const QString &arg1)
+{
+    limdebugLocation = arg1;
+    emit limdebugPathChanged(arg1);
 }

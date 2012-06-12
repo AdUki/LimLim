@@ -37,6 +37,8 @@ LuaControl::LuaControl()
             this,           SLOT(controllerReady()));
     connect(luaDebugger, SIGNAL(waitingForCommand(bool)),
             debugConsole, SLOT(setPrintOutput(bool)));
+    connect(luaDebugger, SIGNAL(limdebugPathChanged(QString)),
+            luaInterpret, SLOT(setLimdebugPath(QString)));
 
     // set up other things
     createActions();
@@ -228,6 +230,11 @@ void LuaControl::createActions()
     connect(stopControlAction, SIGNAL(triggered()), luaDebugger, SLOT(stop()));
     connect(luaDebugger, SIGNAL(updateActions(bool)), stopControlAction, SLOT(setEnabled(bool)));
 
+    // DEBUGGER ACTION
+    debuggerAction = new QAction(tr("&Debugger options"), this);
+    debuggerAction->setEnabled(true);
+    connect(debuggerAction, SIGNAL(triggered()), luaDebugger, SLOT(show()));
+
 }
 
 void LuaControl::createMenus()
@@ -254,6 +261,7 @@ void LuaControl::createMenus()
     projectMenu->addAction(debugAction);
     projectMenu->addAction(stopAction);
     projectMenu->addAction(interpretAction);
+    projectMenu->addAction(debuggerAction);
 
     optionsMenu = menuBar()->addMenu(tr("&Options"));
 

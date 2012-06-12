@@ -102,6 +102,7 @@ private:
     QAction *stepIntoAction;
 
     QAction *interpretAction;
+    QAction *debuggerAction;
 
     QAction *startControlAction;
     QAction *stopControlAction;

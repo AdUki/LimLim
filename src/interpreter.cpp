@@ -38,14 +38,18 @@ Interpreter::~Interpreter()
 void Interpreter::debug(Source* source)
 {
     if (source == NULL) return;
-/*
-    QString remdebugPath = QString(APP_DIR_PATH).append("?.lua");
-#ifdef Q_WS_WIN
-    remdebugPath.replace('\\', "\\\\");
-#endif
-    QString query = QString("package.path = '").append(remdebugPath).append(";' .. package.path");
-    options << "-e" << query;
-*/
+
+    if (!limdebugPath.isEmpty()) {
+        // whitout requires there is error: Loop or previous error loading module...
+        options << "-e" << "require 'socket'";
+        options << "-e" << "require 'lfs'";
+        options << "-e" << "require 'debug'";
+        // add limdebug path
+        QString query = QString("package.path = ';;")
+                .append(limdebugPath).append("'");
+        options << "-e" << query;
+    }
+
     options << "-e" << "require 'limdebug.engine'.start()";
 
     run(source);
@@ -162,6 +166,11 @@ void Interpreter::clearOptions()
 void Interpreter::kill()
 {
     process->kill();
+}
+
+void Interpreter::setLimdebugPath(const QString &path)
+{
+    limdebugPath = path;
 }
 
 void Interpreter::writeInput(const QByteArray& input)

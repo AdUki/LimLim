@@ -1,7 +1,7 @@
 #ifndef DEBUGGER_H
 #define DEBUGGER_H
 
-#include <QObject>
+#include <QDialog>
 #include <QProcess>
 
 #include "editor.h"
@@ -9,13 +9,16 @@
 #include "breakpoint.h"
 #include "interpreter.h"
 
+namespace Ui {
+    class DebuggerForm;
+}
 class QTreeWidgetItem;
 
-class Debugger : public QObject
+class Debugger : public QDialog
 {
 Q_OBJECT
 public:
-    explicit Debugger(Editor *editor, Console *console, QObject *parent = 0);
+    explicit Debugger(Editor *editor, Console *console, QWidget *parent = 0);
     ~Debugger();
 
     enum DebugStatus { Running, Waiting, On, Off };
@@ -33,6 +36,8 @@ signals:
     void started();
     void finished();
     void updateActions(bool isOn);
+
+    void limdebugPathChanged(const QString& path);
 
 public slots:
     void start();
@@ -54,6 +59,8 @@ public slots:
     void setUpdateStack(bool enabled) { updateStack = enabled; }
 
 private:
+    Ui::DebuggerForm *ui;
+
     Console *console;
     Editor *editor;
     Interpreter *remdebug;
@@ -71,6 +78,9 @@ private:
     bool updateGlobals;
     bool updateStack;
 
+    QString controllerLocation;
+    QString limdebugLocation;
+
     inline void giveCommand(const QByteArray& command);
     QString getWatchName(const QTreeWidgetItem *watch);
 
@@ -80,6 +90,11 @@ private slots:
 
     void breakpointSet(int line, QString file);
     void breakpointDeleted(int line, QString file);
+
+    void on_controllerPathButton_clicked();
+    void on_limdebugPathButton_clicked();
+    void on_controllerPathEdit_textChanged(const QString &arg1);
+    void on_limdebugPathEdit_textChanged(const QString &arg1);
 };
 
 #endif // DEBUGGER_H

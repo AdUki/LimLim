@@ -36,6 +36,7 @@ public:
 
 public slots:
     void kill();
+    void setLimdebugPath(const QString &path);
 
 signals:
     void changedRunningState(bool running);
@@ -53,6 +54,7 @@ private:
 
     QString compiler;
     QString interpreter;
+    QString limdebugPath;
 
     Console* console;
     QStringListModel args;
