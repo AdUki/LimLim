@@ -1,5 +1,4 @@
 #include "debugger.h"
-#include "global.h"
 
 #include <QTreeWidgetItem>
 #include <QDebug>
@@ -60,8 +59,7 @@ void Debugger::start()
 {
     if (status != Off) return;
     // Start RemDebug controller
-    QString contPath = QString(APP_DIR_PATH)
-            .append("limdebug")
+    QString contPath = QString("limdebug")
             .append(QDir::separator())
             .append("controller.lua");
     remdebug->runFile(contPath);
@@ -389,11 +387,11 @@ void Debugger::updateWatch(QTreeWidgetItem *watch)
     // evaluate watch
     giveCommand(QByteArray(EvaluateCommand)
         .append("type(")
-        .append(watch->text(0))
+        .append(getWatchName(watch))
         .append("), string.len(tostring(")
-        .append(watch->text(0))
+        .append(getWatchName(watch))
         .append(")), (")
-        .append(watch->text(0))
+        .append(getWatchName(watch))
         .append(")\n")
     );
 }
@@ -409,11 +407,11 @@ void Debugger::updateWatches(QList<QTreeWidgetItem*> *watches)
 
     foreach (QTreeWidgetItem *watch, *watches) {
         eval.append("type(");
-        eval.append(watch->text(0));
+        eval.append(getWatchName(watch));
         eval.append("), string.len(tostring(");
-        eval.append(watch->text(0));
+        eval.append(getWatchName(watch));
         eval.append(")), (");
-        eval.append(watch->text(0));
+        eval.append(getWatchName(watch));
         eval.append(")");
         eval.append(", ");
     }
