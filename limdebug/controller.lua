@@ -198,7 +198,7 @@ while true do
         if exp then
           client:send("EVAL return " .. exp .. ", 1\n")
           local line = client:receive()
-          local _, _, status, len = string.find(line, "^(%d+)[a-zA-Z ]+%s*(%d+)$")
+		  local _, _, status, len = string.find(line, "^(%d+)[a-zA-Z ]+%s*(%d+)$")
           if status == "200" then
                 len = tonumber(len)
                 local res = client:receive(len)
@@ -276,7 +276,7 @@ while true do
       else
             print("Error: Unknown error")
       end
-      
+
   --
   -- GLOBAL command
   --
@@ -295,7 +295,7 @@ while true do
       else
             print("Error: Unknown error")
       end
-      
+
   --
   -- EXEC command
   --

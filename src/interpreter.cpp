@@ -44,6 +44,7 @@ void Interpreter::debug(Source* source)
         options << "-e" << "require 'socket'";
         options << "-e" << "require 'lfs'";
         options << "-e" << "require 'debug'";
+        options << "-e" << "require 'ml'";
         // add limdebug path
         QString query = QString("package.path = ';;")
                 .append(limdebugPath).append("'");
