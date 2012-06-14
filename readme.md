@@ -9,6 +9,7 @@ LimLim is small simple but useful debugger for Lua programming language.
  * Locals and globals view
  * Stack traceback
  * Executing from console with arguments
+ * Specify paths to LimDebug module and LimDebug controller
 
 ## Dependancies
  * Qt 4.7.2
@@ -25,7 +26,6 @@ LimLim is small simple but useful debugger for Lua programming language.
     * bind toolbar buttons to qscintilla
     * changing of appearance (monospace font)
  * project managment (file tree at side of LimLim)
- * changing of program base path to file (and add this feature to Lua Options)
  * remove " from field values of tables (not so easy as i thought)
  * add feature that user can change values of introspected values
  * add gui widget for breakpoints and watchpoints
