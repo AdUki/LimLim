@@ -34,6 +34,8 @@ public:
     void addOption(const QString& option);
     void clearOptions();
 
+    static QStringList createModulePathOptions(const QString &dirPath);
+
 public slots:
     void kill();
     void setLimdebugPath(const QString &path);
@@ -54,7 +56,7 @@ private:
 
     QString compiler;
     QString interpreter;
-    QString limdebugPath;
+    QString modulesPath;
 
     Console* console;
     QStringListModel args;

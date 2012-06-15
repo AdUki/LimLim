@@ -29,7 +29,7 @@ public:
     const QString& getControllerPath();
     const QString& getLimdebugPath();
     void setControllerPath(const QString& path);
-    void setLimdebugPath(const QString& path);
+    void setModulesPath(const QString& path);
 
 signals:
     void waitingForCommand(bool status);
@@ -68,7 +68,7 @@ private:
 
     Console *console;
     Editor *editor;
-    Interpreter *remdebug;
+    Interpreter *limdebug;
 
     DebugStatus status;
     QByteArray output;
@@ -84,7 +84,7 @@ private:
     bool updateStack;
 
     QString controllerLocation;
-    QString limdebugLocation;
+    QString modulesLocation;
 
     inline void giveCommand(const QByteArray& command);
     QString getWatchName(const QTreeWidgetItem *watch);

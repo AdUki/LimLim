@@ -523,5 +523,5 @@ void LuaControl::readSettings()
     fileName = settings.value("debugger/controller", QVariant("limdebug/controller.lua"));
     if (fileName.isValid()) luaDebugger->setControllerPath(fileName.toString());
     fileName = settings.value("debugger/limdebug", QVariant(""));
-    if (fileName.isValid()) luaDebugger->setLimdebugPath(fileName.toString());
+    if (fileName.isValid()) luaDebugger->setModulesPath(fileName.toString());
 }

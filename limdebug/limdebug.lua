@@ -13,28 +13,11 @@ local lfs = require "lfs"
 local debug = require "debug"
 local ml = require "ml"
 
-module("limdebug.engine", package.seeall)
+module("limdebug", package.seeall)
 
 _COPYRIGHT = "2006 - Kepler Project, 2011 - Simon Mikuda"
 _DESCRIPTION = "Remote Debugger for the Lua programming language\nModified to LimDebug"
 _VERSION = "1.0"
-
--- Function taken from Microlight, Steve Donovan, 2012; License MIT
---- map a function over a array.
--- The output must always be the same length as the input, so
--- any `nil` values are mapped to `false`.
--- @param f a function of one or more arguments
--- @param t the array
--- @param ... any extra arguments to the function
--- @return a array with elements `f(t[i],...)`
-function imap(f,t,...)
-    f = ml.function_arg(f)
-    local res = {}
-    for i = 1,#t do
-        res[i] = f(t[i],...) or false
-    end
-    return res
-end
 
 
 -- initialize init state of _G table
@@ -291,7 +274,7 @@ local function debugger_loop(server)
         -- first value is status
         if res[1] then
           -- there is 1 at the end of the table to indicate nil values at the end of table
-          value = table.concat(imap(tostring, res), '\t', 2, #res - 1)
+          value = table.concat(ml.imap(tostring, res), '\t', 2, #res - 1)
           server:send("200 OK " .. string.len(value) .. "\n")
           server:send(value)
         else

@@ -39,19 +39,12 @@ void Interpreter::debug(Source* source)
 {
     if (source == NULL) return;
 
-    if (!limdebugPath.isEmpty()) {
-        // whitout requires there is error: Loop or previous error loading module...
-        options << "-e" << "require 'socket'";
-        options << "-e" << "require 'lfs'";
-        options << "-e" << "require 'debug'";
-        options << "-e" << "require 'ml'";
-        // add limdebug path
-        QString query = QString("package.path = ';;")
-                .append(limdebugPath).append("'");
-        options << "-e" << query;
+    // Add modules path
+    if (!modulesPath.isEmpty()) {
+        addOptions(createModulePathOptions(modulesPath));
     }
-
-    options << "-e" << "require 'limdebug.engine'.start()";
+    // Add limdebug module
+    options << "-e" << "require 'limdebug'.start()";
 
     run(source);
 }
@@ -164,6 +157,21 @@ void Interpreter::clearOptions()
     options.clear();
 }
 
+QStringList Interpreter::createModulePathOptions(const QString &dirPath)
+{
+    QStringList options;
+    QString path(dirPath);
+    if (!path.isEmpty()) {
+        if (path.endsWith('/') || path.endsWith('\\')) ;
+        else path.append('/');
+        options << "-e" << QString("package.path = package.path .. ';")
+                   .append(path).append("?.lua'");
+        options << "-e" << QString("package.path = package.path .. ';")
+                   .append(path).append("?.dll'");
+    }
+    return options;
+}
+
 void Interpreter::kill()
 {
     process->kill();
@@ -171,7 +179,7 @@ void Interpreter::kill()
 
 void Interpreter::setLimdebugPath(const QString &path)
 {
-    limdebugPath = path;
+    modulesPath = path;
 }
 
 void Interpreter::writeInput(const QByteArray& input)

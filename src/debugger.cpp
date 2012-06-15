@@ -35,7 +35,7 @@ Debugger::Debugger(Editor *editor, Console *console, QWidget *parent)
 {
     ui->setupUi(this);
 
-    remdebug = new Interpreter(console);
+    limdebug = new Interpreter(console);
     this->editor = editor;
 
     autoRun = false;
@@ -45,21 +45,19 @@ Debugger::Debugger(Editor *editor, Console *console, QWidget *parent)
     status = Off;
 
     connect(console, SIGNAL(emitOutput(QByteArray)), this, SLOT(parseInput(QByteArray)));
-    connect(remdebug, SIGNAL(changedRunningState(bool)), this, SLOT(stateChange(bool)));
+    connect(limdebug, SIGNAL(changedRunningState(bool)), this, SLOT(stateChange(bool)));
     connect(editor, SIGNAL(breakpointSet(int,QString)), this, SLOT(breakpointSet(int,QString)));
     connect(editor, SIGNAL(breakpointDeleted(int,QString)), this, SLOT(breakpointDeleted(int,QString)));
 
     // set up console
     this->console = console;
 
-    // set up controller path
-    // TODO load path from file or registry
+    // set up default controller path
     controllerLocation = QString("limdebug").append(QDir::separator()).append("controller.lua");
     ui->controllerPathEdit->setText(controllerLocation);
 
-    // set up limdebug path
-    // TODO load path from file or registry
-    emit limdebugPathChanged(limdebugLocation);
+    // set up default limdebug path
+    emit limdebugPathChanged(modulesLocation);
 }
 
 Debugger::~Debugger()
@@ -73,16 +71,19 @@ Debugger::~Debugger()
 void Debugger::start()
 {
     if (status != Off) return;
-    // Start RemDebug controller
-    if (!remdebug->runFile(controllerLocation)){
+    // Add modules path to interpreter
+    limdebug->addOptions(Interpreter::createModulePathOptions(modulesLocation));
+
+    // Start LimDebug controller
+    if (!limdebug->runFile(controllerLocation)){
         // specify path to controller
-        // TODO finish this
+        // TODO add better error handling
     }
 }
 
 void Debugger::stop()
 {
-    if (status != Off) remdebug->kill();
+    if (status != Off) limdebug->kill();
 }
 
 void Debugger::stepOver()
@@ -491,9 +492,9 @@ void Debugger::on_controllerPathButton_clicked()
 
 void Debugger::on_limdebugPathButton_clicked()
 {
-    QString fileName = QFileDialog::getOpenFileName(
-            this, tr("LimDebug module location"), "", tr("Lua Files (*.lua)"));
-    if (!fileName.isEmpty()) setLimdebugPath(fileName);
+    QString dirName = QFileDialog::getExistingDirectory(
+            this, tr("LimDebug module location"), "");
+    if (!dirName.isEmpty()) setModulesPath(dirName);
 }
 
 void Debugger::on_controllerPathEdit_textChanged(const QString &arg1)
@@ -503,7 +504,7 @@ void Debugger::on_controllerPathEdit_textChanged(const QString &arg1)
 
 void Debugger::on_limdebugPathEdit_textChanged(const QString &arg1)
 {
-    setLimdebugPath(arg1);
+    setModulesPath(arg1);
 }
 
 const QString &Debugger::getControllerPath()
@@ -513,18 +514,18 @@ const QString &Debugger::getControllerPath()
 
 const QString &Debugger::getLimdebugPath()
 {
-    return this->limdebugLocation;
+    return this->modulesLocation;
 }
 
 void Debugger::setControllerPath(const QString &path)
 {
-    this->controllerLocation = path;
+    controllerLocation = path;
     ui->controllerPathEdit->setText(path);
 }
 
-void Debugger::setLimdebugPath(const QString &path)
+void Debugger::setModulesPath(const QString &path)
 {
-    this->limdebugLocation = path;
-    ui->limdebugPathEdit->setText(path);
-    emit limdebugPathChanged(limdebugLocation);
+    modulesLocation = path;
+    ui->limdebugPathEdit->setText(modulesLocation);
+    emit limdebugPathChanged(modulesLocation);
 }
