@@ -1,5 +1,5 @@
 -- bisection method for solving non-linear equations
-
+require 'ml'
 delta=1e-6	-- tolerance
 
 function bisect(f,a,b,fa,fb)
