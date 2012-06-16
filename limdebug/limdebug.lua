@@ -8,10 +8,12 @@
 -- Copyright Simon Mikuda STU Fiit 2012
 --
 
-local socket = require "socket"
-local lfs = require "lfs"
-local debug = require "debug"
-local ml = require "ml"
+local socket 	= require "socket"
+local lfs 		= require "lfs"
+local debug 	= require "debug"
+local ml 		= require "ml"
+local table 	= require "table"
+local string 	= require "string"
 
 module("limdebug", package.seeall)
 
@@ -160,6 +162,7 @@ local function evalTable(tab)
 			.. val .. '\n'
 		numFields = numFields + 1
 	end
+	if #sertable == 0 then return "", 0 end
 	return table.concat(sertable), numFields;
 end
 
@@ -211,7 +214,7 @@ local function debugger_loop(server)
   local eval_env = {}
 
   while true do
-    local line, status = server:receive()
+    local line = server:receive()
     command = string.sub(line, string.find(line, "^[A-Z]+"))
     --
     --	SETB command
@@ -416,24 +419,10 @@ end
 coro_debugger = coroutine.create(debugger_loop)
 
 --
--- remdebug.engine.config(tab)
--- Configures the engine
---
-function config(tab)
-  if tab.host then
-    controller_host = tab.host
-  end
-  if tab.port then
-    controller_port = tab.port
-  end
-end
-
---
 -- remdebug.engine.start()
 -- Tries to start the debug session by connecting with a controller
 --
 function start()
-  pcall(require, "remdebug.config")
   local server = socket.connect(controller_host, controller_port)
   if server then
     _TRACEBACK = function (message)
