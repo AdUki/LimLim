@@ -17,10 +17,11 @@ Source::Source(const QString& sourceFile, QWidget *parent) :
             source->close();
             setModified(false);
             file = QFileInfo(*source).absoluteFilePath();
+            linesChanged();
         } else { // TODO rewrite to QErrorMessage
             QMessageBox::critical(this, tr("Error!"),
-                tr("Cannot read from file!\n"
-                   "Check if you have permissions to view this file"),
+                tr("Cannot read from file: ").append(sourceFile).append(
+                tr("\nCheck if you have permissions to view this file")),
                 QMessageBox::Ok);
         }
     }
@@ -43,20 +44,17 @@ void Source::initScintilla()
     markerDefine(RightArrow, RightArrow);
     setMarkerBackgroundColor(QColor::fromRgb(255,255,0), RightArrow);
 
-    // Margin setup
-    // TODO it is weird but it works
-    setMarginType(LineMargin, NumberMargin);
-    setMarginSensitivity(LineMargin, true);
-    setMarginLineNumbers(LineMargin, true);
-    setMarginSensitivity(LineMargin, true);
-    setMarginMarkerMask(LineMargin, 0);
-
+    // Margin with debug symbols setup
     setMarginType(DebugMargin, SymbolMargin);
     setMarginLineNumbers(DebugMargin, false);
     setMarginSensitivity(DebugMargin, true);
     setMarginMarkerMask(DebugMargin, (1<<Circle)|(1<<RightArrow));
 
-    linesChanged();
+    // Margin with line numbers setup
+    setMarginType(LineMargin, NumberMargin);
+    setMarginSensitivity(LineMargin, true);
+    setMarginLineNumbers(LineMargin, true);
+    setMarginMarkerMask(LineMargin, 0);
 }
 
 QString Source::getName() const
@@ -97,7 +95,6 @@ bool Source::saveAs()
     }
 }
 
-// TODO add file name to the text
 bool Source::saveFile(const QString &file)
 {
     QFile source(file);
@@ -109,8 +106,8 @@ bool Source::saveFile(const QString &file)
             return true;
         }
         int r = QMessageBox::warning(this, tr("Lua IDE"),
-             tr("Error in saving file!.\n"
-                "What do you want to do?"),
+             tr("Error in saving file: ").append(file).append(
+             tr("\nWhat do you want to do?")),
              QMessageBox::Retry | QMessageBox::Discard | QMessageBox::Cancel);
 
         if (r == QMessageBox::Discard) return true;
@@ -118,13 +115,12 @@ bool Source::saveFile(const QString &file)
     }
 }
 
-// TODO add file name to the text
 bool Source::canClose()
 {
     if(isModified()) {
         int r = QMessageBox::warning(this, tr("Lua IDE"),
-             tr("The document has been modified.\n"
-                    "Do you want to save your changes?"),
+                tr("The document '").append(getName()).append(tr("' has been modified.\n"
+                "Do you want to save your changes?")),
              QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
 
         if (r == QMessageBox::Save) return save();
@@ -151,7 +147,7 @@ void Source::marginBreakpoint(int margin, int line, Qt::KeyboardModifiers state)
 
 void Source::linesChanged()
 {
-    setMarginWidth(LineMargin, QString::number(lines()) + 1);
+    setMarginWidth(LineMargin, QString::number(lines() + 1).append('0'));
 }
 
 void Source::lock()
