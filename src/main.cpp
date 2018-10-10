@@ -1,4 +1,4 @@
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <QDir>
 #include <QDebug>
 #include "luacontrol.h"

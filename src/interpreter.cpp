@@ -64,7 +64,7 @@ bool Interpreter::run(Source* source)
     } else {
         if (tempFile.open()) {
             tempFile.resize(0); // truncate file
-            if (tempFile.write(source->text().toAscii()) == -1) {
+            if (tempFile.write(source->text().toLatin1()) == -1) {
                 // failed to create temp file
                 return false;
             }
