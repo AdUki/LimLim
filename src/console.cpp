@@ -98,7 +98,7 @@ void Console::writeError(const QByteArray& data)
 void Console::confirmCommand()
 {
     // TODO check if correct, maybe enconding conflict
-    QByteArray input(command.toAscii().append('\n'));
+    QByteArray input(command.toLatin1().append('\n'));
     command = "";
     emit emitInput(input);
 }
@@ -158,7 +158,7 @@ void Console::keyPressEvent ( QKeyEvent * e )
     // Paste operation
     else if (e->matches(QKeySequence::Paste)) {
         QClipboard *clipboard = QApplication::clipboard();
-        writeInput(clipboard->text().toAscii());
+        writeInput(clipboard->text().toLatin1());
     }
     // Input operations
     else {

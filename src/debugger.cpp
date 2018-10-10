@@ -382,13 +382,13 @@ void Debugger::stateChange(bool running)
 void Debugger::breakpointSet(int line, QString file)
 {
     console->setSilent();
-    giveCommand(QString("setb %1 %2\n").arg(file).arg(line).toAscii());
+    giveCommand(QString("setb %1 %2\n").arg(file).arg(line).toLatin1());
 }
 
 void Debugger::breakpointDeleted(int line, QString file)
 {
     console->setSilent();
-    giveCommand(QString("delb %1 %2\n").arg(file).arg(line).toAscii());
+    giveCommand(QString("delb %1 %2\n").arg(file).arg(line).toLatin1());
 }
 
 /** Adds new expression to watch list. Singal watchesUpdated is emmited
@@ -436,7 +436,7 @@ void Debugger::updateWatches(QList<QTreeWidgetItem*> *watches)
     }
     eval.removeLast();
     eval.append("\n");
-    giveCommand(eval.join("").toAscii());
+    giveCommand(eval.join("").toLatin1());
 }
 
 // TODO refactor QTreeWidgetItem to its own class and put this method there

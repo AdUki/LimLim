@@ -2,7 +2,7 @@
 #define WATCHER_H
 
 #include <QTreeWidget>
-
+//#include <QWidget>
 class QTreeWidgetItem;
 
 class Watcher : public QTreeWidget
